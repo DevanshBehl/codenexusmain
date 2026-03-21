@@ -7,6 +7,7 @@ import StudentDashboard from './pages/student/Dashboard';
 import CodeArena from './pages/student/CodeArena';
 import CodeArenaProblem from './pages/student/CodeArenaProblem';
 import UniversityDashboard from './pages/university/Dashboard';
+import CompanyDashboard from './pages/company/Dashboard';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/student/codearena" element={<CodeArena />} />
         <Route path="/student/codearena/:id" element={<CodeArenaProblem />} />
         <Route path="/university/dashboard" element={<UniversityDashboard />} />
+        <Route path="/company/dashboard" element={<CompanyDashboard />} />
       </Routes>
     </Router>
   );
