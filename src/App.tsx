@@ -6,6 +6,7 @@ import Interview from './pages/Interview';
 import StudentDashboard from './pages/student/Dashboard';
 import CodeArena from './pages/student/CodeArena';
 import CodeArenaProblem from './pages/student/CodeArenaProblem';
+import UniversityDashboard from './pages/university/Dashboard';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
         <Route path="/student/dashboard" element={<StudentDashboard />} />
         <Route path="/student/codearena" element={<CodeArena />} />
         <Route path="/student/codearena/:id" element={<CodeArenaProblem />} />
+        <Route path="/university/dashboard" element={<UniversityDashboard />} />
       </Routes>
     </Router>
   );
