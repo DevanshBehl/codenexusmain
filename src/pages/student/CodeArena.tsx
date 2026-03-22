@@ -23,10 +23,10 @@ const CodeArena = () => {
     const sidebarItems = [
         { icon: Terminal, label: 'CMD CENTER', path: '/student/dashboard' },
         { icon: Code2, label: 'CODE ARENA', active: true, path: '/student/codearena' },
-        { icon: Briefcase, label: 'INTERVIEWS', path: '#' },
-        { icon: FileText, label: 'APPLICATIONS', path: '#' },
-        { icon: Box, label: 'PROJECTS', path: '#' },
-        { icon: Activity, label: 'ANALYTICS', path: '#' },
+        { icon: Briefcase, label: 'INTERVIEWS', path: '/student/interview' },
+        { icon: FileText, label: 'APPLICATIONS', path: '/student/dashboard' },
+        { icon: Box, label: 'PROJECTS', path: '/student/dashboard' },
+        { icon: Activity, label: 'ANALYTICS', path: '/student/dashboard' },
     ];
 
     const topics = [

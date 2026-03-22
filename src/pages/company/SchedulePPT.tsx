@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
@@ -69,6 +69,20 @@ export default function SchedulePPT() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [view, setView] = useState<'LIST' | 'SCHEDULE'>('LIST');
     const [ppts, setPpts] = useState<PPT[]>(mockPPTs);
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    // Evaluate 5 min rule
+    useEffect(() => {
+        const timer = setInterval(() => setCurrentTime(new Date()), 60000);
+        return () => clearInterval(timer);
+    }, []);
+
+    const canJoinWebinar = (dateStr: string, timeStr: string) => {
+        const scheduledTime = new Date(`${dateStr}T${timeStr}:00`);
+        const timeDiffMs = scheduledTime.getTime() - currentTime.getTime();
+        const diffMinutes = timeDiffMs / (1000 * 60);
+        return diffMinutes <= 5;
+    };
 
     // Form State
     const [title, setTitle] = useState('');
@@ -81,7 +95,7 @@ export default function SchedulePPT() {
 
     const sidebarItems = [
         { icon: Terminal, label: 'CMD CENTER', onClick: () => window.location.href = '/company/dashboard' },
-        { icon: Presentation, label: 'WEBINARS', active: true },
+        { icon: Presentation, label: 'WEBINARS', active: true, onClick: () => window.location.href = '/company/ppt' },
         { icon: Building2, label: 'UNIVERSITIES', onClick: () => window.location.href = '/company/dashboard' },
         { icon: Users, label: 'CANDIDATES', onClick: () => window.location.href = '/company/dashboard' },
         { icon: FileText, label: 'EVALUATIONS', onClick: () => window.location.href = '/company/evaluation' },
@@ -289,12 +303,17 @@ export default function SchedulePPT() {
                                                 
                                                 {ppt.status === 'UPCOMING' && (
                                                     <a 
-                                                        href={ppt.meetingLink} 
-                                                        target="_blank" 
-                                                        rel="noreferrer"
-                                                        className="ml-auto text-[10px] font-mono text-accent-400 hover:text-white flex items-center gap-1 transition-colors px-3 py-1.5 border border-accent-500/30 hover:bg-accent-500/10 rounded-sm"
+                                                        href={canJoinWebinar(ppt.date, ppt.time) ? "/company/webinar" : "#"} 
+                                                        onClick={(e) => {
+                                                            if (!canJoinWebinar(ppt.date, ppt.time)) e.preventDefault();
+                                                        }}
+                                                        className={`ml-auto text-[10px] font-mono flex items-center gap-1 transition-colors px-3 py-1.5 border rounded-sm ${
+                                                            canJoinWebinar(ppt.date, ppt.time)
+                                                            ? 'text-accent-400 border-accent-500/30 hover:bg-accent-500/10 hover:text-white'
+                                                            : 'text-[#555] border-[#333] cursor-not-allowed bg-[#111]'
+                                                        }`}
                                                     >
-                                                        <Video size={12} /> Join Meeting Route
+                                                        <Video size={12} /> {canJoinWebinar(ppt.date, ppt.time) ? 'Host Webinar' : 'Opens 5 Mins Before'}
                                                     </a>
                                                 )}
                                             </div>

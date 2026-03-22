@@ -13,7 +13,8 @@ import {
     Activity,
     LogOut,
     CheckCircle2,
-    Mail
+    Mail,
+    Presentation
 } from 'lucide-react';
 
 const StudentDashboard = () => {
@@ -21,12 +22,13 @@ const StudentDashboard = () => {
 
     const sidebarItems = [
         { icon: Mail, label: 'MAIL', onClick: () => window.location.href = '/student/mail' },
-        { icon: Terminal, label: 'CMD CENTER', active: true },
-        { icon: Code2, label: 'CODE ARENA' },
-        { icon: Briefcase, label: 'INTERVIEWS' },
-        { icon: FileText, label: 'APPLICATIONS' },
-        { icon: Box, label: 'PROJECTS' },
-        { icon: Activity, label: 'ANALYTICS' },
+        { icon: Presentation, label: 'WEBINARS', onClick: () => window.location.href = '/student/webinars' },
+        { icon: Terminal, label: 'CMD CENTER', active: true, onClick: () => window.location.href = '/student/dashboard' },
+        { icon: Code2, label: 'CODE ARENA', onClick: () => window.location.href = '/student/codearena' },
+        { icon: Briefcase, label: 'INTERVIEWS', onClick: () => window.location.href = '/student/interview' },
+        { icon: FileText, label: 'APPLICATIONS', onClick: () => window.location.href = '/student/dashboard' },
+        { icon: Box, label: 'PROJECTS', onClick: () => window.location.href = '/student/dashboard' },
+        { icon: Activity, label: 'ANALYTICS', onClick: () => window.location.href = '/student/dashboard' },
     ];
 
     const upcomingContests = [
@@ -49,7 +51,7 @@ const StudentDashboard = () => {
 
     return (
         <div className="h-screen w-full bg-[#050505] font-sans text-white selection:bg-accent-500/30 selection:text-white relative overflow-hidden flex">
-            
+
             {/* Background Dots */}
             <div className="fixed inset-0 pointer-events-none z-0 dotted-bg"></div>
 
@@ -143,13 +145,13 @@ const StudentDashboard = () => {
 
             {/* Main Content */}
             <main className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar relative z-10 flex flex-col">
-                
+
                 <div className="w-full max-w-6xl mx-auto flex flex-col gap-6">
-                    
+
                     {/* Header */}
                     <div className="border border-[#333] bg-[#0A0A0A] p-6 lg:p-8 shadow-2xl relative rounded-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
                         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/4 h-[1px] bg-gradient-to-r from-transparent via-accent-500 to-transparent opacity-50"></div>
-                        
+
                         <div>
                             <div className="inline-flex items-center gap-2 border border-[#333] bg-[#111] px-2 py-1 text-[10px] text-[#aaa] rounded-sm mb-4 font-mono tracking-widest uppercase">
                                 <span className="w-1.5 h-1.5 rounded-full bg-accent-500 animate-pulse"></span>
@@ -221,7 +223,7 @@ const StudentDashboard = () => {
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         {/* Middle Column */}
                         <div className="lg:col-span-2 space-y-6">
-                            
+
                             {/* Problem of the Day */}
                             <div className="bg-[#0A0A0A] border border-[#222] p-6 rounded-sm shadow-xl relative overflow-hidden group hover:border-[#333] transition-colors">
                                 <div className="absolute top-0 right-0 p-4 opacity-10 font-mono text-8xl font-black pointer-events-none select-none -mt-4 -mr-4 text-accent-500">
@@ -239,11 +241,11 @@ const StudentDashboard = () => {
                                     </div>
                                     <span className="text-[10px] text-[#555] font-mono">24:00:00 LIMIT</span>
                                 </div>
-                                
+
                                 <h2 className="text-2xl font-sans font-bold text-white mb-3 hover:text-accent-400 transition-colors w-fit cursor-pointer relative z-10">
                                     {problemOfTheDay.title}
                                 </h2>
-                                
+
                                 <div className="flex flex-wrap gap-2 mb-8 relative z-10">
                                     {problemOfTheDay.topics.map((topic, i) => (
                                         <span key={i} className="text-[10px] font-mono uppercase tracking-widest text-[#888] bg-[#111] px-2 py-1 border border-[#333] rounded-sm">
@@ -251,7 +253,7 @@ const StudentDashboard = () => {
                                         </span>
                                     ))}
                                 </div>
-                                
+
                                 <div className="flex items-center justify-between pt-4 border-t border-[#222] relative z-10">
                                     <p className="text-[10px] font-mono uppercase tracking-widest text-[#555]">
                                         Success Rate <span className="text-[#aaa] ml-2">{problemOfTheDay.successRate}</span>
@@ -271,7 +273,7 @@ const StudentDashboard = () => {
                                     </h3>
                                     <button className="text-[10px] font-mono uppercase tracking-widest text-[#555] hover:text-accent-500 transition-colors">VIEW ALL {'>>'}</button>
                                 </div>
-                                
+
                                 <div className="space-y-3">
                                     {upcomingContests.map((contest, i) => (
                                         <div key={i} className="flex flex-col md:flex-row md:items-center justify-between p-4 border border-[#222] bg-[#050505] hover:border-[#333] transition-colors group cursor-pointer rounded-sm">
@@ -310,7 +312,7 @@ const StudentDashboard = () => {
                                         Events
                                     </h3>
                                 </div>
-                                
+
                                 <div className="space-y-4">
                                     {upcomingEvents.map((event, i) => (
                                         <div key={i} className="flex gap-4 group cursor-pointer opacity-90 hover:opacity-100 transition-opacity">
@@ -332,7 +334,7 @@ const StudentDashboard = () => {
                                         </div>
                                     ))}
                                 </div>
-                                
+
                                 <button className="w-full mt-4 py-3 bg-[#111] border border-[#222] rounded-sm text-[10px] font-mono uppercase tracking-widest text-[#888] hover:text-white hover:border-[#333] transition-all flex items-center justify-center gap-2">
                                     View Full Calendar
                                 </button>

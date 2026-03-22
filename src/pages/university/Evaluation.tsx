@@ -123,7 +123,7 @@ export default function UniversityEvaluation() {
         { icon: Building2, label: 'COMPANIES', onClick: () => window.location.href = '/university/dashboard' },
         { icon: Users, label: 'STUDENTS', onClick: () => window.location.href = '/university/dashboard' },
         { icon: Briefcase, label: 'PLACEMENTS', onClick: () => window.location.href = '/university/dashboard' },
-        { icon: CheckCircle2, label: 'EVALUATIONS', active: true },
+        { icon: CheckCircle2, label: 'EVALUATIONS', active: true, onClick: () => window.location.href = '/university/evaluation' },
         { icon: BarChart3, label: 'ANALYTICS', onClick: () => window.location.href = '/university/dashboard' },
         { icon: FileBarChart, label: 'REPORTS', onClick: () => window.location.href = '/university/dashboard' },
     ];

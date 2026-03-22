@@ -255,7 +255,7 @@ export default function RecruiterDashboard() {
 
     const sidebarItems = [
         { icon: Mail, label: 'MAIL', onClick: () => window.location.href = '/recruiter/mail' },
-        { icon: Terminal, label: 'CMD CENTER', active: true },
+        { icon: Terminal, label: 'CMD CENTER', active: true, onClick: () => window.location.href = '/recruiter/dashboard' },
         { icon: Video, label: 'INTERVIEWS', onClick: () => setActiveTab('INTERVIEWS') },
         { icon: Play, label: 'RECORDINGS', onClick: () => setActiveTab('RECORDINGS') },
     ];

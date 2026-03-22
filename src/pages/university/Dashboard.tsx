@@ -22,7 +22,8 @@ import {
     CheckCircle2,
     Clock,
     ArrowUpRight,
-    Mail
+    Mail,
+    Presentation
 } from 'lucide-react';
 
 const UniversityDashboard = () => {
@@ -32,13 +33,14 @@ const UniversityDashboard = () => {
 
     const sidebarItems = [
         { icon: Mail, label: 'MAIL', onClick: () => window.location.href = '/university/mail' },
-        { icon: Terminal, label: 'CMD CENTER', active: true },
-        { icon: Building2, label: 'COMPANIES' },
-        { icon: Users, label: 'STUDENTS' },
-        { icon: Briefcase, label: 'PLACEMENTS' },
+        { icon: Presentation, label: 'WEBINARS', onClick: () => window.location.href = '/university/webinars' },
+        { icon: Terminal, label: 'CMD CENTER', active: true, onClick: () => window.location.href = '/university/dashboard' },
+        { icon: Building2, label: 'COMPANIES', onClick: () => window.location.href = '/university/dashboard' },
+        { icon: Users, label: 'STUDENTS', onClick: () => window.location.href = '/university/dashboard' },
+        { icon: Briefcase, label: 'PLACEMENTS', onClick: () => window.location.href = '/university/dashboard' },
         { icon: CheckCircle2, label: 'EVALUATIONS', onClick: () => window.location.href = '/university/evaluation' },
-        { icon: BarChart3, label: 'ANALYTICS' },
-        { icon: FileBarChart, label: 'REPORTS' },
+        { icon: BarChart3, label: 'ANALYTICS', onClick: () => window.location.href = '/university/dashboard' },
+        { icon: FileBarChart, label: 'REPORTS', onClick: () => window.location.href = '/university/dashboard' },
     ];
 
     const students = [

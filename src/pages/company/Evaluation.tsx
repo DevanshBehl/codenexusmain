@@ -126,7 +126,7 @@ export default function CompanyEvaluation() {
         { icon: Users, label: 'CANDIDATES', onClick: () => window.location.href = '/company/dashboard' },
         { icon: Swords, label: 'CODE ARENA', onClick: () => window.location.href = '/company/dashboard' },
         { icon: Video, label: 'INTERVIEWS', onClick: () => window.location.href = '/company/dashboard' },
-        { icon: CheckCircle2, label: 'EVALUATIONS', active: true },
+        { icon: CheckCircle2, label: 'EVALUATIONS', active: true, onClick: () => window.location.href = '/company/evaluation' },
         { icon: BarChart3, label: 'ANALYTICS', onClick: () => window.location.href = '/company/dashboard' },
     ];
 
