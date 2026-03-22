@@ -21,7 +21,9 @@ import {
     Briefcase,
     GraduationCap,
     Award,
-    Code2
+    Code2,
+    FileText,
+    MessageSquare
 } from 'lucide-react';
 
 /* ────────── Types & Mock Data ────────── */
@@ -130,11 +132,114 @@ const SCHEDULED_INTERVIEWS: Candidate[] = [
     }
 ];
 
-const RECORDINGS = [
-    { student: 'Priya Patel', university: 'IIT Bombay', role: 'SWE', date: 'Mar 15, 2026', duration: '45 min', rating: 4.5, type: 'TECHNICAL', verdict: 'SELECTED' },
-    { student: 'Vikram Singh', university: 'NIT Trichy', role: 'Systems Eng.', date: 'Mar 14, 2026', duration: '52 min', rating: 4.8, type: 'TECHNICAL', verdict: 'SELECTED' },
-    { student: 'Kavya Iyer', university: 'IIT Bombay', role: 'Backend Eng.', date: 'Mar 13, 2026', duration: '38 min', rating: 3.5, type: 'TECHNICAL', verdict: 'PENDING' },
-    { student: 'Arjun Nair', university: 'BITS Pilani', role: 'SDE I', date: 'Mar 12, 2026', duration: '40 min', rating: 2.8, type: 'TECHNICAL', verdict: 'REJECTED' },
+interface SolvedQuestion {
+    title: string;
+    testCasesPassed: number;
+    totalTestCases: number;
+    codeSubmission: string;
+}
+
+interface Recording {
+    id: string;
+    student: string;
+    university: string;
+    role: string;
+    date: string;
+    duration: string;
+    rating: number;
+    type: string;
+    verdict: string;
+    notes: string;
+    questions: SolvedQuestion[];
+}
+
+const RECORDINGS: Recording[] = [
+    { 
+        id: 'r1',
+        student: 'Priya Patel', 
+        university: 'IIT Bombay', 
+        role: 'SWE', 
+        date: 'Mar 15, 2026', 
+        duration: '45 min', 
+        rating: 4.5, 
+        type: 'TECHNICAL', 
+        verdict: 'SELECTED',
+        notes: "Very strong problem-solving skills. Communicated her thought process clearly. Identified edge cases up front. Code structure was optimal.",
+        questions: [
+            {
+                title: 'Two Sum',
+                totalTestCases: 15,
+                testCasesPassed: 15,
+                codeSubmission: "function twoSum(nums, target) {\n  const map = new Map();\n  for (let i = 0; i < nums.length; i++) {\n    const complement = target - nums[i];\n    if (map.has(complement)) {\n      return [map.get(complement), i];\n    }\n    map.set(nums[i], i);\n  }\n  return [];\n}"
+            },
+            {
+                title: 'Reverse Linked List',
+                totalTestCases: 10,
+                testCasesPassed: 10,
+                codeSubmission: "function reverseList(head) {\n  let prev = null;\n  let curr = head;\n  while (curr) {\n    let nextTemp = curr.next;\n    curr.next = prev;\n    prev = curr;\n    curr = nextTemp;\n  }\n  return prev;\n}"
+            }
+        ]
+    },
+    { 
+        id: 'r2',
+        student: 'Vikram Singh', 
+        university: 'NIT Trichy', 
+        role: 'Systems Eng.', 
+        date: 'Mar 14, 2026', 
+        duration: '52 min', 
+        rating: 4.8, 
+        type: 'TECHNICAL', 
+        verdict: 'SELECTED',
+        notes: "Exceptional knowledge of core CS concepts and systems design. Solved the LRU Cache with perfect concurrency considerations.",
+        questions: [
+            {
+                title: 'LRU Cache',
+                totalTestCases: 20,
+                testCasesPassed: 20,
+                codeSubmission: "class LRUCache {\n  constructor(capacity) {\n    this.capacity = capacity;\n    this.cache = new Map();\n  }\n  get(key) {\n    if (!this.cache.has(key)) return -1;\n    const val = this.cache.get(key);\n    this.cache.delete(key);\n    this.cache.set(key, val);\n    return val;\n  }\n  put(key, value) {\n    if (this.cache.has(key)) this.cache.delete(key);\n    this.cache.set(key, value);\n    if (this.cache.size > this.capacity) {\n      this.cache.delete(this.cache.keys().next().value);\n    }\n  }\n}"
+            }
+        ]
+    },
+    { 
+        id: 'r3',
+        student: 'Kavya Iyer', 
+        university: 'IIT Bombay', 
+        role: 'Backend Eng.', 
+        date: 'Mar 13, 2026', 
+        duration: '38 min', 
+        rating: 3.5, 
+        type: 'TECHNICAL', 
+        verdict: 'PENDING',
+        notes: "Struggled a bit initially with DP but brute force solution worked. We talked through memoization but ran out of time to implement fully.",
+        questions: [
+            {
+                title: 'Climbing Stairs',
+                totalTestCases: 15,
+                testCasesPassed: 10,
+                codeSubmission: "function climbStairs(n) {\n  // TLE on large inputs\n  if (n <= 2) return n;\n  return climbStairs(n - 1) + climbStairs(n - 2);\n}"
+            }
+        ]
+    },
+    { 
+        id: 'r4',
+        student: 'Arjun Nair', 
+        university: 'BITS Pilani', 
+        role: 'SDE I', 
+        date: 'Mar 12, 2026', 
+        duration: '40 min', 
+        rating: 2.8, 
+        type: 'TECHNICAL', 
+        verdict: 'REJECTED',
+        notes: "Candidate was unable to grasp the optimal solution even after several hints. The basic string manipulation question was left incomplete.",
+        questions: [
+            {
+                title: 'Valid Palindrome',
+                totalTestCases: 10,
+                testCasesPassed: 4,
+                codeSubmission: "function isPalindrome(s) {\n  const cleanStr = s.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();\n  // Did not finish two-pointer logic\n  for(let i=0; i<cleanStr.length; i++){\n    \n  }\n}"
+            }
+        ]
+    },
 ];
 
 /* ────────── Component ────────── */
@@ -145,6 +250,7 @@ export default function RecruiterDashboard() {
     const [studentFilter, setStudentFilter] = useState<StudentFilter>('ALL');
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+    const [selectedReport, setSelectedReport] = useState<Recording | null>(null);
 
     const sidebarItems = [
         { icon: Terminal, label: 'CMD CENTER', active: true },
@@ -308,7 +414,7 @@ export default function RecruiterDashboard() {
                         <div className="bg-[#0A0A0A] border border-[#222] p-5 rounded-sm group hover:border-[#333] transition-colors relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-1 h-full bg-[#111] group-hover:bg-accent-500 transition-colors"></div>
                             <h3 className="text-[10px] uppercase font-mono tracking-widest text-[#888] mb-1">Avg Rating</h3>
-                            <div className="text-3xl font-bold font-sans tracking-tight text-yellow-400 flex items-center"><Star size={24} className="fill-yellow-400 mr-2" /> 4.2</div>
+                            <div className="text-3xl font-bold font-sans tracking-tight text-yellow-400 flex items-center"><Star size={24} className="fill-yellow-400 mr-2" /> 3.9</div>
                             <div className="text-[10px] font-mono text-[#555] mt-2">from your given ratings</div>
                         </div>
                         <div className="bg-[#0A0A0A] border border-[#222] p-5 rounded-sm group hover:border-[#333] transition-colors relative overflow-hidden">
@@ -479,8 +585,12 @@ export default function RecruiterDashboard() {
                                                     <span className={`text-[9px] font-mono px-2 py-1 border rounded-sm uppercase tracking-widest ${getVerdictStyle(rec.verdict)}`}>
                                                         {rec.verdict}
                                                     </span>
-                                                    <button className="p-2 bg-[#111] border border-[#333] rounded-sm hover:border-accent-500 transition-colors flex items-center gap-1">
-                                                        <Eye size={14} className="text-[#888] group-hover:text-accent-400" />
+                                                    <button 
+                                                        onClick={() => setSelectedReport(rec)}
+                                                        className="px-3 py-1.5 bg-[#111] border border-[#333] rounded-sm hover:border-accent-500 transition-colors flex items-center gap-2 group/btn"
+                                                    >
+                                                        <Eye size={14} className="text-[#888] group-hover/btn:text-accent-400" />
+                                                        <span className="text-[10px] font-mono uppercase tracking-widest text-[#aaa] group-hover/btn:text-white">View Report</span>
                                                     </button>
                                                 </div>
                                             </div>
@@ -635,6 +745,139 @@ export default function RecruiterDashboard() {
                                 >
                                     Join Interview <ChevronRight size={14} />
                                 </Link>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Post-Interview Report Modal */}
+            <AnimatePresence>
+                {selectedReport && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setSelectedReport(null)}
+                        className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 md:p-6"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                            animate={{ scale: 1, opacity: 1, y: 0 }}
+                            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                            onClick={e => e.stopPropagation()}
+                            className="bg-[#0A0A0A] border border-[#222] rounded-sm w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col shadow-2xl relative"
+                        >
+                            {/* Header */}
+                            <div className="shrink-0 h-16 bg-gradient-to-r from-[#111] to-[#0A0A0A] border-b border-[#222] flex items-center justify-between px-6">
+                                <h2 className="text-sm font-bold font-sans uppercase tracking-widest text-white flex items-center gap-2">
+                                    <FileText size={16} className="text-accent-400" /> Interview Report: {selectedReport.student}
+                                </h2>
+                                <button
+                                    onClick={() => setSelectedReport(null)}
+                                    className="p-1.5 bg-[#111] hover:bg-[#222] rounded-sm text-[#666] hover:text-white transition-colors border border-[#333]"
+                                >
+                                    <X size={16} />
+                                </button>
+                            </div>
+
+                            {/* Body */}
+                            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6 bg-[#050505]">
+                                
+                                {/* Top Stats */}
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div className="bg-[#111] border border-[#222] p-4 rounded-sm flex flex-col gap-1">
+                                        <span className="text-[10px] font-mono text-[#888] uppercase tracking-widest">Verdict</span>
+                                        <span className={`text-xs font-bold font-mono tracking-widest uppercase ${getVerdictStyle(selectedReport.verdict).replace('border-', '')}`}>
+                                            {selectedReport.verdict}
+                                        </span>
+                                    </div>
+                                    <div className="bg-[#111] border border-[#222] p-4 rounded-sm flex flex-col gap-1">
+                                        <span className="text-[10px] font-mono text-[#888] uppercase tracking-widest">Recruiter Rating</span>
+                                        <div className="flex items-center gap-1">
+                                            {[...Array(5)].map((_, i) => (
+                                                <Star key={i} size={14} className={i < Math.floor(selectedReport.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-[#333]'} />
+                                            ))}
+                                            <span className="text-xs font-mono font-bold text-white ml-2">{selectedReport.rating}</span>
+                                        </div>
+                                    </div>
+                                    <div className="bg-[#111] border border-[#222] p-4 rounded-sm flex flex-col gap-1">
+                                        <span className="text-[10px] font-mono text-[#888] uppercase tracking-widest">Duration</span>
+                                        <span className="text-sm font-bold text-white font-sans">{selectedReport.duration}</span>
+                                    </div>
+                                    <div className="bg-[#111] border border-[#222] p-4 rounded-sm flex flex-col gap-1">
+                                        <span className="text-[10px] font-mono text-[#888] uppercase tracking-widest">Date</span>
+                                        <span className="text-sm font-bold text-white font-sans">{selectedReport.date}</span>
+                                    </div>
+                                </div>
+
+                                {/* Recruiter Notes */}
+                                <section>
+                                    <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#aaa] mb-3 flex items-center gap-2">
+                                        <MessageSquare size={14} className="text-accent-500" /> Recruiter Final Notes
+                                    </h3>
+                                    <div className="bg-[#0A0A0A] border border-[#222] rounded-sm p-4">
+                                        <p className="font-mono text-xs text-[#ccc] leading-relaxed">
+                                            {selectedReport.notes}
+                                        </p>
+                                    </div>
+                                </section>
+
+                                {/* Questions Solved */}
+                                <section>
+                                    <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#aaa] mb-3 flex items-center gap-2">
+                                        <Code2 size={14} className="text-accent-500" /> Technical Assessment ({selectedReport.questions.length} Questions)
+                                    </h3>
+                                    <div className="space-y-4">
+                                        {selectedReport.questions.map((q, idx) => {
+                                            const passRate = Math.round((q.testCasesPassed / q.totalTestCases) * 100);
+                                            const isPerfect = q.testCasesPassed === q.totalTestCases;
+                                            return (
+                                                <div key={idx} className="bg-[#0A0A0A] border border-[#222] rounded-sm overflow-hidden flex flex-col">
+                                                    <div className="p-4 border-b border-[#222] flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#111]">
+                                                        <div className="font-bold font-sans text-sm text-white flex items-center gap-2">
+                                                            <div className={`w-2 h-2 rounded-full ${isPerfect ? 'bg-green-400' : 'bg-yellow-400'}`} />
+                                                            {q.title}
+                                                        </div>
+                                                        <div className="flex items-center gap-4">
+                                                            <div className="flex items-center gap-1.5 opacity-80">
+                                                                <span className="text-[10px] font-mono text-[#888] uppercase">Test Cases:</span>
+                                                                <span className={`text-xs font-mono font-bold ${isPerfect ? 'text-green-400' : 'text-yellow-400'}`}>
+                                                                    {q.testCasesPassed}/{q.totalTestCases}
+                                                                </span>
+                                                            </div>
+                                                            <div className="w-24 h-1.5 bg-[#222] rounded-full overflow-hidden shrink-0">
+                                                                <div 
+                                                                    className={`h-full ${isPerfect ? 'bg-green-500' : 'bg-yellow-500'}`} 
+                                                                    style={{ width: `${passRate}%` }} 
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="p-4 bg-[#050505]">
+                                                        <div className="text-[10px] font-mono text-[#666] mb-2 uppercase tracking-widest flex items-center gap-2">
+                                                            <Code2 size={12} className="text-[#888]" /> Final Submission
+                                                        </div>
+                                                        <pre className="bg-[#111] border border-[#333] p-4 rounded-sm overflow-x-auto text-[11px] font-mono text-accent-400 leading-relaxed shadow-inner">
+                                                            <code>{q.codeSubmission}</code>
+                                                        </pre>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </section>
+
+                            </div>
+                            
+                            {/* Footer */}
+                            <div className="shrink-0 p-5 bg-[#0A0A0A] border-t border-[#222] flex justify-end">
+                                <button
+                                    onClick={() => setSelectedReport(null)}
+                                    className="px-5 py-2.5 rounded-sm bg-[#111] border border-[#333] text-xs font-mono uppercase tracking-widest text-white hover:border-accent-500 transition-colors"
+                                >
+                                    Dismiss Report
+                                </button>
                             </div>
                         </motion.div>
                     </motion.div>
