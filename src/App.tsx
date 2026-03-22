@@ -12,6 +12,7 @@ import CreateContest from './pages/company/CreateContest';
 import RecruiterDashboard from './pages/recruiter/Dashboard';
 import RecruiterInterview from './pages/recruiter/RecruiterInterview';
 import CompanyEvaluation from './pages/company/Evaluation';
+import Mail from './pages/mail/Mail';
 import UniversityEvaluation from './pages/university/Evaluation';
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         <Route path="/" element={<Landing />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/mail/*" element={<Mail />} />
         <Route path="/student/dashboard" element={<StudentDashboard />} />
         <Route path="/student/codearena" element={<CodeArena />} />
         <Route path="/student/codearena/:id" element={<CodeArenaProblem />} />

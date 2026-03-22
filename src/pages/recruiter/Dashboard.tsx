@@ -24,7 +24,8 @@ import {
     Code2,
     FileText,
     MessageSquare,
-    Trophy
+    Trophy,
+    Mail
 } from 'lucide-react';
 
 /* ────────── Types & Mock Data ────────── */
@@ -253,6 +254,7 @@ export default function RecruiterDashboard() {
     const [selectedReport, setSelectedReport] = useState<Recording | null>(null);
 
     const sidebarItems = [
+        { icon: Mail, label: 'MAIL', onClick: () => window.location.href = '/mail' },
         { icon: Terminal, label: 'CMD CENTER', active: true },
         { icon: Video, label: 'INTERVIEWS', onClick: () => setActiveTab('INTERVIEWS') },
         { icon: Play, label: 'RECORDINGS', onClick: () => setActiveTab('RECORDINGS') },

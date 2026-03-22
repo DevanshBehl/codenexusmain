@@ -21,7 +21,8 @@ import {
     Briefcase,
     CheckCircle2,
     Clock,
-    ArrowUpRight
+    ArrowUpRight,
+    Mail
 } from 'lucide-react';
 
 const UniversityDashboard = () => {
@@ -30,6 +31,7 @@ const UniversityDashboard = () => {
     const [searchQuery, setSearchQuery] = useState('');
 
     const sidebarItems = [
+        { icon: Mail, label: 'MAIL', onClick: () => window.location.href = '/mail' },
         { icon: Terminal, label: 'CMD CENTER', active: true },
         { icon: Building2, label: 'COMPANIES' },
         { icon: Users, label: 'STUDENTS' },
