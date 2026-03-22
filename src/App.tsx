@@ -13,6 +13,7 @@ import RecruiterDashboard from './pages/recruiter/Dashboard';
 import RecruiterInterview from './pages/recruiter/RecruiterInterview';
 import CompanyEvaluation from './pages/company/Evaluation';
 import SchedulePPT from './pages/company/SchedulePPT';
+import WebinarRoom from './pages/shared/WebinarRoom';
 import Mail from './pages/mail/Mail';
 import UniversityEvaluation from './pages/university/Evaluation';
 
@@ -31,12 +32,14 @@ function App() {
         <Route path="/student/codearena" element={<CodeArena />} />
         <Route path="/student/codearena/:id" element={<CodeArenaProblem />} />
         <Route path="/student/interview" element={<StudentInterview />} />
+        <Route path="/student/webinar" element={<WebinarRoom userRole="STUDENT" />} />
         <Route path="/university/dashboard" element={<UniversityDashboard />} />
         <Route path="/university/evaluation" element={<UniversityEvaluation />} />
         <Route path="/company/dashboard" element={<CompanyDashboard />} />
         <Route path="/company/create-contest" element={<CreateContest />} />
         <Route path="/company/evaluation" element={<CompanyEvaluation />} />
         <Route path="/company/ppt" element={<SchedulePPT />} />
+        <Route path="/company/webinar" element={<WebinarRoom userRole="COMPANY" />} />
         <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
         <Route path="/recruiter/interview" element={<RecruiterInterview />} />
       </Routes>
