@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Video,
@@ -16,7 +16,11 @@ import {
     ChevronUp,
     Plus,
     ListChecks,
-    X
+    X,
+    Circle,
+    Star,
+    CheckCircle2,
+    Lock
 } from 'lucide-react';
 import InterviewEditor from './InterviewEditor';
 import InterviewProblem from './InterviewProblem';
@@ -52,19 +56,65 @@ const difficultyStyle = (d: string) => {
 /* ────────── Component ────────── */
 export default function InterviewRoom({ role }: InterviewRoomProps) {
     const navigate = useNavigate();
+    const location = useLocation();
+    
+    // States
+    const [isInLobby, setIsInLobby] = useState(true);
+    const [canJoin, setCanJoin] = useState(false);
+    const [timeRemainingText, setTimeRemainingText] = useState('');
+    
     const [mode, setMode] = useState<Mode>('video');
     const [isMuted, setIsMuted] = useState(false);
     const [isCameraOff, setIsCameraOff] = useState(false);
     const [showChat, setShowChat] = useState(false);
+    
     const [showQuestionBank, setShowQuestionBank] = useState(false);
     const [pushedQuestions, setPushedQuestions] = useState<string[]>([]);
+    
+    const [isRecording, setIsRecording] = useState(false);
     const [showEndConfirm, setShowEndConfirm] = useState(false);
     const [pipMinimized, setPipMinimized] = useState(false);
+    
+    const [showRatingModal, setShowRatingModal] = useState(false);
+    const [rating, setRating] = useState(0);
+    const [summary, setSummary] = useState('');
 
     const isRecruiter = role === 'recruiter';
     const remoteName = isRecruiter ? 'Candidate' : 'Interviewer';
     const selfName = isRecruiter ? 'Recruiter (You)' : 'Student (You)';
 
+    /* ────────── Timing Validation for Lobby ────────── */
+    useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        const scheduledTimeStr = searchParams.get('time');
+        
+        if (!scheduledTimeStr) {
+            setCanJoin(true);
+            return;
+        }
+
+        const checkTime = () => {
+            const scheduledTime = new Date(scheduledTimeStr).getTime();
+            const currTime = new Date().getTime();
+            // 5 minutes in ms
+            const timeDiff = scheduledTime - currTime;
+            
+            if (timeDiff <= 300000) {
+                setCanJoin(true);
+                setTimeRemainingText('');
+            } else {
+                setCanJoin(false);
+                const minutes = Math.ceil(timeDiff / 60000);
+                setTimeRemainingText(`Available in ${minutes} min`);
+            }
+        };
+        
+        checkTime();
+        const interval = setInterval(checkTime, 10000);
+        return () => clearInterval(interval);
+    }, [location.search]);
+
+    /* ────────── Actions ────────── */
     const pushQuestion = (id: string) => {
         if (!pushedQuestions.includes(id)) {
             setPushedQuestions(prev => [...prev, id]);
@@ -72,7 +122,16 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
     };
 
     const handleEndCall = () => {
-        navigate(isRecruiter ? '/company/dashboard' : '/student/dashboard');
+        if (isRecruiter) {
+            setShowEndConfirm(false);
+            setShowRatingModal(true);
+        } else {
+            navigate('/student/dashboard');
+        }
+    };
+
+    const handleRatingSubmit = () => {
+        navigate('/recruiter/dashboard');
     };
 
     /* ────────── Dock items ────────── */
@@ -100,10 +159,74 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
         },
     ];
 
+    /* ────────── Render lobby ────────── */
+    if (isInLobby) {
+        return (
+            <div className="h-screen w-full bg-[#050505] font-sans text-white flex flex-col items-center justify-center relative overflow-hidden">
+                <div className="fixed inset-0 pointer-events-none z-0 dotted-bg" />
+                
+                <div className="z-10 bg-[#0A0A0A] border border-[#222] rounded-sm p-8 w-full max-w-xl text-center shadow-2xl relative overflow-hidden">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-[1px] bg-gradient-to-r from-transparent via-accent-500 to-transparent opacity-50"></div>
+                    
+                    <h2 className="text-xl font-bold font-sans tracking-tight mb-2">Ready to join?</h2>
+                    <p className="text-[#888] font-mono text-xs mb-8 uppercase tracking-widest">
+                        {role === 'recruiter' ? 'Recruiter Portal' : 'Student Portal'}
+                    </p>
+
+                    <div className="w-full aspect-video bg-[#111] border border-[#333] rounded-lg mb-8 relative overflow-hidden shadow-inner flex items-center justify-center">
+                         {isCameraOff ? (
+                            <div className="flex flex-col items-center gap-3">
+                                <div className="w-16 h-16 rounded-full bg-[#1a1a1a] border border-[#333] flex items-center justify-center">
+                                    <VideoOff size={28} className="text-[#444]" />
+                                </div>
+                                <span className="text-[10px] font-mono text-[#666] uppercase tracking-widest">Camera is off</span>
+                            </div>
+                         ) : (
+                             <div className="w-full h-full object-cover bg-[#1a1a1a] flex flex-col items-center justify-center relative">
+                                <Video size={48} className="text-[#333] mb-4" />
+                                <span className="text-[10px] font-mono text-accent-400 border border-accent-500/20 bg-accent-500/10 px-2 py-1 rounded-sm uppercase tracking-widest">Live Preview</span>
+                                
+                                {isMuted && (
+                                    <div className="absolute top-4 right-4 bg-red-500/20 border border-red-500/30 p-2 rounded-full">
+                                        <MicOff size={16} className="text-red-400" />
+                                    </div>
+                                )}
+                             </div>
+                         )}
+                    </div>
+
+                    <div className="flex items-center justify-center gap-4 mb-8">
+                        <button onClick={() => setIsMuted(!isMuted)} className={`p-4 rounded-full border transition-colors ${isMuted ? 'bg-red-500/10 border-red-500/30 text-red-500' : 'bg-[#111] border-[#333] text-white hover:border-[#555]'}`}>
+                            {isMuted ? <MicOff size={20} /> : <Mic size={20} />}
+                        </button>
+                        <button onClick={() => setIsCameraOff(!isCameraOff)} className={`p-4 rounded-full border transition-colors ${isCameraOff ? 'bg-red-500/10 border-red-500/30 text-red-500' : 'bg-[#111] border-[#333] text-white hover:border-[#555]'}`}>
+                            {isCameraOff ? <VideoOff size={20} /> : <Video size={20} />}
+                        </button>
+                    </div>
+
+                    {canJoin ? (
+                        <button 
+                            onClick={() => setIsInLobby(false)}
+                            className="w-full py-4 bg-accent-500 text-black font-bold font-mono tracking-widest uppercase rounded-sm hover:bg-accent-400 transition-colors shadow-[0_0_20px_rgba(168,85,247,0.4)]"
+                        >
+                            Join Interview
+                        </button>
+                    ) : (
+                        <button 
+                            disabled
+                            className="w-full py-4 bg-[#111] text-[#666] font-bold font-mono tracking-widest uppercase rounded-sm border border-[#333] cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                            <Lock size={16} /> {timeRemainingText}
+                        </button>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
     /* ────────── Video panel (PiP when in ide/whiteboard) ────────── */
     const renderVideoFull = () => (
         <div className="flex-1 flex items-center justify-center relative p-6">
-            {/* Remote (large) */}
             <div className="relative w-full max-w-4xl aspect-video bg-[#0A0A0A] border border-[#222] rounded-lg overflow-hidden shadow-2xl">
                 <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-[#0A0A0A] to-[#111]">
                     <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-accent-600 to-[#6b21a8] flex items-center justify-center text-3xl font-bold shadow-xl border-2 border-accent-500/30">
@@ -116,7 +239,6 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
                 </div>
             </div>
 
-            {/* Self (small PiP, bottom-right) */}
             <div className="absolute bottom-8 right-8 w-52 aspect-video bg-[#111] border border-accent-500/30 rounded-lg overflow-hidden shadow-xl">
                 <div className="absolute inset-0 flex items-center justify-center">
                     {isCameraOff ? (
@@ -145,7 +267,6 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
             animate={{ opacity: 1, scale: 1 }}
             className="absolute top-4 right-4 z-30 flex flex-col gap-2"
         >
-            {/* Toggle */}
             <button
                 onClick={() => setPipMinimized(!pipMinimized)}
                 className="self-end p-1 bg-[#111] border border-[#333] rounded-sm text-[#888] hover:text-white transition-colors"
@@ -161,7 +282,6 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
                         exit={{ opacity: 0, height: 0 }}
                         className="flex flex-col gap-2"
                     >
-                        {/* Remote */}
                         <div className="w-48 aspect-video bg-[#0A0A0A] border border-[#222] rounded-lg overflow-hidden shadow-xl relative">
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-accent-600 to-[#6b21a8] flex items-center justify-center text-sm font-bold">
@@ -172,7 +292,6 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
                                 {remoteName}
                             </div>
                         </div>
-                        {/* Self */}
                         <div className="w-48 aspect-video bg-[#111] border border-accent-500/20 rounded-lg overflow-hidden shadow-xl relative">
                             <div className="absolute inset-0 flex items-center justify-center">
                                 {isCameraOff ? (
@@ -268,7 +387,6 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
                 </AnimatePresence>
             )}
 
-            {/* IDE grid */}
             <div className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-0 min-h-0">
                 <div className="col-span-1 border-r border-[#222] flex flex-col min-h-0">
                     <InterviewProblem />
@@ -291,7 +409,6 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
     /* ────────── Main Render ────────── */
     return (
         <div className="h-screen w-full bg-[#050505] font-sans text-white selection:bg-accent-500/30 selection:text-white flex flex-col overflow-hidden relative">
-            {/* Background */}
             <div className="fixed inset-0 pointer-events-none z-0 dotted-bg" />
 
             {/* Top bar */}
@@ -308,6 +425,12 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
                     }`}>
                         {role}
                     </span>
+                    {isRecruiter && isRecording && (
+                        <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 px-2 py-1 rounded-sm ml-2">
+                            <Circle size={8} className="fill-red-500 text-red-500 animate-pulse" />
+                            <span className="text-[10px] font-mono text-red-400 uppercase tracking-widest font-bold">REC</span>
+                        </div>
+                    )}
                 </div>
                 <div className="flex items-center gap-4 text-xs font-mono text-[#888]">
                     <span className="flex items-center gap-1.5">
@@ -356,20 +479,33 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
 
                     <div className="w-px h-8 bg-[#333] mx-2" />
 
-                    {/* Recruiter: Push Question button (only in IDE mode) */}
-                    {isRecruiter && mode === 'ide' && (
+                    {/* Recruiter specific dock items */}
+                    {isRecruiter && (
                         <>
+                            {mode === 'ide' && (
+                                <button
+                                    onClick={() => setShowQuestionBank(!showQuestionBank)}
+                                    className={`flex items-center gap-2 px-3 py-2.5 rounded-xl transition-all ${
+                                        showQuestionBank
+                                            ? 'bg-accent-500/15 text-accent-400 border border-accent-500/30'
+                                            : 'text-[#888] hover:text-white hover:bg-[#222] border border-transparent'
+                                    }`}
+                                    title="Push Question"
+                                >
+                                    <Plus size={18} />
+                                    <span className="text-[10px] font-mono uppercase tracking-widest hidden sm:inline">Push Q</span>
+                                </button>
+                            )}
                             <button
-                                onClick={() => setShowQuestionBank(!showQuestionBank)}
-                                className={`flex items-center gap-2 px-3 py-2.5 rounded-xl transition-all ${
-                                    showQuestionBank
-                                        ? 'bg-accent-500/15 text-accent-400 border border-accent-500/30'
-                                        : 'text-[#888] hover:text-white hover:bg-[#222] border border-transparent'
+                                onClick={() => setIsRecording(!isRecording)}
+                                className={`p-2.5 rounded-xl transition-all border ${
+                                    isRecording
+                                        ? 'bg-red-500/20 text-red-500 border-red-500/30'
+                                        : 'text-[#888] hover:text-white hover:bg-[#222] border-transparent'
                                 }`}
-                                title="Push Question"
+                                title={isRecording ? 'Stop Recording' : 'Start Recording'}
                             >
-                                <Plus size={18} />
-                                <span className="text-[10px] font-mono uppercase tracking-widest hidden sm:inline">Push Q</span>
+                                <Circle size={18} className={isRecording ? 'fill-red-500 text-red-500' : ''} />
                             </button>
                             <div className="w-px h-8 bg-[#333] mx-2" />
                         </>
@@ -525,6 +661,77 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
                                     <PhoneOff size={14} /> End Call
                                 </button>
                             </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Post-Interview Rating Modal (Recruiter Only) */}
+            <AnimatePresence>
+                {showRatingModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.9, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            className="bg-[#0A0A0A] border border-[#333] rounded-sm p-8 max-w-lg w-full shadow-2xl relative overflow-hidden"
+                        >
+                            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-[1px] bg-gradient-to-r from-transparent via-accent-500 to-transparent opacity-50"></div>
+                            
+                            <h3 className="text-xl font-bold font-sans uppercase tracking-widest text-white mb-2">
+                                Candidate Evaluation
+                            </h3>
+                            <p className="text-[10px] font-mono text-[#888] mb-8 uppercase tracking-widest">
+                                Required before exiting interview
+                            </p>
+
+                            <div className="mb-6">
+                                <label className="text-[10px] font-mono text-[#aaa] uppercase tracking-widest block mb-3">
+                                    Overall Rating
+                                </label>
+                                <div className="flex items-center gap-2">
+                                    {[1, 2, 3, 4, 5].map((starIdx) => (
+                                        <button
+                                            key={starIdx}
+                                            onClick={() => setRating(starIdx)}
+                                            className="group p-1"
+                                        >
+                                            <Star
+                                                size={32}
+                                                className={`transition-colors ${
+                                                    starIdx <= rating
+                                                        ? 'fill-yellow-400 text-yellow-400'
+                                                        : 'text-[#333] group-hover:text-[#555]'
+                                                }`}
+                                            />
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="mb-8">
+                                <label className="text-[10px] font-mono text-[#aaa] uppercase tracking-widest block mb-3">
+                                    Interview Summary / Notes
+                                </label>
+                                <textarea
+                                    value={summary}
+                                    onChange={(e) => setSummary(e.target.value)}
+                                    placeholder="Detailed feedback regarding technical skills, communication, problem-solving approach..."
+                                    className="w-full bg-[#111] border border-[#333] focus:border-accent-500 outline-none rounded-sm p-4 text-xs font-mono text-white resize-none min-h-[120px] transition-colors"
+                                />
+                            </div>
+
+                            <button
+                                onClick={handleRatingSubmit}
+                                disabled={rating === 0 || summary.trim().length === 0}
+                                className="w-full py-3 bg-accent-500 text-black font-bold font-mono tracking-widest uppercase rounded-sm hover:bg-accent-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                            >
+                                <CheckCircle2 size={16} /> Submit & Exit
+                            </button>
                         </motion.div>
                     </motion.div>
                 )}
