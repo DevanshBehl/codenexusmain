@@ -25,7 +25,8 @@ import {
     ExternalLink,
     Swords,
     Eye,
-    Mail
+    Mail,
+    Presentation
 } from 'lucide-react';
 
 type StudentFilter = 'ALL' | 'SHORTLISTED' | 'INTERVIEWED' | 'SELECTED' | 'REJECTED';
@@ -40,6 +41,7 @@ const CompanyDashboard = () => {
 
     const sidebarItems = [
         { icon: Mail, label: 'MAIL', onClick: () => window.location.href = '/company/mail' },
+        { icon: Presentation, label: 'WEBINARS', onClick: () => window.location.href = '/company/ppt' },
         { icon: Terminal, label: 'CMD CENTER', active: true },
         { icon: Building2, label: 'UNIVERSITIES' },
         { icon: Users, label: 'CANDIDATES' },

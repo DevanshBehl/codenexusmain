@@ -12,6 +12,7 @@ import CreateContest from './pages/company/CreateContest';
 import RecruiterDashboard from './pages/recruiter/Dashboard';
 import RecruiterInterview from './pages/recruiter/RecruiterInterview';
 import CompanyEvaluation from './pages/company/Evaluation';
+import SchedulePPT from './pages/company/SchedulePPT';
 import Mail from './pages/mail/Mail';
 import UniversityEvaluation from './pages/university/Evaluation';
 
@@ -35,6 +36,7 @@ function App() {
         <Route path="/company/dashboard" element={<CompanyDashboard />} />
         <Route path="/company/create-contest" element={<CreateContest />} />
         <Route path="/company/evaluation" element={<CompanyEvaluation />} />
+        <Route path="/company/ppt" element={<SchedulePPT />} />
         <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
         <Route path="/recruiter/interview" element={<RecruiterInterview />} />
       </Routes>
