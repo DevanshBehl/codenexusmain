@@ -14,7 +14,8 @@ import {
     LogOut,
     CheckCircle2,
     Mail,
-    Presentation
+    Presentation,
+    PenTool
 } from 'lucide-react';
 
 const StudentDashboard = () => {
@@ -25,6 +26,7 @@ const StudentDashboard = () => {
         { icon: Presentation, label: 'WEBINARS', onClick: () => window.location.href = '/student/webinars' },
         { icon: Terminal, label: 'CMD CENTER', active: true, onClick: () => window.location.href = '/student/dashboard' },
         { icon: Code2, label: 'CODE ARENA', onClick: () => window.location.href = '/student/codearena' },
+        { icon: PenTool, label: 'DESIGN ARENA', onClick: () => window.location.href = '/student/designarena' },
         { icon: Briefcase, label: 'INTERVIEWS', onClick: () => window.location.href = '/student/interview' },
         { icon: FileText, label: 'APPLICATIONS', onClick: () => window.location.href = '/student/dashboard' },
         { icon: Box, label: 'PROJECTS', onClick: () => window.location.href = '/student/dashboard' },

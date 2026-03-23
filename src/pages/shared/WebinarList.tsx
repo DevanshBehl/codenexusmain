@@ -3,7 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import {
     Terminal, Building2, Users, FileText, CheckSquare, Mail, Presentation,
-    Calendar, Video, Building, Lock
+    Calendar, Video, Building, Lock,
+    Code2, Play, CheckCircle2, MessageSquare, Briefcase, PenTool, 
+    BarChart3, FileBarChart
 } from 'lucide-react';
 
 /* ────────── Types & Mock Data ────────── */
@@ -77,21 +79,27 @@ export default function WebinarList({ userRole }: WebinarListProps) {
 
     const studentSidebarItems = [
         { icon: Terminal, label: 'CMD CENTER', onClick: () => navigate('/student/dashboard') },
-        { icon: Presentation, label: 'WEBINARS', active: true, onClick: () => navigate('/student/webinar') },
-        { icon: Building2, label: 'COMPANIES', onClick: () => navigate('/student/dashboard') },
-        { icon: Users, label: 'COMMUNITY', onClick: () => navigate('/student/dashboard') },
-        { icon: FileText, label: 'APPLICATIONS', onClick: () => navigate('/student/dashboard') },
-        { icon: Mail, label: 'MAIL', onClick: () => navigate('/student/mail') },
+        { icon: Code2, label: 'CODE ARENA', onClick: () => navigate('/student/codearena') },
+        { icon: Play, label: 'INTERVIEWS', onClick: () => navigate('/student/dashboard') },
+        { icon: Users, label: 'PORTFOLIO', onClick: () => navigate('/student/dashboard') },
+        { icon: FileText, label: 'RESUME', onClick: () => navigate('/student/dashboard') },
+        { icon: CheckCircle2, label: 'EVALUATIONS', onClick: () => navigate('/student/dashboard') },
+        { icon: MessageSquare, label: 'FORUM', onClick: () => navigate('/student/dashboard') },
+        { icon: Briefcase, label: 'JOBS', onClick: () => navigate('/student/dashboard') },
+        { icon: Presentation, label: 'WEBINARS', active: true, onClick: () => navigate('/student/webinars') },
+        { icon: PenTool, label: 'DESIGN ARENA', onClick: () => navigate('/student/designarena') },
     ];
 
     const universitySidebarItems = [
-        { icon: Terminal, label: 'CMD CENTER', onClick: () => navigate('/university/dashboard') },
-        { icon: Presentation, label: 'WEBINARS', active: true, onClick: () => navigate('/university/webinars') },
-        { icon: Users, label: 'STUDENTS', onClick: () => navigate('/university/dashboard') },
-        { icon: Building2, label: 'COMPANIES', onClick: () => navigate('/university/dashboard') },
-        { icon: CheckSquare, label: 'APPROVALS', onClick: () => navigate('/university/dashboard') },
-        { icon: FileText, label: 'EVALUATIONS', onClick: () => navigate('/university/evaluation') },
         { icon: Mail, label: 'MAIL', onClick: () => navigate('/university/mail') },
+        { icon: Presentation, label: 'WEBINARS', active: true, onClick: () => navigate('/university/webinars') },
+        { icon: Terminal, label: 'CMD CENTER', onClick: () => navigate('/university/dashboard') },
+        { icon: Building2, label: 'COMPANIES', onClick: () => navigate('/university/dashboard') },
+        { icon: Users, label: 'STUDENTS', onClick: () => navigate('/university/dashboard') },
+        { icon: Briefcase, label: 'PLACEMENTS', onClick: () => navigate('/university/dashboard') },
+        { icon: CheckCircle2, label: 'EVALUATIONS', onClick: () => navigate('/university/evaluation') },
+        { icon: BarChart3, label: 'ANALYTICS', onClick: () => navigate('/university/dashboard') },
+        { icon: FileBarChart, label: 'REPORTS', onClick: () => navigate('/university/dashboard') },
     ];
 
     const sidebarItems = userRole === 'STUDENT' ? studentSidebarItems : universitySidebarItems;

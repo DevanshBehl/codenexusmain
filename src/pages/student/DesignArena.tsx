@@ -14,7 +14,9 @@ import {
     Search,
     Filter,
     CheckCircle2,
-    PenTool
+    PenTool,
+    Mail,
+    Presentation
 } from 'lucide-react';
 
 const DesignArena = () => {
@@ -22,6 +24,8 @@ const DesignArena = () => {
     const [activeTopic, setActiveTopic] = useState('All');
 
     const sidebarItems = [
+        { icon: Mail, label: 'MAIL', path: '/student/mail' },
+        { icon: Presentation, label: 'WEBINARS', path: '/student/webinars' },
         { icon: Terminal, label: 'CMD CENTER', path: '/student/dashboard' },
         { icon: Code2, label: 'CODE ARENA', path: '/student/codearena' },
         { icon: PenTool, label: 'DESIGN ARENA', active: true, path: '/student/designarena' },

@@ -13,7 +13,22 @@ import {
     ShieldAlert,
     X,
     MessageSquare,
-    ShieldCheck
+    ShieldCheck,
+    Terminal,
+    Code2,
+    Play,
+    Users,
+    FileText,
+    CheckCircle2,
+    Briefcase,
+    Presentation,
+    PenTool,
+    Video,
+    Building2,
+    Swords,
+    BarChart3,
+    FileBarChart,
+    Calendar
 } from 'lucide-react';
 
 /* ────────── Types & Constants ────────── */
@@ -103,6 +118,56 @@ export default function Mail() {
         { icon: Send, label: 'SENT', view: 'SENT' },
         { icon: PenSquare, label: 'COMPOSE', view: 'COMPOSE' },
     ];
+
+    const getDashboardSidebarItems = () => {
+        switch (activeUserRole) {
+            case 'STUDENT':
+                return [
+                    { icon: Terminal, label: 'CMD CENTER', onClick: () => window.location.href = '/student/dashboard' },
+                    { icon: Code2, label: 'CODE ARENA', onClick: () => window.location.href = '/student/codearena' },
+                    { icon: Play, label: 'INTERVIEWS', onClick: () => window.location.href = '/student/dashboard' },
+                    { icon: Users, label: 'PORTFOLIO', onClick: () => window.location.href = '/student/dashboard' },
+                    { icon: FileText, label: 'RESUME', onClick: () => window.location.href = '/student/dashboard' },
+                    { icon: CheckCircle2, label: 'EVALUATIONS', onClick: () => window.location.href = '/student/dashboard' },
+                    { icon: MessageSquare, label: 'FORUM', onClick: () => window.location.href = '/student/dashboard' },
+                    { icon: Briefcase, label: 'JOBS', onClick: () => window.location.href = '/student/dashboard' },
+                    { icon: Presentation, label: 'WEBINARS', onClick: () => window.location.href = '/student/webinars' },
+                    { icon: PenTool, label: 'DESIGN ARENA', onClick: () => window.location.href = '/student/designarena' },
+                ];
+            case 'COMPANY':
+                return [
+                    { icon: Presentation, label: 'WEBINARS', onClick: () => window.location.href = '/company/ppt' },
+                    { icon: Terminal, label: 'CMD CENTER', onClick: () => window.location.href = '/company/dashboard' },
+                    { icon: Building2, label: 'UNIVERSITIES', onClick: () => window.location.href = '/company/dashboard' },
+                    { icon: Users, label: 'CANDIDATES', onClick: () => window.location.href = '/company/dashboard' },
+                    { icon: Swords, label: 'CODE ARENA', onClick: () => window.location.href = '/company/dashboard' },
+                    { icon: Video, label: 'INTERVIEWS', onClick: () => window.location.href = '/company/dashboard' },
+                    { icon: CheckCircle2, label: 'EVALUATIONS', onClick: () => window.location.href = '/company/evaluation' },
+                    { icon: BarChart3, label: 'ANALYTICS', onClick: () => window.location.href = '/company/dashboard' },
+                ];
+            case 'UNIVERSITY':
+                return [
+                    { icon: Presentation, label: 'WEBINARS', onClick: () => window.location.href = '/university/webinars' },
+                    { icon: Terminal, label: 'CMD CENTER', onClick: () => window.location.href = '/university/dashboard' },
+                    { icon: Building2, label: 'COMPANIES', onClick: () => window.location.href = '/university/dashboard' },
+                    { icon: Users, label: 'STUDENTS', onClick: () => window.location.href = '/university/dashboard' },
+                    { icon: Briefcase, label: 'PLACEMENTS', onClick: () => window.location.href = '/university/dashboard' },
+                    { icon: CheckCircle2, label: 'EVALUATIONS', onClick: () => window.location.href = '/university/evaluation' },
+                    { icon: BarChart3, label: 'ANALYTICS', onClick: () => window.location.href = '/university/dashboard' },
+                    { icon: FileBarChart, label: 'REPORTS', onClick: () => window.location.href = '/university/dashboard' },
+                ];
+            case 'RECRUITER':
+                return [
+                    { icon: Terminal, label: 'CMD CENTER', onClick: () => window.location.href = '/recruiter/dashboard' },
+                    { icon: Users, label: 'CANDIDATES', onClick: () => window.location.href = '/recruiter/dashboard' },
+                    { icon: Video, label: 'INTERVIEWS', onClick: () => window.location.href = '/recruiter/dashboard' },
+                    { icon: Calendar, label: 'SCHEDULE', onClick: () => window.location.href = '/recruiter/dashboard' },
+                    { icon: FileText, label: 'REPORTS', onClick: () => window.location.href = '/recruiter/dashboard' },
+                ];
+            default:
+                return [];
+        }
+    };
 
     // Determine allowed recipients based on user role
     const getAllowedRecipientRoles = (role: Role): Role[] => {
@@ -205,7 +270,30 @@ export default function Mail() {
                 </button>
 
                 <div className="flex-1 py-6 flex flex-col gap-1 px-3 overflow-y-auto custom-scrollbar">
-                    <div className="text-[10px] font-mono text-[#555] uppercase tracking-widest px-3 mb-2">Mailbox</div>
+                    <div className="text-[10px] font-mono text-[#555] uppercase tracking-widest px-3 mb-2">Back to Dashboard</div>
+                    {getDashboardSidebarItems().map((item, index) => (
+                        <button
+                            key={'dash'+index}
+                            onClick={item.onClick}
+                            className={`flex items-center px-3 py-2.5 rounded-sm transition-all duration-200 group relative border border-transparent text-[#888] hover:bg-[#111] hover:border-[#222] hover:text-white`}
+                        >
+                            <item.icon size={16} className={`min-w-[16px] group-hover:text-white transition-colors`} />
+                            <AnimatePresence>
+                                {isSidebarOpen && (
+                                    <motion.span
+                                        initial={{ opacity: 0, width: 0 }}
+                                        animate={{ opacity: 1, width: 'auto' }}
+                                        exit={{ opacity: 0, width: 0 }}
+                                        className="ml-3 font-mono text-[10px] uppercase tracking-widest whitespace-nowrap overflow-hidden"
+                                    >
+                                        {item.label}
+                                    </motion.span>
+                                )}
+                            </AnimatePresence>
+                        </button>
+                    ))}
+                    
+                    <div className="text-[10px] font-mono text-[#555] uppercase tracking-widest px-3 mb-2 mt-4 pt-4 border-t border-[#222]">Mailbox</div>
                     {sidebarItems.map((item, index) => (
                         <button
                             key={index}

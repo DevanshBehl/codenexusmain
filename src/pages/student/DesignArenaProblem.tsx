@@ -12,7 +12,9 @@ import {
     ChevronRight,
     LogOut,
     Send,
-    PenTool
+    PenTool,
+    Mail,
+    Presentation
 } from 'lucide-react';
 import Whiteboard from '../../components/Interview/Whiteboard';
 
@@ -48,6 +50,8 @@ Design a URL shortening service like bit.ly.
     };
 
     const sidebarItems = [
+        { icon: Mail, label: 'MAIL', path: '/student/mail' },
+        { icon: Presentation, label: 'WEBINARS', path: '/student/webinars' },
         { icon: Terminal, label: 'CMD CENTER', path: '/student/dashboard' },
         { icon: Code2, label: 'CODE ARENA', path: '/student/codearena' },
         { icon: PenTool, label: 'DESIGN ARENA', active: true, path: '/student/designarena' },

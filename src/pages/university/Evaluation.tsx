@@ -17,8 +17,10 @@ import {
     Star,
     X,
     MessageSquare,
-    Code2,
     FileText,
+    Code2,
+    Mail,
+    Presentation
 } from 'lucide-react';
 
 /* ────────── Types & Mock Data ────────── */
@@ -119,6 +121,8 @@ export default function UniversityEvaluation() {
     const [selectedCandidate, setSelectedCandidate] = useState<EvaluationCandidate | null>(null);
 
     const sidebarItems = [
+        { icon: Mail, label: 'MAIL', onClick: () => window.location.href = '/university/mail' },
+        { icon: Presentation, label: 'WEBINARS', onClick: () => window.location.href = '/university/webinars' },
         { icon: Terminal, label: 'CMD CENTER', onClick: () => window.location.href = '/university/dashboard' },
         { icon: Building2, label: 'COMPANIES', onClick: () => window.location.href = '/university/dashboard' },
         { icon: Users, label: 'STUDENTS', onClick: () => window.location.href = '/university/dashboard' },

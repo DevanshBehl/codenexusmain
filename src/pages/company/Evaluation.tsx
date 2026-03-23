@@ -19,8 +19,10 @@ import {
     MessageSquare,
     Code2,
     FileText,
+    XCircle,
     Check,
-    XCircle
+    Mail,
+    Presentation
 } from 'lucide-react';
 
 /* ────────── Types & Mock Data ────────── */
@@ -121,6 +123,8 @@ export default function CompanyEvaluation() {
     const [evaluatorNote, setEvaluatorNote] = useState('');
 
     const sidebarItems = [
+        { icon: Mail, label: 'MAIL', onClick: () => window.location.href = '/company/mail' },
+        { icon: Presentation, label: 'WEBINARS', onClick: () => window.location.href = '/company/ppt' },
         { icon: Terminal, label: 'CMD CENTER', onClick: () => window.location.href = '/company/dashboard' },
         { icon: Building2, label: 'UNIVERSITIES', onClick: () => window.location.href = '/company/dashboard' },
         { icon: Users, label: 'CANDIDATES', onClick: () => window.location.href = '/company/dashboard' },

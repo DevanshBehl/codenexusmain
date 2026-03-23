@@ -13,7 +13,10 @@ import {
     LogOut,
     Search,
     Filter,
-    CheckCircle2
+    CheckCircle2,
+    Mail,
+    Presentation,
+    PenTool
 } from 'lucide-react';
 
 const CodeArena = () => {
@@ -21,8 +24,11 @@ const CodeArena = () => {
     const [activeTopic, setActiveTopic] = useState('All');
 
     const sidebarItems = [
+        { icon: Mail, label: 'MAIL', path: '/student/mail' },
+        { icon: Presentation, label: 'WEBINARS', path: '/student/webinars' },
         { icon: Terminal, label: 'CMD CENTER', path: '/student/dashboard' },
         { icon: Code2, label: 'CODE ARENA', active: true, path: '/student/codearena' },
+        { icon: PenTool, label: 'DESIGN ARENA', path: '/student/designarena' },
         { icon: Briefcase, label: 'INTERVIEWS', path: '/student/interview' },
         { icon: FileText, label: 'APPLICATIONS', path: '/student/dashboard' },
         { icon: Box, label: 'PROJECTS', path: '/student/dashboard' },

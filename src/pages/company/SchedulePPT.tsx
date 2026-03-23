@@ -20,7 +20,9 @@ import {
     Link as LinkIcon,
     Video,
     AlignLeft,
-    Building
+    Building,
+    CheckCircle2,
+    BarChart3
 } from 'lucide-react';
 
 /* ────────── Types & Mock Data ────────── */
@@ -94,15 +96,15 @@ export default function SchedulePPT() {
     const [agenda, setAgenda] = useState('');
 
     const sidebarItems = [
-        { icon: Terminal, label: 'CMD CENTER', onClick: () => window.location.href = '/company/dashboard' },
+        { icon: Mail, label: 'MAIL', onClick: () => window.location.href = '/company/mail' },
         { icon: Presentation, label: 'WEBINARS', active: true, onClick: () => window.location.href = '/company/ppt' },
+        { icon: Terminal, label: 'CMD CENTER', onClick: () => window.location.href = '/company/dashboard' },
         { icon: Building2, label: 'UNIVERSITIES', onClick: () => window.location.href = '/company/dashboard' },
         { icon: Users, label: 'CANDIDATES', onClick: () => window.location.href = '/company/dashboard' },
-        { icon: FileText, label: 'EVALUATIONS', onClick: () => window.location.href = '/company/evaluation' },
-        { icon: ExternalLink, label: 'JOB POSTINGS', onClick: () => window.location.href = '/company/dashboard' },
         { icon: Swords, label: 'CODE ARENA', onClick: () => window.location.href = '/company/dashboard' },
-        { icon: Eye, label: 'PROCTORING', onClick: () => window.location.href = '/company/dashboard' },
-        { icon: Mail, label: 'MAIL', onClick: () => window.location.href = '/company/mail' },
+        { icon: Video, label: 'INTERVIEWS', onClick: () => window.location.href = '/company/dashboard' },
+        { icon: CheckCircle2, label: 'EVALUATIONS', onClick: () => window.location.href = '/company/evaluation' },
+        { icon: BarChart3, label: 'ANALYTICS', onClick: () => window.location.href = '/company/dashboard' },
     ];
 
     const toggleUniversity = (uni: string) => {
