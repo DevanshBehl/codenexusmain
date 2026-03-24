@@ -4,6 +4,8 @@ import Signup from './pages/Signup';
 import Login from './pages/Login';
 import StudentDashboard from './pages/student/Dashboard';
 import CodeArena from './pages/student/CodeArena';
+import CodeArenaLeaderboard from './pages/student/CodeArenaLeaderboard';
+import CodeArenaSubmissions from './pages/student/CodeArenaSubmissions';
 import CodeArenaProblem from './pages/student/CodeArenaProblem';
 import DesignArenaProblem from './pages/student/DesignArenaProblem';
 import StudentInterview from './pages/student/StudentInterview';
@@ -35,6 +37,8 @@ function App() {
         <Route path="/recruiter/mail/*" element={<Mail />} />
         <Route path="/student/dashboard" element={<StudentDashboard />} />
         <Route path="/student/codearena" element={<CodeArena />} />
+        <Route path="/student/codearena/leaderboard" element={<CodeArenaLeaderboard />} />
+        <Route path="/student/codearena/submissions" element={<CodeArenaSubmissions />} />
         <Route path="/student/codearena/:id" element={<CodeArenaProblem />} />
         <Route path="/student/designarena" element={<DesignArena />} />
         <Route path="/student/designarena/:id" element={<DesignArenaProblem />} />

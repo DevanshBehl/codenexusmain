@@ -20,6 +20,7 @@ import {
     Presentation,
     PenTool
 } from 'lucide-react';
+import AskAI from '../../components/CodeArena/AskAI';
 
 const CodeArenaProblem = () => {
     const { id } = useParams();
@@ -185,9 +186,9 @@ Output: []
                             <button className="px-4 py-3 border-r border-[#222] text-[10px] font-mono uppercase tracking-widest text-accent-400 border-b-2 border-accent-500 bg-[#0A0A0A] flex items-center gap-2">
                                 <FileText size={12} /> Description
                             </button>
-                            <button className="px-4 py-3 border-r border-[#222] text-[10px] font-mono uppercase tracking-widest text-[#888] hover:text-white hover:bg-[#1a1a1a] transition-colors flex items-center gap-2">
+                            <Link to="/student/codearena/submissions" className="px-4 py-3 border-r border-[#222] text-[10px] font-mono uppercase tracking-widest text-[#888] hover:text-white hover:bg-[#1a1a1a] transition-colors flex items-center gap-2">
                                 <Activity size={12} /> Submissions
-                            </button>
+                            </Link>
                         </div>
 
                         {/* Content Area */}
@@ -342,6 +343,7 @@ Output: []
                     </div>
                 </div>
             </div>
+            <AskAI />
         </div>
     );
 };

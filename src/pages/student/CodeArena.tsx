@@ -18,6 +18,8 @@ import {
     Presentation,
     PenTool
 } from 'lucide-react';
+import ActivityHeatmap from '../../components/CodeArena/ActivityHeatmap';
+import AskAI from '../../components/CodeArena/AskAI';
 
 const CodeArena = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -171,6 +173,13 @@ const CodeArena = () => {
                 <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
                     <div className="max-w-6xl mx-auto flex flex-col gap-6">
                         
+                        {/* Top Navigation Strip */}
+                        <div className="flex items-center gap-4 text-sm font-mono uppercase tracking-widest border-b border-[#333] pb-4">
+                            <span className="text-accent-500 border-b-2 border-accent-500 pb-4 -mb-[17px]">Problems</span>
+                            <Link to="/student/codearena/leaderboard" className="text-[#888] hover:text-white transition-colors">Leaderboard</Link>
+                            <Link to="/student/codearena/submissions" className="text-[#888] hover:text-white transition-colors">Submissions</Link>
+                        </div>
+
                         {/* Header */}
                         <div className="border border-[#333] bg-[#0A0A0A] p-6 lg:p-8 shadow-2xl relative rounded-sm flex flex-col md:flex-row md:items-end justify-between gap-6">
                             <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/4 h-[1px] bg-gradient-to-r from-transparent via-accent-500 to-transparent opacity-50"></div>
@@ -203,6 +212,9 @@ const CodeArena = () => {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Activity Tracker */}
+                        <ActivityHeatmap />
 
                         {/* Topics Filter */}
                         <div className="flex flex-col gap-4">
@@ -302,6 +314,8 @@ const CodeArena = () => {
                     </div>
                 </div>
             </main>
+
+            <AskAI />
 
             <style dangerouslySetInnerHTML={{
                 __html: `
