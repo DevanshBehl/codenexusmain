@@ -24,6 +24,7 @@ import WebinarList from './pages/shared/WebinarList';
 import Mail from './pages/mail/Mail';
 import UniversityEvaluation from './pages/university/Evaluation';
 import AboutDeveloper from './pages/AboutDeveloper';
+import Recordings from './pages/shared/Recordings';
 
 function App() {
   return (
@@ -47,18 +48,22 @@ function App() {
         <Route path="/student/interview" element={<StudentInterview />} />
         <Route path="/student/projects" element={<StudentProjects />} />
         <Route path="/student/profile" element={<StudentProfile />} />
+        <Route path="/student/recording" element={<Recordings userRole="STUDENT" />} />
         <Route path="/student/webinars" element={<WebinarList userRole="STUDENT" />} />
         <Route path="/student/webinar" element={<WebinarRoom userRole="STUDENT" />} />
         <Route path="/university/dashboard" element={<UniversityDashboard />} />
+        <Route path="/university/recording" element={<Recordings userRole="UNIVERSITY" />} />
         <Route path="/university/webinars" element={<WebinarList userRole="UNIVERSITY" />} />
         <Route path="/university/evaluation" element={<UniversityEvaluation />} />
         <Route path="/company/dashboard" element={<CompanyDashboard />} />
         <Route path="/company/create-contest" element={<CreateContest />} />
         <Route path="/company/evaluation" element={<CompanyEvaluation />} />
+        <Route path="/company/recording" element={<Recordings userRole="COMPANY" />} />
         <Route path="/company/ppt" element={<SchedulePPT />} />
         <Route path="/company/webinar" element={<WebinarRoom userRole="COMPANY" />} />
         <Route path="/recruiter/dashboard" element={<RecruiterDashboard />} />
         <Route path="/recruiter/interview" element={<RecruiterInterview />} />
+        <Route path="/recruiter/recording" element={<Recordings userRole="RECRUITER" />} />
       </Routes>
     </Router>
   );
