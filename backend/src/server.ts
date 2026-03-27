@@ -1,15 +1,13 @@
-import { prisma } from "./lib/prisma.js";
+import express from "express";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import cors from "cors";
 
-const createUser = async () => {
-    const user = await prisma.user.create({
-        data: {
-            email: "devanshbhel@gmail.com",
-            password: "anudev0405",
-            role: "STUDENT"
+const app = express();
+app.use(express.json());
 
-        }
-    })
-    console.log("user created", user);
-}
 
-createUser();
+
+app.listen(3000, () => {
+    console.log("server is running");
+});
