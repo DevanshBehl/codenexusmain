@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
-import { Role } from '../generated/prisma/enums.js';
 import { env } from '../config/env.js';
 import { ApiError } from '../utils/api-error.js';
+import { Role } from '../generated/prisma/enums.js';
 
 // Add RequestHandler here, and you can remove the types from req, res, next
 export const authenticate: RequestHandler = (req, res, next) => {

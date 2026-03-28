@@ -1,8 +1,8 @@
 import { RequestHandler, Router } from "express";
 import * as userController from "./user.controller.js";
-import { validate } from "../middleware/validate.js";
-import { authenticate } from "../middleware/authenticate.js";
-import { authorize } from "../middleware/authorize.js";
+import { validate } from "../../middleware/validate.js";
+import { authenticate } from "../../middleware/authenticate.js";
+import { authorize } from "../../middleware/authorize.js";
 
 import {
     createStundetProfileSchema,

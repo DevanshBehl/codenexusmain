@@ -3,7 +3,8 @@ import cors from "cors";
 import { errorHandler } from "./middleware/error-handler.js";
 import { ApiResponse } from "./utils/api-response.js";
 import authRoutes from './modules/auth/auth.routes.js';
-import userRoutes from './modules/user.routes.js';
+import userRoutes from './modules/user/user.routes.js';
+import contestRoutes from "./modules/contest/contest.routes.js";
 const app: Application = express();
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
@@ -19,7 +20,7 @@ app.get("/api/v1/health", (req, res) => {
 
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/user", userRoutes);
-
+app.use("api/vq/contests", contestRoutes)
 app.use((req, res) => {
     res.status(404).json({
         success: false,

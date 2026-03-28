@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import * as userService from "./user.services.js";
-import { ApiResponse } from "../utils/api-response.js";
-import { NestedBoolFilter } from "../generated/prisma/commonInputTypes.js";
+import { ApiResponse } from "../../utils/api-response.js";
+import { NestedBoolFilter } from "../../generated/prisma/commonInputTypes.js";
 
 export const setupStudentProfile = async (req: Request, res: Response, next: NextFunction) => {
     try {

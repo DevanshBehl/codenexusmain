@@ -1,5 +1,5 @@
-import { prisma } from "../lib/prisma.js";
-import { ApiError } from "../utils/api-error.js";
+import { prisma } from "../../lib/prisma.js";
+import { ApiError } from "../../utils/api-error.js";
 import { CreateCompanyInput, CreateStudentInput, CreateUniversityInput } from "./user.schema.js";
 
 export const createStudentProfile = async (userId: string, data: CreateStudentInput) => {
