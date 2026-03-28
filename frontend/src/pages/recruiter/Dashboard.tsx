@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Editor from '@monaco-editor/react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -860,8 +861,32 @@ export default function RecruiterDashboard() {
                                                         <div className="text-[10px] font-mono text-[#666] mb-2 uppercase tracking-widest flex items-center gap-2">
                                                             <Code2 size={12} className="text-[#888]" /> Final Submission
                                                         </div>
-                                                        <pre className="bg-[#111] border border-[#333] p-4 rounded-sm overflow-x-auto text-[11px] font-mono text-accent-400 leading-relaxed shadow-inner">
-                                                            <code>{q.codeSubmission}</code>
+                                                        <pre className="border border-[#333] rounded-sm overflow-hidden" style={{ height: '180px' }}>
+                                                            <Editor
+                                                                value={q.codeSubmission}
+                                                                language="javascript"
+                                                                theme="vs-dark"
+                                                                options={{
+                                                                    readOnly: true,
+                                                                    minimap: { enabled: false },
+                                                                    fontSize: 11,
+                                                                    fontFamily: "'JetBrains Mono', 'Fira Code', Menlo, Monaco, 'Courier New', monospace",
+                                                                    lineNumbers: 'on',
+                                                                    scrollBeyondLastLine: false,
+                                                                    automaticLayout: true,
+                                                                    renderLineHighlight: 'none',
+                                                                    overviewRulerBorder: false,
+                                                                    hideCursorInOverviewRuler: true,
+                                                                    domReadOnly: true,
+                                                                    padding: { top: 8, bottom: 8 },
+                                                                    scrollbar: {
+                                                                        vertical: 'auto',
+                                                                        horizontal: 'auto',
+                                                                        verticalScrollbarSize: 4,
+                                                                        horizontalScrollbarSize: 4,
+                                                                    },
+                                                                }}
+                                                            />
                                                         </pre>
                                                     </div>
                                                 </div>

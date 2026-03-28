@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Editor from '@monaco-editor/react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -21,6 +22,65 @@ import {
     PenTool
 } from 'lucide-react';
 import AskAI from '../../components/CodeArena/AskAI';
+
+const LANGUAGE_MAP: Record<string, string> = {
+    cpp: 'cpp',
+    java: 'java',
+    python: 'python',
+    javascript: 'javascript',
+};
+
+const DEFAULT_CODE: Record<string, string> = {
+    cpp: `/**
+ * Definition for singly-linked list.
+ * struct ListNode {
+ *     int val;
+ *     ListNode *next;
+ *     ListNode() : val(0), next(nullptr) {}
+ *     ListNode(int x) : val(x), next(nullptr) {}
+ *     ListNode(int x, ListNode *next) : val(x), next(next) {}
+ * };
+ */
+class Solution {
+public:
+    ListNode* mergeKLists(vector<ListNode*>& lists) {
+        
+    }
+};`,
+    java: `/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    public ListNode mergeKLists(ListNode[] lists) {
+        
+    }
+}`,
+    python: `# Definition for singly-linked list.
+# class ListNode:
+#     def __init__(self, val=0, next=None):
+#         self.val = val
+#         self.next = next
+class Solution:
+    def mergeKLists(self, lists: list[Optional[ListNode]]) -> Optional[ListNode]:
+        pass`,
+    javascript: `/**
+ * Definition for singly-linked list.
+ * function ListNode(val, next) {
+ *     this.val = (val===undefined ? 0 : val)
+ *     this.next = (next===undefined ? null : next)
+ * }
+ */
+function mergeKLists(lists) {
+    
+}`,
+};
 
 const CodeArenaProblem = () => {
     const { id } = useParams();
@@ -296,31 +356,50 @@ Output: []
                             </div>
                         </div>
 
-                        {/* Code Editor Body Mock */}
-                        <div className="flex-1 overflow-auto bg-[#050505] p-4 font-mono text-xs leading-relaxed relative text-[#aaa]">
-                            {/* Simple line numbers + code representation */}
-                            <div className="flex">
-                                <div className="text-[#444] text-right pr-4 select-none flex flex-col">
-                                    {[...Array(20)].map((_, i) => <span key={i}>{i + 1}</span>)}
-                                </div>
-                                <div>
-                                    <span className="text-[#555]">/**</span><br />
-                                    <span className="text-[#555]"> * Definition for singly-linked list.</span><br />
-                                    <span className="text-[#555]"> * struct ListNode {'{'}</span><br />
-                                    <span className="text-[#555]"> *     int val;</span><br />
-                                    <span className="text-[#555]"> *     ListNode *next;</span><br />
-                                    <span className="text-[#555]"> *     ListNode() : val(0), next(nullptr) {'}'}</span><br />
-                                    <span className="text-[#555]"> *     ListNode(int x) : val(x), next(nullptr) {'}'}</span><br />
-                                    <span className="text-[#555]"> *     ListNode(int x, ListNode *next) : val(x), next(next) {'}'}</span><br />
-                                    <span className="text-[#555]"> * {'};'}</span><br />
-                                    <span className="text-[#555]"> */</span><br />
-                                    <span className="text-accent-400">class</span> <span className="text-amber-200">Solution</span> {'{'}<br />
-                                    <span className="text-accent-400">public:</span><br />
-                                    &nbsp;&nbsp;&nbsp;&nbsp;ListNode* <span className="text-blue-300">mergeKLists</span>(vector&lt;ListNode*&gt;&amp; lists) {'{'}<br />
-                                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span className="inline-block w-2 h-3.5 bg-accent-400 animate-pulse ml-0.5 align-middle"></span><br />
-                                    &nbsp;&nbsp;&nbsp;&nbsp;{'}'}<br />
-                                    {'};'}<br />
-                                </div>
+                        {/* Code Editor Body */}
+                        <div className="flex-1 relative min-h-0">
+                            <div className="absolute inset-0">
+                            <Editor
+                                height="100%"
+                                defaultLanguage={LANGUAGE_MAP[language]}
+                                language={LANGUAGE_MAP[language]}
+                                defaultValue={DEFAULT_CODE[language]}
+                                theme="vs-dark"
+                                options={{
+                                    fontSize: 13,
+                                    fontFamily: "'JetBrains Mono', 'Fira Code', Menlo, Monaco, 'Courier New', monospace",
+                                    fontLigatures: true,
+                                    lineNumbers: 'on',
+                                    minimap: { enabled: false },
+                                    scrollBeyondLastLine: false,
+                                    automaticLayout: true,
+                                    tabSize: 4,
+                                    wordWrap: 'off',
+                                    cursorBlinking: 'smooth',
+                                    cursorSmoothCaretAnimation: 'on',
+                                    smoothScrolling: true,
+                                    bracketPairColorization: { enabled: true },
+                                    autoClosingBrackets: 'always',
+                                    autoClosingQuotes: 'always',
+                                    autoIndent: 'full',
+                                    formatOnPaste: true,
+                                    formatOnType: true,
+                                    suggestOnTriggerCharacters: true,
+                                    parameterHints: { enabled: true },
+                                    folding: true,
+                                    matchBrackets: 'always',
+                                    renderLineHighlight: 'line',
+                                    padding: { top: 12, bottom: 12 },
+                                    overviewRulerBorder: false,
+                                    hideCursorInOverviewRuler: true,
+                                    scrollbar: {
+                                        vertical: 'auto',
+                                        horizontal: 'auto',
+                                        verticalScrollbarSize: 6,
+                                        horizontalScrollbarSize: 6,
+                                    },
+                                }}
+                            />
                             </div>
                         </div>
 

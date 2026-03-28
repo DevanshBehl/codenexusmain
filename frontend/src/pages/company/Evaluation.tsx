@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import Editor from '@monaco-editor/react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -503,9 +504,33 @@ export default function CompanyEvaluation() {
                                                                 </div>
                                                             </div>
                                                             <div className="p-3 bg-[#050505]">
-                                                                <pre className="bg-[#111] border border-[#333] p-3 rounded-sm overflow-x-auto text-[10px] font-mono text-accent-400 leading-relaxed max-h-40 custom-scrollbar">
-                                                                    <code>{q.codeSubmission}</code>
-                                                                </pre>
+                                                                <div className="border border-[#333] rounded-sm overflow-hidden" style={{ height: '160px' }}>
+                                                                    <Editor
+                                                                        value={q.codeSubmission}
+                                                                        language="javascript"
+                                                                        theme="vs-dark"
+                                                                        options={{
+                                                                            readOnly: true,
+                                                                            minimap: { enabled: false },
+                                                                            fontSize: 11,
+                                                                            fontFamily: "'JetBrains Mono', 'Fira Code', Menlo, Monaco, 'Courier New', monospace",
+                                                                            lineNumbers: 'on',
+                                                                            scrollBeyondLastLine: false,
+                                                                            automaticLayout: true,
+                                                                            renderLineHighlight: 'none',
+                                                                            overviewRulerBorder: false,
+                                                                            hideCursorInOverviewRuler: true,
+                                                                            domReadOnly: true,
+                                                                            padding: { top: 8, bottom: 8 },
+                                                                            scrollbar: {
+                                                                                vertical: 'auto',
+                                                                                horizontal: 'auto',
+                                                                                verticalScrollbarSize: 4,
+                                                                                horizontalScrollbarSize: 4,
+                                                                            },
+                                                                        }}
+                                                                    />
+                                                                </div>
                                                             </div>
                                                         </div>
                                                     );

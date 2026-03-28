@@ -1,17 +1,89 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Terminal, Play, Send, Settings } from 'lucide-react';
+import Editor, { type OnMount } from '@monaco-editor/react';
+
+/* ── Language mapping for Monaco ── */
+const LANGUAGE_MAP: Record<string, string> = {
+    cpp: 'cpp',
+    java: 'java',
+    python: 'python',
+    javascript: 'javascript',
+};
+
+const DEFAULT_CODE: Record<string, string> = {
+    cpp: `class Solution {
+public:
+    vector<int> twoSum(vector<int>& nums, int target) {
+        unordered_map<int, int> numMap;
+        for (int i = 0; i < nums.size(); i++) {
+            int complement = target - nums[i];
+            if (numMap.count(complement)) {
+                return {numMap[complement], i};
+            }
+            numMap[nums[i]] = i;
+        }
+        return {};
+    }
+};`,
+    java: `class Solution {
+    public int[] twoSum(int[] nums, int target) {
+        Map<Integer, Integer> map = new HashMap<>();
+        for (int i = 0; i < nums.length; i++) {
+            int complement = target - nums[i];
+            if (map.containsKey(complement)) {
+                return new int[] { map.get(complement), i };
+            }
+            map.put(nums[i], i);
+        }
+        return new int[] {};
+    }
+}`,
+    python: `class Solution:
+    def twoSum(self, nums: list[int], target: int) -> list[int]:
+        num_map = {}
+        for i, num in enumerate(nums):
+            complement = target - num
+            if complement in num_map:
+                return [num_map[complement], i]
+            num_map[num] = i
+        return []`,
+    javascript: `function twoSum(nums, target) {
+    const numMap = new Map();
+    for (let i = 0; i < nums.length; i++) {
+        const complement = target - nums[i];
+        if (numMap.has(complement)) {
+            return [numMap.get(complement), i];
+        }
+        numMap.set(nums[i], i);
+    }
+    return [];
+}`,
+};
 
 export default function InterviewEditor() {
     const [language, setLanguage] = useState('cpp');
+    const editorRef = useRef<Parameters<OnMount>[0] | null>(null);
+
+    const handleEditorDidMount: OnMount = (editor) => {
+        editorRef.current = editor;
+        editor.focus();
+    };
+
+    const handleLanguageChange = (newLang: string) => {
+        setLanguage(newLang);
+        if (editorRef.current) {
+            editorRef.current.setValue(DEFAULT_CODE[newLang] ?? '');
+        }
+    };
 
     return (
-        <section className="col-span-2 border border-accent-500/30 bg-[#050505] rounded-sm overflow-hidden flex flex-col relative group hover:border-accent-500/60 transition-colors shadow-[0_0_20px_oklch(0.777_0.152_181.912_/_0.05)]">
+        <section className="h-full min-h-0 border border-accent-500/30 bg-[#050505] rounded-sm overflow-hidden flex flex-col relative group hover:border-accent-500/60 transition-colors shadow-[0_0_20px_oklch(0.777_0.152_181.912_/_0.05)]">
             {/* Editor Header */}
             <div className="h-12 border-b border-[#333] flex items-center justify-between px-4 bg-[#111]">
                 <div className="flex items-center gap-3">
                     <select
                         value={language}
-                        onChange={(e) => setLanguage(e.target.value)}
+                        onChange={(e) => handleLanguageChange(e.target.value)}
                         className="bg-[#222] border border-[#333] text-white text-sm rounded-sm px-3 py-1.5 focus:outline-none focus:border-accent-500/50 appearance-none font-mono cursor-pointer"
                     >
                         <option value="cpp">C++</option>
@@ -36,27 +108,61 @@ export default function InterviewEditor() {
                 </div>
             </div>
 
-            {/* Editor Area (Mockup) */}
-            <div className="flex-1 relative font-mono text-sm leading-relaxed flex overflow-hidden">
-                {/* Line numbers */}
-                <div className="w-12 border-r border-[#222] bg-[#0A0A0A] pt-4 flex flex-col items-end pr-3 text-[#555] select-none">
-                    {[...Array(20)].map((_, i) => (
-                        <div key={i}>{i + 1}</div>
-                    ))}
-                </div>
-                {/* Code Textarea (Mock) */}
-                <textarea
-                    className="flex-1 bg-transparent p-4 text-white/90 resize-none focus:outline-none custom-scrollbar whitespace-pre"
-                    defaultValue={`class Solution {\npublic:\n    vector<int> twoSum(vector<int>& nums, int target) {\n        unordered_map<int, int> numMap;\n        for (int i = 0; i < nums.size(); i++) {\n            int complement = target - nums[i];\n            if (numMap.count(complement)) {\n                return {numMap[complement], i};\n            }\n            numMap[nums[i]] = i;\n        }\n        return {};\n    }\n};`}
-                    spellCheck="false"
+            {/* Monaco Editor */}
+            <div className="flex-1 relative min-h-0">
+                <div className="absolute inset-0">
+                <Editor
+                    height="100%"
+                    defaultLanguage={LANGUAGE_MAP[language]}
+                    language={LANGUAGE_MAP[language]}
+                    defaultValue={DEFAULT_CODE[language]}
+                    theme="vs-dark"
+                    onMount={handleEditorDidMount}
+                    options={{
+                        fontSize: 14,
+                        fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', Menlo, Monaco, 'Courier New', monospace",
+                        fontLigatures: true,
+                        lineNumbers: 'on',
+                        minimap: { enabled: false },
+                        scrollBeyondLastLine: false,
+                        automaticLayout: true,
+                        tabSize: 4,
+                        wordWrap: 'off',
+                        renderWhitespace: 'selection',
+                        cursorBlinking: 'smooth',
+                        cursorSmoothCaretAnimation: 'on',
+                        smoothScrolling: true,
+                        bracketPairColorization: { enabled: true },
+                        autoClosingBrackets: 'always',
+                        autoClosingQuotes: 'always',
+                        autoIndent: 'full',
+                        formatOnPaste: true,
+                        formatOnType: true,
+                        suggestOnTriggerCharacters: true,
+                        parameterHints: { enabled: true },
+                        folding: true,
+                        foldingHighlight: true,
+                        matchBrackets: 'always',
+                        renderLineHighlight: 'line',
+                        renderLineHighlightOnlyWhenFocus: false,
+                        lineDecorationsWidth: 8,
+                        padding: { top: 16, bottom: 16 },
+                        overviewRulerBorder: false,
+                        hideCursorInOverviewRuler: true,
+                        scrollbar: {
+                            vertical: 'auto',
+                            horizontal: 'auto',
+                            verticalScrollbarSize: 6,
+                            horizontalScrollbarSize: 6,
+                        },
+                    }}
                 />
+                </div>
 
                 {/* Floating watermark/logo */}
-                <div className="absolute bottom-4 right-4 opacity-5 pointer-events-none">
+                <div className="absolute bottom-4 right-4 opacity-5 pointer-events-none z-10">
                     <Terminal size={120} />
                 </div>
-                {/* Caret Mock */}
-                <div className="absolute top-[31%] left-[32%] w-0.5 h-4 bg-accent-400 animate-pulse"></div>
             </div>
         </section>
     );
