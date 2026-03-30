@@ -9,7 +9,7 @@ export const createProblem = async (userId: string, data: CreateProblemInput) =>
         }
     })
     if (!company) {
-        throw new ApiError(403, "Only Verified Comapnies can create problem");
+        throw new ApiError(403, "Only verified companies can create problems");
     }
 
     if (data.contestId) {
@@ -21,8 +21,8 @@ export const createProblem = async (userId: string, data: CreateProblemInput) =>
         if (!contest) {
             throw new ApiError(404, "Contest not found");
         }
-        if (contest.id !== company.id) {
-            throw new ApiError(403, "You can't add problem in someone else contest");
+        if (contest.companyId !== company.id) {
+            throw new ApiError(403, "You can't add problems to someone else's contest");
         }
     }
 
@@ -44,4 +44,70 @@ export const createProblem = async (userId: string, data: CreateProblemInput) =>
             testCases: true
         }
     })
+}
+
+export const getProblems = async (difficulty?: string, page: number = 1, limit: number = 20) => {
+    const where: any = {};
+    if (difficulty) {
+        where.difficulty = difficulty;
+    }
+    const skip = (page - 1) * limit;
+
+    const [problems, total] = await Promise.all([
+        prisma.problem.findMany({
+            where,
+            select: {
+                id: true,
+                title: true,
+                difficulty: true,
+                contestId: true,
+                _count: {
+                    select: {
+                        testCases: true,
+                        submissions: true
+                    }
+                }
+            },
+            skip,
+            take: limit,
+            orderBy: { title: 'asc' }
+        }),
+        prisma.problem.count({ where })
+    ]);
+
+    return {
+        problems,
+        pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit)
+        }
+    };
+}
+
+export const getProblemById = async (id: string) => {
+    const problem = await prisma.problem.findUnique({
+        where: { id },
+        include: {
+            testCases: {
+                where: { isHidden: false },
+                select: {
+                    id: true,
+                    input: true,
+                    output: true
+                }
+            },
+            contest: {
+                select: {
+                    id: true,
+                    title: true
+                }
+            }
+        }
+    });
+    if (!problem) {
+        throw new ApiError(404, "Problem not found");
+    }
+    return problem;
 }
