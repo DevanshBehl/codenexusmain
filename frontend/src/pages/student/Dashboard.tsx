@@ -23,7 +23,7 @@ const StudentDashboard = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [userName, setUserName] = useState('Student');
     const [codeArenaScore, setCodeArenaScore] = useState(0);
-    const [upcomingContests, setUpcomingContests] = useState<{title: string; date: string; participants: string; status: string}[]>([]);
+    const [upcomingContests, setUpcomingContests] = useState<{ title: string; date: string; participants: string; status: string }[]>([]);
     const [problemOfTheDay, setProblemOfTheDay] = useState({
         title: 'Loading...',
         difficulty: 'Medium',
@@ -39,7 +39,7 @@ const StudentDashboard = () => {
                 setUserName(data.profile.name?.split(' ')[0] || 'Student');
                 setCodeArenaScore(data.profile.codeArenaScore || 0);
             }
-        }).catch(() => {});
+        }).catch(() => { });
 
         // Fetch contests
         contestApi.getAll().then(res => {
@@ -50,7 +50,7 @@ const StudentDashboard = () => {
                 participants: c._count?.problems ? `${c._count.problems} Q` : '0 Q',
                 status: c.status || 'UPCOMING',
             })));
-        }).catch(() => {});
+        }).catch(() => { });
 
         // Fetch problem of the day (pick first problem)
         problemApi.getAll({ limit: 5 }).then(res => {
@@ -65,7 +65,7 @@ const StudentDashboard = () => {
                     points: p.points || 100,
                 });
             }
-        }).catch(() => {});
+        }).catch(() => { });
     }, []);
 
     const upcomingEvents = [
@@ -74,14 +74,14 @@ const StudentDashboard = () => {
     ];
 
     const sidebarItems = [
-        { icon: Mail, label: 'MAIL', onClick: () => window.location.href = '/student/mail' },
-        { icon: Presentation, label: 'WEBINARS', onClick: () => window.location.href = '/student/webinars' },
-        { icon: Terminal, label: 'CMD CENTER', active: true, onClick: () => window.location.href = '/student/dashboard' },
-        { icon: Code2, label: 'CODE ARENA', onClick: () => window.location.href = '/student/codearena' },
-        { icon: PenTool, label: 'DESIGN ARENA', onClick: () => window.location.href = '/student/designarena' },
-        { icon: Briefcase, label: 'INTERVIEWS', onClick: () => window.location.href = '/student/interview' },
-        { icon: FileText, label: 'APPLICATIONS', onClick: () => window.location.href = '/student/dashboard' },
-        { icon: Box, label: 'PROJECTS', onClick: () => window.location.href = '/student/projects' },
+        { icon: Mail, label: 'MAIL', path: '/student/mail' },
+        { icon: Presentation, label: 'WEBINARS', path: '/student/webinars' },
+        { icon: Terminal, label: 'CMD CENTER', path: '/student/dashboard' },
+        { icon: Code2, label: 'CODE ARENA', path: '/student/codearena' },
+        { icon: PenTool, label: 'DESIGN ARENA', active: true, path: '/student/designarena' },
+        { icon: Briefcase, label: 'INTERVIEWS', path: '/student/interview' },
+        { icon: FileText, label: 'APPLICATIONS', path: '/student/dashboard' },
+        { icon: Box, label: 'PROJECTS', path: '/student/projects' },
     ];
 
     return (

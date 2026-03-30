@@ -34,3 +34,43 @@ export const getProblemById = async (req: Request, res: Response, next: NextFunc
         next(e);
     }
 }
+
+export const updateProblem = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.id;
+        const problem = await problemService.updateProblem(userId as string, req.params.id as string, req.body);
+        res.status(200).json(new ApiResponse(200, problem, "Problem updated successfully"));
+    } catch (e) {
+        next(e);
+    }
+}
+
+export const deleteProblem = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.id;
+        await problemService.deleteProblem(userId as string, req.params.id as string);
+        res.status(200).json(new ApiResponse(200, null, "Problem deleted successfully"));
+    } catch (e) {
+        next(e);
+    }
+}
+
+export const submitProblem = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.id;
+        const submission = await problemService.createSubmission(userId as string, req.params.id as string, req.body);
+        res.status(201).json(new ApiResponse(201, submission, "Submission received successfully"));
+    } catch (e) {
+        next(e);
+    }
+}
+
+export const getSubmissions = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.id;
+        const submissions = await problemService.getSubmissions(userId as string, req.params.id as string);
+        res.status(200).json(new ApiResponse(200, submissions, "Submissions fetched successfully"));
+    } catch (e) {
+        next(e);
+    }
+}

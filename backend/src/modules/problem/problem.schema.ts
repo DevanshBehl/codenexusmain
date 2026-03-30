@@ -24,4 +24,25 @@ export const createProblemSchema = z.object({
     })
 })
 
+export const updateProblemSchema = z.object({
+    body: z.object({
+        title: z.string().min(3, "Title must be at least 3 characters long").optional(),
+        description: z.string().min(10, "Description must be at least 10 characters long").optional(),
+        difficulty: z.enum(["EASY", "MEDIUM", "HARD"]).optional(),
+        topic: z.string().optional(),
+        points: z.number().int().min(10).optional(),
+        constraints: z.string().optional(),
+        testCases: z.array(testCaseSchema).optional()
+    })
+})
+
+export const createSubmissionSchema = z.object({
+    body: z.object({
+        code: z.string().min(1, "Code cannot be empty"),
+        language: z.string().min(1, "Language must be specified"),
+    })
+})
+
 export type CreateProblemInput = z.infer<typeof createProblemSchema>["body"];
+export type UpdateProblemInput = z.infer<typeof updateProblemSchema>["body"];
+export type CreateSubmissionInput = z.infer<typeof createSubmissionSchema>["body"];

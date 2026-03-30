@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -22,6 +22,7 @@ import {
     PenTool
 } from 'lucide-react';
 import AskAI from '../../components/CodeArena/AskAI';
+import { problemApi } from '../../lib/api';
 
 const LANGUAGE_MAP: Record<string, string> = {
     cpp: 'cpp',
@@ -87,48 +88,35 @@ const CodeArenaProblem = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Default collapsed for more space
     const [language, setLanguage] = useState('cpp');
 
-    // Mocks
-    const problem = {
-        title: 'Merge K Sorted Lists',
-        difficulty: 'Hard',
-        acceptance: '52.4%',
+    const [problemData, setProblemData] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (!id) return;
+        const fetchProblem = async () => {
+            try {
+                const res = await problemApi.getById(id);
+                setProblemData(res.data);
+            } catch (err) {
+                console.error("Failed to load problem", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchProblem();
+    }, [id]);
+
+    const problem = problemData ? {
+        title: problemData.title,
+        difficulty: problemData.difficulty === 'EASY' ? 'Easy' : problemData.difficulty === 'MEDIUM' ? 'Medium' : 'Hard',
+        acceptance: '52.4%', // Placeholder
         timeLimit: '2.0s',
         memoryLimit: '256MB',
-        tags: ['Linked List', 'Divide and Conquer', 'Heap'],
-        description: `
-You are given an array of \`k\` linked-lists \`lists\`, each linked-list is sorted in ascending order.
-
-*Merge all the linked-lists into one sorted linked-list and return it.*
-
-**Example 1:**
-\`\`\`
-Input: lists = [[1,4,5],[1,3,4],[2,6]]
-Output: [1,1,2,3,4,4,5,6]
-Explanation: The linked-lists are:
-[
-  1->4->5,
-  1->3->4,
-  2->6
-]
-merging them into one sorted list:
-1->1->2->3->4->4->5->6
-\`\`\`
-
-**Example 2:**
-\`\`\`
-Input: lists = []
-Output: []
-\`\`\`
-
-**Constraints:**
-- \`k == lists.length\`
-- \`0 <= k <= 10^4\`
-- \`0 <= lists[i].length <= 500\`
-- \`-10^4 <= lists[i][j] <= 10^4\`
-- \`lists[i]\` is sorted in ascending order.
-- The sum of \`lists[i].length\` will not exceed \`10^4\`.
-        `
-    };
+        tags: [problemData.topic || 'General'],
+        description: problemData.description,
+        constraints: problemData.constraints,
+        testCases: problemData.testCases || []
+    } : null;
 
     const sidebarItems = [
         { icon: Mail, label: 'MAIL', path: '/student/mail' },
@@ -242,19 +230,31 @@ Output: []
                     <div className="w-full md:w-[45%] lg:w-[40%] bg-[#0A0A0A] border border-[#222] rounded-sm flex flex-col overflow-hidden">
                         {/* Header Tabs */}
                         <div className="flex border-b border-[#222] bg-[#111]">
-                            <button className="px-4 py-3 border-r border-[#222] text-[10px] font-mono uppercase tracking-widest text-accent-400 border-b-2 border-accent-500 bg-[#0A0A0A] flex items-center gap-2">
+                            <button className="px-4 py-3 border-r border-[#222] text-[10px] font-mono uppercase tracking-widest text-accent-400 border-b-2 border-accent-500 bg-[#0A0A0A] flex items-center gap-2 transition-colors">
                                 <FileText size={12} /> Description
                             </button>
                             <Link to="/student/codearena/submissions" className="px-4 py-3 border-r border-[#222] text-[10px] font-mono uppercase tracking-widest text-[#888] hover:text-white hover:bg-[#1a1a1a] transition-colors flex items-center gap-2">
                                 <Activity size={12} /> Submissions
                             </Link>
                         </div>
-
-                        {/* Content Area */}
+                        
+                        {loading ? (
+                            <div className="flex-1 flex items-center justify-center p-6">
+                                <div className="text-[#888] font-mono text-sm tracking-widest uppercase flex items-center gap-2">
+                                    <RefreshCw className="animate-spin" size={14} /> Loading Problem...
+                                </div>
+                            </div>
+                        ) : !problem ? (
+                            <div className="flex-1 flex items-center justify-center p-6 text-red-400 font-mono text-xs text-center border-t border-[#222]">
+                                Could not find problem.
+                            </div>
+                        ) : (
+                            <>
+                                {/* Content Area */}
                         <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
                             <div className="flex justify-between items-start mb-4">
-                                <h1 className="text-2xl font-sans font-bold text-white tracking-tight flex items-center gap-3">
-                                    <span className="text-[#555] font-mono text-lg">{id}.</span> {problem.title}
+                                <h1 className="text-xl md:text-2xl font-sans font-bold text-white tracking-tight flex items-center gap-2 md:gap-3 leading-tight">
+                                    {problem?.title}
                                 </h1>
                             </div>
 
@@ -268,59 +268,47 @@ Output: []
                             </div>
 
                             <div className="flex flex-wrap gap-2 mb-8">
-                                {problem.tags.map((tag, i) => (
+                                {problem?.tags.map((tag: string, i: number) => (
                                     <span key={i} className="text-[9px] font-mono uppercase tracking-widest text-[#888] bg-[#111] px-2 py-1 border border-[#333] rounded-sm">
                                         {tag}
                                     </span>
                                 ))}
                             </div>
 
-                            {/* Marked renderer mock */}
+                            {/* Render Dynamic Problem Data */}
                             <div className="prose prose-invert prose-pre:bg-[#111] prose-pre:border prose-pre:border-[#222] prose-pre:rounded-sm max-w-none font-sans text-sm text-[#ccc] leading-relaxed">
-                                <p>You are given an array of <code>k</code> linked-lists <code>lists</code>, each linked-list is sorted in ascending order.</p>
-                                <p><em>Merge all the linked-lists into one sorted linked-list and return it.</em></p>
+                                <p className="whitespace-pre-wrap">{problem?.description}</p>
 
-                                <h4 className="text-white font-bold mt-6 mb-2">Example 1:</h4>
-                                <pre className="p-4 rounded-sm text-xs font-mono !bg-[#111] !border-[#333]">
-                                    <code className="text-[#aaa]">
-                                        <span className="text-[#888]">Input:</span> lists = [[1,4,5],[1,3,4],[2,6]]<br />
-                                        <span className="text-[#888]">Output:</span> [1,1,2,3,4,4,5,6]<br />
-                                        <span className="text-[#888]">Explanation:</span> The linked-lists are:<br />
-                                        [<br />
-                                        1-&gt;4-&gt;5,<br />
-                                        1-&gt;3-&gt;4,<br />
-                                        2-&gt;6<br />
-                                        ]<br />
-                                        merging them into one sorted list:<br />
-                                        1-&gt;1-&gt;2-&gt;3-&gt;4-&gt;4-&gt;5-&gt;6
-                                    </code>
-                                </pre>
+                                {problem?.testCases?.map((tc: any, idx: number) => (
+                                    <div key={idx}>
+                                        <h4 className="text-white font-bold mt-6 mb-2">Example {idx + 1}:</h4>
+                                        <pre className="p-4 rounded-sm text-xs font-mono !bg-[#111] !border-[#333] overflow-x-auto">
+                                            <code className="text-[#aaa]">
+                                                <span className="text-[#888]">Input:</span> {tc.input}<br />
+                                                <span className="text-[#888]">Output:</span> {tc.output}
+                                            </code>
+                                        </pre>
+                                    </div>
+                                ))}
 
-                                <h4 className="text-white font-bold mt-6 mb-2">Example 2:</h4>
-                                <pre className="p-4 rounded-sm text-xs font-mono !bg-[#111] !border-[#333]">
-                                    <code>
-                                        <span className="text-[#888]">Input:</span> lists = []<br />
-                                        <span className="text-[#888]">Output:</span> []
-                                    </code>
-                                </pre>
-
-                                <h4 className="text-white font-bold mt-6 mb-2">Constraints:</h4>
-                                <ul className="list-disc pl-5 space-y-1 text-xs">
-                                    <li><code>k == lists.length</code></li>
-                                    <li><code>0 &lt;= k &lt;= 10^4</code></li>
-                                    <li><code>0 &lt;= lists[i].length &lt;= 500</code></li>
-                                    <li><code>-10^4 &lt;= lists[i][j] &lt;= 10^4</code></li>
-                                    <li><code>lists[i]</code> is sorted in ascending order.</li>
-                                    <li>The sum of <code>lists[i].length</code> will not exceed <code>10^4</code>.</li>
-                                </ul>
+                                {problem?.constraints && (
+                                    <>
+                                        <h4 className="text-white font-bold mt-6 mb-2">Constraints:</h4>
+                                        <pre className="p-4 rounded-sm text-xs font-mono !bg-[#111] !border-[#333] overflow-x-auto text-[#aaa]">
+                                            {problem.constraints}
+                                        </pre>
+                                    </>
+                                )}
                             </div>
                         </div>
 
-                        {/* Footer limits */}
-                        <div className="p-3 border-t border-[#222] bg-[#111] flex justify-between items-center text-[9px] font-mono text-[#666] uppercase tracking-widest">
-                            <span>Time Limit: <span className="text-[#aaa]">{problem.timeLimit}</span></span>
-                            <span>Memory Limit: <span className="text-[#aaa]">{problem.memoryLimit}</span></span>
-                        </div>
+                                {/* Footer limits */}
+                                <div className="p-3 border-t border-[#222] bg-[#111] flex justify-between items-center text-[9px] font-mono text-[#666] uppercase tracking-widest">
+                                    <span>Time Limit: <span className="text-[#aaa]">{problem.timeLimit}</span></span>
+                                    <span>Memory Limit: <span className="text-[#aaa]">{problem.memoryLimit}</span></span>
+                                </div>
+                            </>
+                        )}
                     </div>
 
                     {/* Right Pane: Code Editor */}

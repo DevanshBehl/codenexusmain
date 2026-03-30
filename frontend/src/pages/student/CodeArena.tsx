@@ -10,7 +10,6 @@ import {
     ChevronLeft,
     Box,
     FileText,
-    Activity,
     LogOut,
     Search,
     Filter,
@@ -297,7 +296,7 @@ const CodeArena = () => {
                                                 </td>
                                                 <td className="py-4 px-4">
                                                     <Link to={`/student/codearena/${problem.id}`} className="font-sans font-bold text-sm text-white group-hover:text-accent-400 transition-colors flex items-center gap-2">
-                                                        <span className="text-[#555] font-mono text-xs">{problem.id}.</span> {problem.title}
+                                                        {problem.title}
                                                     </Link>
                                                 </td>
                                                 <td className="py-4 px-4">

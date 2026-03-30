@@ -1,6 +1,6 @@
 import { prisma } from "../../lib/prisma.js";
 import { ApiError } from "../../utils/api-error.js";
-import { CreateProjectInput } from "./project.schema.js";
+import { CreateProjectInput, UpdateProjectInput } from "./project.schema.js";
 
 export const createProject = async (userId: string, data: CreateProjectInput) => {
     const student = await prisma.student.findUnique({
@@ -64,5 +64,35 @@ export const deleteProject = async (userId: string, projectId: string) => {
 
     return await prisma.project.delete({
         where: { id: projectId }
+    });
+}
+
+export const updateProject = async (userId: string, projectId: string, data: UpdateProjectInput) => {
+    const student = await prisma.student.findUnique({
+        where: { userId }
+    });
+    if (!student) {
+        throw new ApiError(404, "Student profile not found");
+    }
+
+    const project = await prisma.project.findUnique({
+        where: { id: projectId }
+    });
+    if (!project) {
+        throw new ApiError(404, "Project not found");
+    }
+    if (project.studentId !== student.id) {
+        throw new ApiError(403, "You can only edit your own projects");
+    }
+
+    return await prisma.project.update({
+        where: { id: projectId },
+        data: {
+            ...(data.title && { title: data.title }),
+            ...(data.description && { description: data.description }),
+            ...(data.techStack && { techStack: data.techStack }),
+            ...(data.githubLink !== undefined && { githubLink: data.githubLink || null }),
+            ...(data.liveLink !== undefined && { liveLink: data.liveLink || null }),
+        }
     });
 }

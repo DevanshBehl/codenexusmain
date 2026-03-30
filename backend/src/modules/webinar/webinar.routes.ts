@@ -3,7 +3,7 @@ import * as webinarController from "./webinar.controller.js";
 import { authenticate } from "../../middleware/authenticate.js";
 import { authorize } from "../../middleware/authorize.js";
 import { validate } from "../../middleware/validate.js";
-import { createWebinarSchema } from "./webinar.schema.js";
+import { createWebinarSchema, updateWebinarSchema } from "./webinar.schema.js";
 
 const router = Router();
 
@@ -24,6 +24,19 @@ router.post("/",
     authorize(["COMPANY_ADMIN"]) as RequestHandler,
     validate(createWebinarSchema) as RequestHandler,
     webinarController.createWebinar as RequestHandler
+);
+
+router.put("/:id",
+    authenticate as RequestHandler,
+    authorize(["COMPANY_ADMIN"]) as RequestHandler,
+    validate(updateWebinarSchema) as RequestHandler,
+    webinarController.updateWebinar as RequestHandler
+);
+
+router.delete("/:id",
+    authenticate as RequestHandler,
+    authorize(["COMPANY_ADMIN"]) as RequestHandler,
+    webinarController.deleteWebinar as RequestHandler
 );
 
 export default router;

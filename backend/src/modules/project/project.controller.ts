@@ -31,3 +31,13 @@ export const deleteProject = async (req: Request, res: Response, next: NextFunct
         next(e);
     }
 }
+
+export const updateProject = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.id;
+        const project = await projectService.updateProject(userId as string, req.params.id as string, req.body);
+        res.status(200).json(new ApiResponse(200, project, "Project updated successfully"));
+    } catch (e) {
+        next(e);
+    }
+}

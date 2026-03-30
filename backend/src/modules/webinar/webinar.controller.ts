@@ -40,3 +40,23 @@ export const getWebinarById = async (req: Request, res: Response, next: NextFunc
         next(e);
     }
 }
+
+export const updateWebinar = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.id;
+        const webinar = await webinarService.updateWebinar(userId as string, req.params.id as string, req.body);
+        res.status(200).json(new ApiResponse(200, webinar, "Webinar updated successfully"));
+    } catch (e) {
+        next(e);
+    }
+}
+
+export const deleteWebinar = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.id;
+        await webinarService.deleteWebinar(userId as string, req.params.id as string);
+        res.status(200).json(new ApiResponse(200, null, "Webinar deleted successfully"));
+    } catch (e) {
+        next(e);
+    }
+}

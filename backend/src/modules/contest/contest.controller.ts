@@ -30,3 +30,23 @@ export const getContestById = async (req: Request, res: Response, next: NextFunc
         next(e);
     }
 }
+
+export const updateContest = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.id;
+        const contest = await contestService.updateContest(userId as string, req.params.id as string, req.body);
+        res.status(200).json(new ApiResponse(200, contest, "Contest updated successfully"));
+    } catch (e) {
+        next(e);
+    }
+}
+
+export const deleteContest = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.id;
+        await contestService.deleteContest(userId as string, req.params.id as string);
+        res.status(200).json(new ApiResponse(200, null, "Contest deleted successfully"));
+    } catch (e) {
+        next(e);
+    }
+}

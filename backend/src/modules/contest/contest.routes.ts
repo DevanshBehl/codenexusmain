@@ -3,7 +3,7 @@ import * as contestController from "./contest.controller.js";
 import { authenticate } from "../../middleware/authenticate.js";
 import { authorize } from "../../middleware/authorize.js";
 import { validate } from "../../middleware/validate.js";
-import { createContestSchema } from "./contest.schema.js";
+import { createContestSchema, updateContestSchema } from "./contest.schema.js";
 
 const router = Router();
 
@@ -17,6 +17,19 @@ router.post("/",
     authorize(["COMPANY_ADMIN"]) as RequestHandler,
     validate(createContestSchema) as RequestHandler,
     contestController.createcontest as RequestHandler
+);
+
+router.put("/:id",
+    authenticate as RequestHandler,
+    authorize(["COMPANY_ADMIN"]) as RequestHandler,
+    validate(updateContestSchema) as RequestHandler,
+    contestController.updateContest as RequestHandler
+);
+
+router.delete("/:id",
+    authenticate as RequestHandler,
+    authorize(["COMPANY_ADMIN"]) as RequestHandler,
+    contestController.deleteContest as RequestHandler
 );
 
 export default router;

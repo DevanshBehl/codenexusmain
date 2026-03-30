@@ -1,6 +1,6 @@
 import { prisma } from "../../lib/prisma.js";
 import { ApiError } from "../../utils/api-error.js";
-import { CreateContestInput } from "./contest.schema.js";
+import { CreateContestInput, UpdateContestInput } from "./contest.schema.js";
 
 export const createContest = async (userId: string, data: CreateContestInput) => {
     const company = await prisma.company.findUnique({
@@ -92,4 +92,45 @@ export const getContestById = async (id: string) => {
         throw new ApiError(404, "Contest not found");
     }
     return contest;
+}
+
+export const updateContest = async (userId: string, id: string, data: UpdateContestInput) => {
+    const company = await prisma.company.findUnique({ where: { userId } });
+    if (!company) throw new ApiError(403, "Only verified companies can modify contests");
+
+    const contest = await prisma.contest.findUnique({ where: { id } });
+    if (!contest) throw new ApiError(404, "Contest not found");
+
+    if (contest.companyId !== company.id) {
+        throw new ApiError(403, "You can't modify someone else's contest");
+    }
+
+    const updateData: any = {};
+    if (data.title !== undefined) updateData.title = data.title;
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.scheduledDate !== undefined) updateData.date = new Date(data.scheduledDate);
+    if (data.durationMins !== undefined) updateData.durationMins = data.durationMins;
+    if (data.timeLimitMinutes !== undefined) updateData.timeLimitMinutes = data.timeLimitMinutes;
+    if (data.languages !== undefined) updateData.languages = data.languages;
+    if (data.status !== undefined) updateData.status = data.status;
+
+    return await prisma.contest.update({
+        where: { id },
+        data: updateData
+    });
+}
+
+export const deleteContest = async (userId: string, id: string) => {
+    const company = await prisma.company.findUnique({ where: { userId } });
+    if (!company) throw new ApiError(403, "Only verified companies can delete contests");
+
+    const contest = await prisma.contest.findUnique({ where: { id } });
+    if (!contest) throw new ApiError(404, "Contest not found");
+
+    if (contest.companyId !== company.id) {
+        throw new ApiError(403, "You can't delete someone else's contest");
+    }
+
+    await prisma.contest.delete({ where: { id } });
+    return { success: true };
 }
