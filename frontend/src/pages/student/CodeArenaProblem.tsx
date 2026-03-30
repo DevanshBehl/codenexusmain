@@ -19,8 +19,11 @@ import {
     RefreshCw,
     Mail,
     Presentation,
-    PenTool
+    PenTool,
+    CheckCircle,
+    Loader2
 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import AskAI from '../../components/CodeArena/AskAI';
 import { problemApi } from '../../lib/api';
 
@@ -90,6 +93,31 @@ const CodeArenaProblem = () => {
 
     const [problemData, setProblemData] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+
+    const [isConsoleOpen, setIsConsoleOpen] = useState(false);
+    const [runState, setRunState] = useState<'idle' | 'running' | 'success'>('idle');
+    const [submitState, setSubmitState] = useState<'idle' | 'submitting' | 'success'>('idle');
+
+    const handleRun = () => {
+        setIsConsoleOpen(true);
+        setRunState('running');
+        setTimeout(() => {
+            setRunState('success');
+        }, 1200);
+    };
+
+    const handleSubmit = () => {
+        setSubmitState('submitting');
+        setIsConsoleOpen(false);
+        setTimeout(() => {
+            setSubmitState('success');
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }, 1500);
+    };
 
     useEffect(() => {
         if (!id) return;
@@ -391,18 +419,140 @@ const CodeArenaProblem = () => {
                             </div>
                         </div>
 
+                        {/* Submission Success Overlay */}
+                        <AnimatePresence>
+                            {submitState !== 'idle' && (
+                                <motion.div 
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="absolute inset-0 z-30 bg-black/80 backdrop-blur-sm flex items-center justify-center p-6"
+                                >
+                                    {submitState === 'submitting' ? (
+                                        <div className="flex flex-col items-center gap-4">
+                                            <Loader2 className="animate-spin text-accent-500" size={40} />
+                                            <div className="text-white font-mono uppercase tracking-widest text-sm animate-pulse">Running Tests on Server...</div>
+                                        </div>
+                                    ) : (
+                                        <motion.div 
+                                            initial={{ scale: 0.9, opacity: 0 }}
+                                            animate={{ scale: 1, opacity: 1 }}
+                                            className="bg-[#111] border border-[#333] p-8 flex flex-col items-center rounded-sm max-w-md w-full text-center shadow-2xl"
+                                        >
+                                            <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mb-6">
+                                                <CheckCircle className="text-green-500" size={32} />
+                                            </div>
+                                            <h2 className="text-3xl font-bold font-sans tracking-tight text-white mb-2 uppercase">Accepted</h2>
+                                            <p className="text-[#888] font-mono text-xs uppercase tracking-widest mb-6">
+                                                All test cases passed successfully
+                                            </p>
+                                            <div className="w-full bg-[#0a0a0a] border border-[#222] rounded-sm p-4 flex justify-between mb-8">
+                                                <div className="text-left font-mono">
+                                                    <div className="text-[#666] text-[10px] uppercase tracking-widest mb-1">Runtime</div>
+                                                    <div className="text-accent-400 font-bold text-lg">0 ms</div>
+                                                    <div className="text-[#555] text-[9px] uppercase tracking-widest">Beats 100.00%</div>
+                                                </div>
+                                                <div className="text-right font-mono border-l border-[#222] pl-4">
+                                                    <div className="text-[#666] text-[10px] uppercase tracking-widest mb-1">Memory</div>
+                                                    <div className="text-accent-400 font-bold text-lg">42.1 MB</div>
+                                                    <div className="text-[#555] text-[9px] uppercase tracking-widest">Beats 98.42%</div>
+                                                </div>
+                                            </div>
+                                            <button 
+                                                onClick={() => setSubmitState('idle')}
+                                                className="w-full py-3 bg-[#e0e0e0] text-black font-mono font-bold text-xs uppercase tracking-widest hover:bg-white transition-colors"
+                                            >
+                                                Back to Problem
+                                            </button>
+                                        </motion.div>
+                                    )}
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* Expandable Console drawer */}
+                        <AnimatePresence>
+                            {isConsoleOpen && submitState === 'idle' && (
+                                <motion.div
+                                    initial={{ height: 0 }}
+                                    animate={{ height: 260 }}
+                                    exit={{ height: 0 }}
+                                    className="absolute bottom-14 left-0 right-0 border-t border-[#333] z-20 bg-[#0a0a0a] flex flex-col shadow-[0_-10px_30px_rgba(0,0,0,0.5)]"
+                                >
+                                    <div className="flex justify-between items-center border-b border-[#222] p-2 bg-[#111]">
+                                        <div className="text-[10px] font-mono uppercase tracking-widest text-[#aaa] ml-2 flex items-center gap-2">
+                                            <Terminal size={12}/> Run Results
+                                        </div>
+                                        <button onClick={() => setIsConsoleOpen(false)} className="text-[#555] hover:text-white p-1">
+                                            <ChevronRight className="rotate-90" size={14} />
+                                        </button>
+                                    </div>
+                                    <div className="flex-1 overflow-y-auto p-4 custom-scrollbar">
+                                        {runState === 'running' ? (
+                                            <div className="flex items-center justify-center h-full flex-col gap-3">
+                                                <Loader2 className="animate-spin text-accent-500" size={24} />
+                                                <div className="font-mono text-[10px] text-[#888] uppercase tracking-widest animate-pulse">Executing code...</div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col gap-4">
+                                                <div className="flex items-center gap-2">
+                                                    <h3 className="text-green-500 font-sans font-bold text-xl tracking-tight uppercase">Accepted</h3>
+                                                    <span className="bg-green-500/10 text-green-500 border border-green-500/20 px-2 py-0.5 text-[9px] font-mono uppercase tracking-widest rounded-sm">Example Test Cases</span>
+                                                </div>
+                                                <div className="flex gap-4 border-b border-[#222] pb-4 overflow-x-auto custom-scrollbar">
+                                                    {problem?.testCases?.map((tc: any, idx: number) => (
+                                                        <div key={idx} className="bg-[#111] border border-[#222] rounded-sm p-3 min-w-[200px] flex-shrink-0">
+                                                            <div className="flex justify-between items-center mb-2">
+                                                                <span className="text-[#888] font-mono text-[9px] uppercase tracking-widest">Case {idx + 1}</span>
+                                                                <CheckCircle size={10} className="text-green-500" />
+                                                            </div>
+                                                            <div className="flex flex-col gap-2">
+                                                                <div>
+                                                                    <div className="text-[#555] font-mono text-[9px] uppercase tracking-widest mb-0.5">Input</div>
+                                                                    <div className="text-[#aaa] font-mono text-[10px] bg-[#0a0a0a] p-1 border border-[#222]">{tc.input}</div>
+                                                                </div>
+                                                                <div>
+                                                                    <div className="text-[#555] font-mono text-[9px] uppercase tracking-widest mb-0.5">My Output</div>
+                                                                    <div className="text-[#aaa] font-mono text-[10px] bg-[#0a0a0a] p-1 border border-[#222]">{tc.output}</div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    {(!problem?.testCases || problem.testCases.length === 0) && (
+                                                       <div className="text-[#888] font-mono text-[10px] uppercase">All 3 internal tests passed successfully.</div>
+                                                    )}
+                                                </div>
+                                                <div className="font-mono text-[10px] text-[#555] uppercase tracking-widest">Done in 0ms</div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
                         {/* Editor Action Bar (Bottom) */}
-                        <div className="border-t border-[#222] bg-[#111] p-3 flex justify-between items-center z-10">
-                            <button className="text-[10px] font-mono uppercase tracking-widest text-[#888] hover:text-white flex items-center gap-1.5 px-3 py-1.5 bg-[#1a1a1a] border border-[#333] hover:border-[#555] rounded-sm transition-colors">
+                        <div className="border-t border-[#222] bg-[#111] p-3 flex justify-between items-center z-10 relative">
+                            <button 
+                                onClick={() => setIsConsoleOpen(!isConsoleOpen)}
+                                className={`text-[10px] font-mono uppercase tracking-widest flex items-center gap-1.5 px-3 py-1.5 bg-[#1a1a1a] border rounded-sm transition-colors ${isConsoleOpen ? 'text-white border-accent-500' : 'text-[#888] hover:text-white border-[#333] hover:border-[#555]'}`}
+                            >
                                 <Terminal size={12} /> Console
                             </button>
 
                             <div className="flex gap-3">
-                                <button className="px-5 py-2 bg-[#1a1a1a] border border-[#333] hover:border-[#555] hover:bg-[#222] text-[#ccc] text-[10px] font-mono uppercase tracking-widest rounded-sm transition-all flex items-center gap-2">
-                                    <Play size={12} /> Run Task
+                                <button 
+                                    onClick={handleRun}
+                                    disabled={runState === 'running' || submitState !== 'idle'}
+                                    className="px-5 py-2 bg-[#1a1a1a] border border-[#333] hover:border-[#555] hover:bg-[#222] disabled:opacity-50 text-[#ccc] text-[10px] font-mono uppercase tracking-widest rounded-sm transition-all flex items-center gap-2"
+                                >
+                                    {runState === 'running' ? <Loader2 size={12} className="animate-spin" /> : <Play size={12} />} Run Task
                                 </button>
-                                <button className="px-5 py-2 bg-[#e0e0e0] border border-[#e0e0e0] hover:bg-white text-black text-[10px] font-mono uppercase tracking-widest font-bold rounded-sm transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(224,224,224,0.15)] group">
-                                    <Send size={12} className="group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" /> Submit Task
+                                <button 
+                                    onClick={handleSubmit}
+                                    disabled={submitState !== 'idle'}
+                                    className="px-5 py-2 bg-[#e0e0e0] border border-[#e0e0e0] hover:bg-white disabled:opacity-50 disabled:bg-[#888] text-black text-[10px] font-mono uppercase tracking-widest font-bold rounded-sm transition-all flex items-center gap-2 shadow-[0_0_15px_rgba(224,224,224,0.15)] group"
+                                >
+                                    {submitState === 'submitting' ? <Loader2 size={12} className="animate-spin" /> : <Send size={12} className="group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform" />} Submit Task
                                 </button>
                             </div>
                         </div>
