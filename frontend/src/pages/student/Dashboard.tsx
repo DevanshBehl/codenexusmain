@@ -80,7 +80,7 @@ const StudentDashboard = () => {
         { icon: Code2, label: 'CODE ARENA', path: '/student/codearena' },
         { icon: PenTool, label: 'DESIGN ARENA', active: true, path: '/student/designarena' },
         { icon: Briefcase, label: 'INTERVIEWS', path: '/student/interview' },
-        { icon: FileText, label: 'APPLICATIONS', path: '/student/dashboard' },
+        { icon: FileText, label: 'PROFILE', path: '/student/profile' },
         { icon: Box, label: 'PROJECTS', path: '/student/projects' },
     ];
 
@@ -129,6 +129,8 @@ const StudentDashboard = () => {
                     {sidebarItems.map((item, index) => (
                         <button
                             key={index}
+                            onClick={() => { if(item.onClick) item.onClick(); else if(item.path) window.location.href=item.path; }}
+
                             className={`flex items-center px-3 py-2.5 rounded-sm transition-all duration-200 group relative
                                 ${item.active
                                     ? 'bg-[#111] border border-[#333] border-l-2 border-l-accent-500 text-white'

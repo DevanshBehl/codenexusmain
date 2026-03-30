@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './lib/auth';
 import Landing from './pages/Landing';
 import Signup from './pages/Signup';
@@ -31,6 +31,7 @@ import type { ReactNode } from 'react';
 
 function ProtectedRoute({ children, allowedRoles }: { children: ReactNode; allowedRoles?: string[] }) {
   const { isAuthenticated, isLoading, user } = useAuth();
+  const location = useLocation();
 
   if (isLoading) {
     return (
@@ -49,6 +50,15 @@ function ProtectedRoute({ children, allowedRoles }: { children: ReactNode; allow
 
   if (allowedRoles && user && !allowedRoles.includes(user.role)) {
     return <Navigate to="/login" replace />;
+  }
+
+  // FORCE PROFILE COMPLETION GUARD FOR NEW SIGNUPS
+  const isSignupSession = localStorage.getItem('cn_signup_session') === 'true';
+  const isStudent = user?.role === 'STUDENT';
+  const isProfilePage = location.pathname === '/student/profile';
+  
+  if (isSignupSession && isStudent && !isProfilePage) {
+      return <Navigate to="/student/profile" replace />;
   }
 
   return <>{children}</>;

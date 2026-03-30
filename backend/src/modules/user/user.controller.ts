@@ -46,3 +46,12 @@ export const setupUniversityProfile = async (req: Request, res: Response, next: 
         next(e)
     }
 }
+
+export const getUniversities = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const universities = await userService.getUniversities();
+        res.status(200).json(new ApiResponse(200, universities, "Universities fetched successfully"));
+    } catch (e) {
+        next(e);
+    }
+}

@@ -131,3 +131,12 @@ export const createUniversityProfile = async (userId: string, data: CreateUniver
         }
     })
 }
+
+export const getUniversities = async () => {
+    return await prisma.university.findMany({
+        select: {
+            id: true,
+            name: true,
+        }
+    });
+}

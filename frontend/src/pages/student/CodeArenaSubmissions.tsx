@@ -29,7 +29,7 @@ const CodeArenaSubmissions = () => {
         { icon: Code2, label: 'CODE ARENA', active: true, path: '/student/codearena' },
         { icon: PenTool, label: 'DESIGN ARENA', path: '/student/designarena' },
         { icon: Briefcase, label: 'INTERVIEWS', path: '/student/interview' },
-        { icon: FileText, label: 'APPLICATIONS', path: '/student/dashboard' },
+        { icon: FileText, label: 'PROFILE', path: '/student/profile' },
         { icon: Box, label: 'PROJECTS', path: '/student/projects' },
     ];
 

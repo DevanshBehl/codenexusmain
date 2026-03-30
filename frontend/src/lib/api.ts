@@ -167,6 +167,7 @@ export interface UserProfile {
 
 export const userApi = {
     getMe: () => api.get<UserProfile>('/user/me'),
+    getUniversities: () => api.get<{id: string, name: string}[]>('/user/universities'),
     createStudentProfile: (data: any) => api.post('/user/profile/student', data),
     updateStudentProfile: (data: any) => api.patch('/user/profile/student', data),
     createCompanyProfile: (data: any) => api.post('/user/profile/company', data),

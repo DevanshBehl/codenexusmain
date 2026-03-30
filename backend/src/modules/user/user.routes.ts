@@ -18,6 +18,9 @@ router.use(authenticate as RequestHandler);
 // Get current user profile
 router.get("/me", userController.getMe as RequestHandler);
 
+// Get all universities
+router.get("/universities", userController.getUniversities as RequestHandler);
+
 // Student profile
 router.post("/profile/student", authorize(['STUDENT']) as RequestHandler,
     validate(createStundetProfileSchema) as RequestHandler,

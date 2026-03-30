@@ -71,7 +71,7 @@ export default function StudentInterview() {
         { icon: Code2, label: 'CODE ARENA', onClick: () => navigate('/student/codearena') },
         { icon: PenTool, label: 'DESIGN ARENA', onClick: () => navigate('/student/designarena') },
         { icon: Briefcase, label: 'INTERVIEWS', active: true, onClick: () => navigate('/student/interview') },
-        { icon: FileText, label: 'APPLICATIONS', onClick: () => navigate('/student/dashboard') },
+        { icon: FileText, label: 'PROFILE', onClick: () => window.location.href = '/student/profile' },
         { icon: Box, label: 'PROJECTS', onClick: () => navigate('/student/projects') },
     ];
 

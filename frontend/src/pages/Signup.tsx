@@ -30,8 +30,14 @@ export default function Signup() {
         setIsSubmitting(true);
         try {
             await signup({ email, password, role });
-            // After signup + auto-login, redirect to role-based dashboard
-            navigate(getRoleDashboard(role), { replace: true });
+            // Set flag for forced profile completion on signup
+            localStorage.setItem('cn_signup_session', 'true');
+            // After signup + auto-login, redirect to profile to force completion
+            if (role === 'STUDENT') {
+                navigate('/student/profile', { replace: true });
+            } else {
+                navigate(getRoleDashboard(role), { replace: true });
+            }
         } catch (err) {
             if (err instanceof ApiRequestError) {
                 setError(err.message);

@@ -34,7 +34,9 @@ export default function StudentProfile() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [isNewProfile, setIsNewProfile] = useState(false);
     const [userEmail, setUserEmail] = useState('');
+    const [universities, setUniversities] = useState<{id: string, name: string}[]>([]);
     
     const [profile, setProfile] = useState<ProfileData>({
         name: '',
@@ -61,6 +63,9 @@ export default function StudentProfile() {
     useEffect(() => {
         const fetchProfile = async () => {
             try {
+                // Fetch available universities
+                userApi.getUniversities().then(res => setUniversities(res.data)).catch(console.error);
+
                 const res = await userApi.getMe();
                 const data = res.data;
                 setUserEmail(data.email);
@@ -87,6 +92,8 @@ export default function StudentProfile() {
                         xiiPercentage: p.xiiPercentage || '',
                         otherInfo: p.otherInfo || '',
                     });
+                } else {
+                    setIsNewProfile(true);
                 }
             } catch (err) {
                 console.error('Failed to fetch profile:', err);
@@ -106,7 +113,7 @@ export default function StudentProfile() {
         { icon: Code2, label: 'CODE ARENA', onClick: () => window.location.href = '/student/codearena' },
         { icon: PenTool, label: 'DESIGN ARENA', onClick: () => window.location.href = '/student/designarena' },
         { icon: Briefcase, label: 'INTERVIEWS', onClick: () => window.location.href = '/student/interview' },
-        { icon: FileText, label: 'APPLICATIONS', onClick: () => window.location.href = '/student/dashboard' },
+        { icon: FileText, label: 'PROFILE', onClick: () => window.location.href = '/student/profile' },
         { icon: Box, label: 'PROJECTS', onClick: () => window.location.href = '/student/projects' },
     ];
 
@@ -115,6 +122,7 @@ export default function StudentProfile() {
         try {
             const payload: any = {
                 name: editForm.name,
+                universityId: editForm.institute || undefined,
                 age: editForm.age ? parseInt(editForm.age) || undefined : undefined,
                 phone: editForm.number || undefined,
                 branch: editForm.branch,
@@ -131,7 +139,21 @@ export default function StudentProfile() {
                 xiiPercentage: editForm.xiiPercentage || undefined,
                 otherInfo: editForm.otherInfo || undefined,
             };
-            await userApi.updateStudentProfile(payload);
+            
+            if (isNewProfile) {
+                await userApi.createStudentProfile(payload);
+                setIsNewProfile(false);
+            } else {
+                await userApi.updateStudentProfile(payload);
+            }
+
+            // Remove signup guard if it exists
+            if (localStorage.getItem('cn_signup_session')) {
+                localStorage.removeItem('cn_signup_session');
+                // Optional: navigate away from profile since they just completed boarding
+                window.location.href = '/student/dashboard';
+            }
+
             setProfile(editForm);
             setIsEditModalOpen(false);
         } catch (err: any) {
@@ -334,7 +356,7 @@ export default function StudentProfile() {
                             <div className="grid grid-cols-2 gap-y-6 gap-x-4">
                                 <div className="col-span-2">
                                     <label className="text-[9px] font-mono text-[#555] uppercase tracking-widest block mb-1">Institute</label>
-                                    <div className="text-sm font-sans font-semibold text-white">{profile.institute}</div>
+                                    <div className="text-sm font-sans font-semibold text-white">{universities.find(u => u.id === profile.institute)?.name || profile.institute}</div>
                                 </div>
                                 <div>
                                     <label className="text-[9px] font-mono text-[#555] uppercase tracking-widest block mb-1">X Board</label>
@@ -465,7 +487,10 @@ export default function StudentProfile() {
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                         <div className="flex flex-col gap-1.5">
                                             <label className="text-[9px] font-mono text-[#666] uppercase tracking-widest">Institute</label>
-                                            <input name="institute" value={editForm.institute} onChange={handleChange} className="bg-[#111] border border-[#333] p-2.5 text-xs text-white outline-none focus:border-accent-500 rounded-sm font-sans" />
+                                            <select name="institute" value={editForm.institute} onChange={(e) => setEditForm(prev => ({...prev, institute: e.target.value}))} className="bg-[#111] border border-[#333] p-2.5 text-xs text-white outline-none focus:border-accent-500 rounded-sm font-sans appearance-none">
+                                                <option value="" disabled>Select your university</option>
+                                                {universities.map(u => <option key={u.id} value={u.id}>{u.name}</option>)}
+                                            </select>
                                         </div>
                                         <div className="flex flex-col gap-1.5">
                                             <label className="text-[9px] font-mono text-[#666] uppercase tracking-widest">Current CGPA</label>
