@@ -70,12 +70,12 @@ function formatTimestamp(dateStr: string): string {
 function mailItemToEmail(mail: MailItem): Email {
     return {
         id: mail.id,
-        senderId: mail.sender_cnid,
-        senderName: mail.sender_name,
-        senderRole: (mail.sender_cnid.split('-')[1] as Role) || 'CODENEXUS',
-        recipientId: mail.recipient_cnid,
-        recipientName: mail.recipient_name,
-        recipientRole: (mail.recipient_cnid.split('-')[1] as Role) || 'CODENEXUS',
+        senderId: mail.sender_cnid || '',
+        senderName: mail.sender_name || 'Unknown',
+        senderRole: ((mail.sender_cnid?.split('-')[1] || 'CODENEXUS') as Role) || 'CODENEXUS',
+        recipientId: mail.recipient_cnid || '',
+        recipientName: mail.recipient_name || 'Unknown',
+        recipientRole: ((mail.recipient_cnid?.split('-')[1] || 'CODENEXUS') as Role) || 'CODENEXUS',
         subject: mail.subject,
         body: mail.body,
         timestamp: formatTimestamp(mail.sent_at),

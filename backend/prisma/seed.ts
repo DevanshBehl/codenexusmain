@@ -13,6 +13,8 @@ async function main() {
 
     // ── 0. Clean existing data ──
     console.log("🗑️   Cleaning existing data...");
+    await prisma.mail.deleteMany();
+    await prisma.mailPermissionViolation.deleteMany();
     await prisma.webinarTargetUniversity.deleteMany();
     await prisma.webinar.deleteMany();
     await prisma.recording.deleteMany();
@@ -42,6 +44,7 @@ async function main() {
             email: "admin@vit.ac.in",
             password: PASSWORD,
             role: "UNIVERSITY",
+            cnid: "CN-UNI-VITUNI",
         },
     });
     const vit = await prisma.university.create({
@@ -75,9 +78,11 @@ async function main() {
     ];
 
     const companies: Awaited<ReturnType<typeof prisma.company.create>>[] = [];
-    for (const c of companyData) {
+    const companyCnids = ["CN-COM-GOOG01", "CN-COM-MSFTA1"];
+    for (let i = 0; i < companyData.length; i++) {
+        const c = companyData[i];
         const user = await prisma.user.create({
-            data: { email: c.email, password: PASSWORD, role: "COMPANY_ADMIN" },
+            data: { email: c.email, password: PASSWORD, role: "COMPANY_ADMIN", cnid: companyCnids[i] },
         });
         const company = await prisma.company.create({
             data: {
@@ -195,9 +200,11 @@ async function main() {
     ];
 
     const students: Awaited<ReturnType<typeof prisma.student.create>>[] = [];
-    for (const s of studentData) {
+    const studentCnids = ["CN-STU-DEVAN1", "CN-STU-PRIYA2", "CN-STU-ARJUN3", "CN-STU-SNEHA4"];
+    for (let i = 0; i < studentData.length; i++) {
+        const s = studentData[i];
         const user = await prisma.user.create({
-            data: { email: s.email, password: PASSWORD, role: "STUDENT" },
+            data: { email: s.email, password: PASSWORD, role: "STUDENT", cnid: studentCnids[i] },
         });
         const student = await prisma.student.create({
             data: {
@@ -210,7 +217,7 @@ async function main() {
                 cgpa: s.cgpa,
                 gender: s.gender,
                 registrationNumber: s.registrationNumber,
-                codeNexusId: s.codeNexusId,
+                codeNexusId: studentCnids[i],
                 parentsName: s.parentsName,
                 parentContactNo: s.parentContactNo,
                 parentEmail: s.parentEmail,
@@ -717,6 +724,71 @@ async function main() {
         },
     });
     console.log(`   ✅ "${webinar.title}"\n`);
+
+    // ══════════════════════════════════════════════
+    // 7. SAMPLE MAILS
+    // ══════════════════════════════════════════════
+    console.log("📧  Creating sample mails...");
+
+    const vitStudent1Cnid = students[0]!.codeNexusId!;
+    const vitStudent2Cnid = students[1]!.codeNexusId!;
+    const vitCnid = uniUser.cnid!;
+    const googleCnid = "CN-COM-GOOG01";
+    const microsoftCnid = "CN-COM-MSFTA1";
+
+    const mailThread1 = crypto.randomUUID();
+    const mailThread2 = crypto.randomUUID();
+
+    await prisma.mail.createMany({
+        data: [
+            {
+                sender_cnid: vitCnid,
+                recipient_cnid: vitStudent1Cnid,
+                subject: "Upcoming Amazon Drive - Important Details",
+                body: "Dear students, please ensure your resumes are updated on the portal by 11:59 PM tonight. Late submissions will not be considered for the Amazon SDE I drive.\n\nBest,\nPlacement Cell",
+                sent_at: new Date("2026-03-22T10:30:00Z"),
+                is_read: false,
+                thread_id: mailThread1,
+            },
+            {
+                sender_cnid: googleCnid,
+                recipient_cnid: vitCnid,
+                subject: "Feedback regarding recent technical interviews",
+                body: "Hello Placement Team,\n\nWe have evaluated the candidates from yesterday. Overall, performance was exceptional. We will send the final offers via the evaluations portal by EOD.\n\nRegards,\nJane (Google HR)",
+                sent_at: new Date("2026-03-21T16:15:00Z"),
+                is_read: true,
+                thread_id: mailThread2,
+            },
+            {
+                sender_cnid: googleCnid,
+                recipient_cnid: vitStudent2Cnid,
+                subject: "Re: Google Summer of Code 2026 Opportunity",
+                body: "Hi Priya,\n\nYour application for GSoC 2026 has been shortlisted. We will schedule a technical interview next week. Please keep your GitHub profile updated with your latest contributions.\n\nBest,\nGoogle Open Source Team",
+                sent_at: new Date("2026-03-20T09:00:00Z"),
+                is_read: true,
+                thread_id: mailThread2,
+            },
+            {
+                sender_cnid: vitStudent2Cnid,
+                recipient_cnid: vitCnid,
+                subject: "Query regarding contest registration",
+                body: "Hello Placement Team,\n\nI have a question about the Google Code Sprint 2026 - is there a specific eligibility criteria for the AI/ML specialization students?\n\nThanks,\nPriya Sharma",
+                sent_at: new Date("2026-03-19T14:30:00Z"),
+                is_read: true,
+                thread_id: mailThread1,
+            },
+            {
+                sender_cnid: microsoftCnid,
+                recipient_cnid: vitStudent1Cnid,
+                subject: "Microsoft Azure Certification Scholarship",
+                body: "Dear Devansh,\n\nCongratulations on your outstanding performance in the Code Arena! We are pleased to offer you the Microsoft Azure Certification Scholarship. Please check your email for the detailed steps to avail it.\n\nBest,\nMicrosoft University Relations",
+                sent_at: new Date("2026-03-18T11:00:00Z"),
+                is_read: false,
+                thread_id: crypto.randomUUID(),
+            },
+        ],
+    });
+    console.log("   ✅ 5 sample mails created\n");
 
     // ══════════════════════════════════════════════
     // DONE
