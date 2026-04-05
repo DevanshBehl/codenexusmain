@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -28,8 +28,11 @@ import {
     Swords,
     BarChart3,
     FileBarChart,
-    Calendar
+    Calendar,
+    Loader2
 } from 'lucide-react';
+import { useAuth } from '../../lib/auth';
+import { mailApi, type MailItem, type RecipientSearchResult } from '../../lib/api';
 
 /* ────────── Types & Constants ────────── */
 type Role = 'STUDENT' | 'UNIVERSITY' | 'COMPANY' | 'RECRUITER' | 'CODENEXUS';
@@ -48,59 +51,46 @@ interface Email {
     read: boolean;
 }
 
-const mockMails: Email[] = [
-    {
-        id: '1',
-        senderId: 'CN-UNI-001',
-        senderName: 'Placement Cell - IITB',
-        senderRole: 'UNIVERSITY',
-        recipientId: 'CN-STU-442',
-        recipientName: 'Kavya Iyer',
-        recipientRole: 'STUDENT',
-        subject: 'Upcoming Amazon Drive - Important Details',
-        body: 'Dear students, please ensure your resumes are updated on the portal by 11:59 PM tonight. Late submissions will not be considered for the Amazon SDE I drive.\n\nBest,\nPlacement Cell',
-        timestamp: 'Mar 22, 10:30 AM',
-        read: false
-    },
-    {
-        id: '2',
-        senderId: 'CN-COM-099',
-        senderName: 'Jane Smith - Stripe',
-        senderRole: 'COMPANY',
-        recipientId: 'CN-UNI-001',
-        recipientName: 'Placement Cell - IITB',
-        recipientRole: 'UNIVERSITY',
-        subject: 'Feedback regarding recent technical interviews',
-        body: 'Hello Placement Team,\n\nWe have evaluated the candidates from yesterday. Overall, performance was exceptional. We will send the final offers via the evaluations portal by EOD.\n\nRegards,\nJane (Stripe HR)',
-        timestamp: 'Mar 21, 04:15 PM',
-        read: true
-    },
-    {
-        id: '3',
-        senderId: 'CN-ADM-000',
-        senderName: 'CodeNexus Support',
-        senderRole: 'CODENEXUS',
-        recipientId: 'CN-UNI-001',
-        recipientName: 'Placement Cell - IITB',
-        recipientRole: 'UNIVERSITY',
-        subject: 'Platform Maintenance Alert',
-        body: 'The CodeNexus CodeArena will be offline for maintenance on Mar 24th from 2AM to 4AM IST. Please inform ongoing test administrators.',
-        timestamp: 'Mar 20, 09:00 AM',
-        read: true
-    }
-];
+function formatTimestamp(dateStr: string): string {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays < 7) return `${diffDays}d ago`;
+
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+
+function mailItemToEmail(mail: MailItem): Email {
+    return {
+        id: mail.id,
+        senderId: mail.sender_cnid,
+        senderName: mail.sender_name,
+        senderRole: (mail.sender_cnid.split('-')[1] as Role) || 'CODENEXUS',
+        recipientId: mail.recipient_cnid,
+        recipientName: mail.recipient_name,
+        recipientRole: (mail.recipient_cnid.split('-')[1] as Role) || 'CODENEXUS',
+        subject: mail.subject,
+        body: mail.body,
+        timestamp: formatTimestamp(mail.sent_at),
+        read: mail.is_read
+    };
+}
 
 export default function Mail() {
+    const { user, isLoading: authLoading } = useAuth();
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    
-    // Default sub-route based on manual mapping or generic path checks.
-    // For simplicity, we use a single component state here, but real routing might hook into params.
     const [currentView, setCurrentView] = useState<'INBOX' | 'SENT' | 'COMPOSE'>('INBOX');
 
-    // MOCK LOGIN STATE: Simulate who is logged in right now to test constraints
-    const [activeUserRole, setActiveUserRole] = useState<Role>('UNIVERSITY');
-    const activeUserId = 'CN-UNI-001';
-    const activeUserName = 'Placement Cell - IITB';
+    // Auth user info derived from useAuth
+    const activeUserId = user?.id || '';
+    const activeUserRole = (user?.role as Role) || 'STUDENT';
 
     // Composition State
     const [composeTo, setComposeTo] = useState('');
@@ -109,9 +99,14 @@ export default function Mail() {
     const [composeBody, setComposeBody] = useState('');
 
     // Mail State
-    const [mails, setMails] = useState<Email[]>(mockMails);
+    const [mails, setMails] = useState<Email[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedMail, setSelectedMail] = useState<Email | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
+    const [isSending, setIsSending] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [recipientSearchResults, setRecipientSearchResults] = useState<RecipientSearchResult[]>([]);
+    const [searchLoading, setSearchLoading] = useState(false);
 
     const sidebarItems = [
         { icon: Inbox, label: 'INBOX', view: 'INBOX' },
@@ -169,56 +164,114 @@ export default function Mail() {
         }
     };
 
-    // Determine allowed recipients based on user role
     const getAllowedRecipientRoles = (role: Role): Role[] => {
         switch (role) {
             case 'STUDENT': return ['UNIVERSITY', 'CODENEXUS'];
             case 'UNIVERSITY': return ['STUDENT', 'COMPANY', 'CODENEXUS'];
             case 'COMPANY': return ['UNIVERSITY', 'STUDENT', 'RECRUITER', 'CODENEXUS'];
             case 'RECRUITER': return ['COMPANY', 'CODENEXUS'];
-            case 'CODENEXUS': return ['STUDENT', 'UNIVERSITY', 'COMPANY', 'RECRUITER']; // System admin
+            case 'CODENEXUS': return ['STUDENT', 'UNIVERSITY', 'COMPANY', 'RECRUITER'];
             default: return ['CODENEXUS'];
         }
     };
-    
+
     const allowedRoles = getAllowedRecipientRoles(activeUserRole);
 
-    const handleSendEmail = () => {
+    const fetchMails = useCallback(async () => {
+        if (!user) return;
+        setIsLoading(true);
+        setError(null);
+        try {
+            const endpoint = currentView === 'INBOX' ? mailApi.getInbox() : mailApi.getSent();
+            const res = await endpoint;
+            const emails = res.data.mails.map((mail) => mailItemToEmail(mail));
+            setMails(emails);
+        } catch (err: any) {
+            setError(err.message || 'Failed to fetch mails');
+            setMails([]);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [user, currentView]);
+
+    useEffect(() => {
+        if (!authLoading && user) {
+            fetchMails();
+        }
+    }, [authLoading, user, currentView, fetchMails]);
+
+    useEffect(() => {
+        if (currentView === 'COMPOSE') {
+            setRecipientSearchResults([]);
+            setSearchQuery('');
+        }
+    }, [currentView]);
+
+    const handleSendEmail = async () => {
         if (!composeTo.trim() || !composeSubject.trim() || !composeBody.trim()) return;
 
-        const newMail: Email = {
-            id: Math.random().toString(36).substr(2, 9),
-            senderId: activeUserId,
-            senderName: activeUserName,
-            senderRole: activeUserRole,
-            recipientId: composeTo,
-            recipientName: `User (${composeTo})`,
-            recipientRole: composeTargetRole,
-            subject: composeSubject,
-            body: composeBody,
-            timestamp: 'Just now',
-            read: false
-        };
-
-        setMails([newMail, ...mails]);
-        setComposeTo('');
-        setComposeSubject('');
-        setComposeBody('');
-        setCurrentView('SENT'); // Redirect to sent after sending
+        setIsSending(true);
+        setError(null);
+        try {
+            await mailApi.send({
+                recipient_cnid: composeTo,
+                subject: composeSubject,
+                body: composeBody
+            });
+            setComposeTo('');
+            setComposeSubject('');
+            setComposeBody('');
+            setCurrentView('SENT');
+            fetchMails();
+        } catch (err: any) {
+            setError(err.message || 'Failed to send mail');
+        } finally {
+            setIsSending(false);
+        }
     };
 
-    // Filter mails based on current view and user
+    const handleSearchRecipients = async (query: string) => {
+        setSearchQuery(query);
+        if (query.length < 2) {
+            setRecipientSearchResults([]);
+            return;
+        }
+        setSearchLoading(true);
+        try {
+            const res = await mailApi.searchRecipients(query);
+            setRecipientSearchResults(res.data.filter(r => allowedRoles.includes(r.role.toUpperCase() as Role)));
+        } catch (err) {
+            setRecipientSearchResults([]);
+        } finally {
+            setSearchLoading(false);
+        }
+    };
+
+    const handleSelectRecipient = (result: RecipientSearchResult) => {
+        setComposeTo(result.cnid);
+        setSearchQuery(result.displayName);
+        setRecipientSearchResults([]);
+    };
+
+    const handleMailClick = async (mail: Email) => {
+        setSelectedMail(mail);
+        if (currentView === 'INBOX' && !mail.read) {
+            try {
+                await mailApi.markAsRead(mail.id);
+                setMails(prev => prev.map(m => m.id === mail.id ? { ...m, read: true } : m));
+            } catch (err) {
+                // Silently fail - mail will remain unread visually
+            }
+        }
+    };
+
     const displayList = mails.filter(m => {
-        const isInbox = currentView === 'INBOX' && m.recipientId === activeUserId;
-        const isSent = currentView === 'SENT' && m.senderId === activeUserId;
-        const matchView = isInbox || isSent;
-        
-        const searchMatches = 
-            m.subject.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        const searchMatches =
+            m.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
             m.senderName.toLowerCase().includes(searchQuery.toLowerCase()) ||
             m.recipientName.toLowerCase().includes(searchQuery.toLowerCase());
-            
-        return matchView && searchMatches;
+
+        return searchMatches;
     });
 
     const getRoleColor = (role: Role) => {
@@ -231,6 +284,26 @@ export default function Mail() {
             default: return 'text-[#888] bg-[#111] border-[#333]';
         }
     };
+
+    if (authLoading) {
+        return (
+            <div className="h-screen w-full bg-[#050505] flex items-center justify-center">
+                <Loader2 className="w-8 h-8 text-accent-500 animate-spin" />
+            </div>
+        );
+    }
+
+    if (!user) {
+        return (
+            <div className="h-screen w-full bg-[#050505] flex flex-col items-center justify-center">
+                <MessageSquare size={48} className="text-[#444] mb-4" />
+                <p className="text-[#666] font-mono text-sm uppercase tracking-widest">Please login to access mail</p>
+                <Link to="/login" className="mt-4 px-6 py-2 bg-accent-500 text-black font-mono text-xs uppercase tracking-widest rounded-sm hover:bg-accent-400 transition-colors">
+                    Login
+                </Link>
+            </div>
+        );
+    }
 
     return (
         <div className="h-screen w-full bg-[#050505] font-sans text-white selection:bg-accent-500/30 selection:text-white relative overflow-hidden flex">
@@ -292,7 +365,7 @@ export default function Mail() {
                             </AnimatePresence>
                         </button>
                     ))}
-                    
+
                     <div className="text-[10px] font-mono text-[#555] uppercase tracking-widest px-3 mb-2 mt-4 pt-4 border-t border-[#222]">Mailbox</div>
                     {sidebarItems.map((item, index) => (
                         <button
@@ -322,8 +395,8 @@ export default function Mail() {
                             </AnimatePresence>
                         </button>
                     ))}
-                    
-                    {/* Role Switcher for Demo Purposes */}
+
+                    {/* Current Role Display */}
                     <div className="mt-8 border-t border-[#222] pt-4">
                         <AnimatePresence>
                             {isSidebarOpen && (
@@ -333,21 +406,11 @@ export default function Mail() {
                                     className="px-3"
                                 >
                                     <div className="text-[10px] font-mono text-accent-500 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                        <ShieldCheck size={12}/> Demo Logic: Role
+                                        <ShieldCheck size={12}/> Current Role
                                     </div>
-                                    <select 
-                                        value={activeUserRole}
-                                        onChange={(e) => {
-                                            setActiveUserRole(e.target.value as Role);
-                                            setComposeTargetRole('CODENEXUS'); // Reset target
-                                        }}
-                                        className="w-full bg-[#111] border border-[#333] text-white text-xs p-2 rounded-sm outline-none cursor-pointer focus:border-accent-500"
-                                    >
-                                        <option value="STUDENT">Student</option>
-                                        <option value="UNIVERSITY">University</option>
-                                        <option value="COMPANY">Company</option>
-                                        <option value="RECRUITER">Recruiter</option>
-                                    </select>
+                                    <div className={`text-xs font-mono px-2 py-1 border rounded-sm uppercase tracking-wider ${getRoleColor(activeUserRole)}`}>
+                                        {activeUserRole}
+                                    </div>
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -389,7 +452,7 @@ export default function Mail() {
                         {currentView === 'SENT' && <><Send size={18} className="text-accent-400"/> Sent Messages</>}
                         {currentView === 'COMPOSE' && <><PenSquare size={18} className="text-accent-400"/> Compose New Message</>}
                     </h1>
-                    
+
                     {currentView !== 'COMPOSE' && (
                         <div className="relative">
                             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#555]" />
@@ -403,6 +466,12 @@ export default function Mail() {
                         </div>
                     )}
                 </header>
+
+                {error && (
+                    <div className="px-6 py-3 bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-mono">
+                        {error}
+                    </div>
+                )}
 
                 <div className="flex-1 overflow-hidden flex">
                     {currentView === 'COMPOSE' ? (
@@ -419,27 +488,58 @@ export default function Mail() {
                                     <div className="flex flex-col gap-2 relative">
                                         <label className="text-[10px] font-mono text-[#888] uppercase tracking-widest">To (CodeNexus ID)</label>
                                         <div className="flex gap-4">
-                                            <select 
+                                            <select
                                                 value={composeTargetRole}
                                                 onChange={(e) => setComposeTargetRole(e.target.value as Role)}
                                                 className="w-1/4 bg-[#111] border border-[#333] outline-none p-3 text-sm font-mono text-white focus:border-accent-500 rounded-sm cursor-pointer"
                                             >
                                                 {allowedRoles.map(r => <option key={r} value={r}>{r}</option>)}
                                             </select>
-                                            <input 
-                                                type="text" 
-                                                value={composeTo}
-                                                onChange={(e) => setComposeTo(e.target.value)}
-                                                placeholder="e.g. CN-ADM-000"
-                                                className="flex-1 bg-[#111] border border-[#333] outline-none p-3 text-sm font-mono text-white placeholder:text-[#444] rounded-sm focus:border-accent-500 transition-colors"
-                                            />
+                                            <div className="flex-1 relative">
+                                                <input
+                                                    type="text"
+                                                    value={searchQuery || composeTo}
+                                                    onChange={(e) => {
+                                                        setComposeTo(e.target.value);
+                                                        handleSearchRecipients(e.target.value);
+                                                    }}
+                                                    onFocus={(e) => {
+                                                        if (e.target.value.length >= 2) {
+                                                            handleSearchRecipients(e.target.value);
+                                                        }
+                                                    }}
+                                                    placeholder="Search or enter CN-ID (e.g. CN-ADM-000)"
+                                                    className="w-full bg-[#111] border border-[#333] outline-none p-3 text-sm font-mono text-white placeholder:text-[#444] rounded-sm focus:border-accent-500 transition-colors"
+                                                />
+                                                {recipientSearchResults.length > 0 && (
+                                                    <div className="absolute top-full left-0 right-0 mt-1 bg-[#111] border border-[#333] rounded-sm max-h-48 overflow-y-auto custom-scrollbar z-50">
+                                                        {recipientSearchResults.map((result) => (
+                                                            <button
+                                                                key={result.cnid}
+                                                                onClick={() => handleSelectRecipient(result)}
+                                                                className="w-full px-4 py-2 text-left hover:bg-[#222] flex items-center justify-between border-b border-[#222] last:border-b-0"
+                                                            >
+                                                                <span className="text-sm font-mono text-white">{result.displayName}</span>
+                                                                <span className={`text-[9px] font-mono px-1.5 py-0.5 border rounded-sm uppercase ${getRoleColor(result.role.toUpperCase() as Role)}`}>
+                                                                    {result.role}
+                                                                </span>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                                {searchLoading && (
+                                                    <div className="absolute top-full left-0 right-0 mt-1 bg-[#111] border border-[#333] rounded-sm p-4 flex items-center justify-center">
+                                                        <Loader2 className="w-4 h-4 text-accent-500 animate-spin" />
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="flex flex-col gap-2">
                                         <label className="text-[10px] font-mono text-[#888] uppercase tracking-widest">Subject</label>
-                                        <input 
-                                            type="text" 
+                                        <input
+                                            type="text"
                                             value={composeSubject}
                                             onChange={(e) => setComposeSubject(e.target.value)}
                                             placeholder="Enter message subject"
@@ -449,7 +549,7 @@ export default function Mail() {
 
                                     <div className="flex flex-col gap-2 flex-1">
                                         <label className="text-[10px] font-mono text-[#888] uppercase tracking-widest">Message</label>
-                                        <textarea 
+                                        <textarea
                                             value={composeBody}
                                             onChange={(e) => setComposeBody(e.target.value)}
                                             placeholder="Type your message here..."
@@ -458,12 +558,17 @@ export default function Mail() {
                                     </div>
 
                                     <div className="flex justify-end pt-4 border-t border-[#222]">
-                                        <button 
+                                        <button
                                             onClick={handleSendEmail}
-                                            disabled={!composeTo || !composeSubject || !composeBody}
+                                            disabled={!composeTo || !composeSubject || !composeBody || isSending}
                                             className="bg-white text-black px-8 py-3 font-mono font-bold uppercase tracking-widest text-[10px] hover:bg-accent-400 hover:text-white transition-colors flex items-center gap-2 rounded-sm disabled:opacity-50 disabled:cursor-not-allowed group"
                                         >
-                                            <Send size={14} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" /> Send Encrypted
+                                            {isSending ? (
+                                                <Loader2 size={14} className="animate-spin" />
+                                            ) : (
+                                                <Send size={14} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+                                            )}
+                                            {isSending ? 'Sending...' : 'Send Encrypted'}
                                         </button>
                                     </div>
                                 </div>
@@ -472,49 +577,55 @@ export default function Mail() {
                     ) : (
                         /* Inbox / Sent View */
                         <div className="flex-1 flex bg-[#050505] overflow-hidden">
-                            {/* List */ }
+                            {/* List */}
                             <div className="w-full h-full flex flex-col bg-[#0A0A0A]">
-                                <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-[#1a1a1a]">
-                                    {displayList.map(mail => (
-                                        <div 
-                                            key={mail.id} 
-                                            onClick={() => setSelectedMail(mail)}
-                                            className={`p-4 cursor-pointer hover:bg-[#111] transition-colors ${selectedMail?.id === mail.id ? 'bg-[#111] border-l-2 border-l-accent-500' : 'border-l-2 border-l-transparent'}`}
-                                        >
-                                            <div className="flex justify-between items-start mb-2">
-                                                <div className="flex items-center gap-2">
-                                                    {!mail.read && currentView === 'INBOX' && <div className="w-2 h-2 rounded-full bg-accent-500"></div>}
-                                                    <span className={`text-[9px] font-mono px-1.5 py-0.5 border rounded-sm tracking-widest uppercase ${getRoleColor(currentView === 'INBOX' ? mail.senderRole : mail.recipientRole)}`}>
-                                                        {currentView === 'INBOX' ? mail.senderRole : mail.recipientRole}
-                                                    </span>
+                                {isLoading ? (
+                                    <div className="flex-1 flex items-center justify-center">
+                                        <Loader2 className="w-8 h-8 text-accent-500 animate-spin" />
+                                    </div>
+                                ) : (
+                                    <div className="flex-1 overflow-y-auto custom-scrollbar divide-y divide-[#1a1a1a]">
+                                        {displayList.map(mail => (
+                                            <div
+                                                key={mail.id}
+                                                onClick={() => handleMailClick(mail)}
+                                                className={`p-4 cursor-pointer hover:bg-[#111] transition-colors ${selectedMail?.id === mail.id ? 'bg-[#111] border-l-2 border-l-accent-500' : 'border-l-2 border-l-transparent'}`}
+                                            >
+                                                <div className="flex justify-between items-start mb-2">
+                                                    <div className="flex items-center gap-2">
+                                                        {!mail.read && currentView === 'INBOX' && <div className="w-2 h-2 rounded-full bg-accent-500"></div>}
+                                                        <span className={`text-[9px] font-mono px-1.5 py-0.5 border rounded-sm tracking-widest uppercase ${getRoleColor(currentView === 'INBOX' ? mail.senderRole : mail.recipientRole)}`}>
+                                                            {currentView === 'INBOX' ? mail.senderRole : mail.recipientRole}
+                                                        </span>
+                                                    </div>
+                                                    <span className="text-[10px] font-mono text-[#666]">{mail.timestamp}</span>
                                                 </div>
-                                                <span className="text-[10px] font-mono text-[#666]">{mail.timestamp}</span>
+                                                <div className="font-bold text-sm text-white mb-1 truncate">{currentView === 'INBOX' ? mail.senderName : `To: ${mail.recipientId}`}</div>
+                                                <div className="font-sans font-semibold text-xs text-[#ccc] mb-2 truncate">{mail.subject}</div>
+                                                <div className="font-sans text-xs text-[#666] line-clamp-2 leading-relaxed">{mail.body}</div>
                                             </div>
-                                            <div className="font-bold text-sm text-white mb-1 truncate">{currentView === 'INBOX' ? mail.senderName : `To: ${mail.recipientId}`}</div>
-                                            <div className="font-sans font-semibold text-xs text-[#ccc] mb-2 truncate">{mail.subject}</div>
-                                            <div className="font-sans text-xs text-[#666] line-clamp-2 leading-relaxed">{mail.body}</div>
-                                        </div>
-                                    ))}
-                                    {displayList.length === 0 && (
-                                        <div className="flex flex-col items-center justify-center p-12 text-[#555]">
-                                            <MessageSquare size={32} className="mb-4 opacity-20" />
-                                            <span className="text-[10px] font-mono uppercase tracking-widest">Folder Empty</span>
-                                        </div>
-                                    )}
-                                </div>
+                                        ))}
+                                        {displayList.length === 0 && (
+                                            <div className="flex flex-col items-center justify-center p-12 text-[#555]">
+                                                <MessageSquare size={32} className="mb-4 opacity-20" />
+                                                <span className="text-[10px] font-mono uppercase tracking-widest">Folder Empty</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
 
-                            {/* Viewer Modal */ }
+                            {/* Viewer Modal */}
                             <AnimatePresence>
                             {selectedMail && (
-                                <motion.div 
+                                <motion.div
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
                                     className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
                                     onClick={() => setSelectedMail(null)}
                                 >
-                                    <motion.div 
+                                    <motion.div
                                         initial={{ opacity: 0, scale: 0.95, y: 20 }}
                                         animate={{ opacity: 1, scale: 1, y: 0 }}
                                         exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -546,7 +657,7 @@ export default function Mail() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <button 
+                                            <button
                                                 onClick={() => setSelectedMail(null)}
                                                 className="p-2 text-[#666] hover:text-white hover:bg-[#222] border border-[#333] rounded-sm transition-colors"
                                             >

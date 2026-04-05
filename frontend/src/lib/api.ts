@@ -310,3 +310,62 @@ export const webinarApi = {
     getById: (id: string) => api.get<WebinarItem>(`/webinars/${id}`, false),
     create: (data: CreateWebinarPayload) => api.post<WebinarItem>('/webinars', data),
 };
+
+// ─── Mail APIs ───
+export interface MailItem {
+    id: string;
+    sender_cnid: string;
+    sender_name: string;
+    recipient_cnid: string;
+    recipient_name: string;
+    subject: string;
+    body: string;
+    sent_at: string;
+    is_read: boolean;
+    thread_id: string;
+    parent_mail_id: string | null;
+}
+
+export interface MailListResponse {
+    mails: MailItem[];
+    total: number;
+    page: number;
+    limit: number;
+}
+
+export interface RecipientSearchResult {
+    cnid: string;
+    displayName: string;
+    role: string;
+}
+
+export interface SendMailPayload {
+    recipient_cnid: string;
+    subject: string;
+    body: string;
+    parent_mail_id?: string;
+}
+
+export const mailApi = {
+    getInbox: (page?: number, limit?: number) => {
+        const query = new URLSearchParams();
+        if (page) query.set('page', page.toString());
+        if (limit) query.set('limit', limit.toString());
+        const qs = query.toString();
+        return api.get<MailListResponse>(`/mail/inbox${qs ? `?${qs}` : ''}`);
+    },
+    getSent: (page?: number, limit?: number) => {
+        const query = new URLSearchParams();
+        if (page) query.set('page', page.toString());
+        if (limit) query.set('limit', limit.toString());
+        const qs = query.toString();
+        return api.get<MailListResponse>(`/mail/sent${qs ? `?${qs}` : ''}`);
+    },
+    getById: (id: string) => api.get<MailItem>(`/mail/${id}`),
+    getThread: (threadId: string) => api.get<MailItem[]>(`/mail/thread/${threadId}`),
+    send: (data: SendMailPayload) => api.post<MailItem>('/mail/send', data),
+    markAsRead: (id: string) => api.patch(`/mail/${id}/read`, {}),
+    delete: (id: string) => api.del(`/mail/${id}`),
+    getUnreadCount: () => api.get<{ unread_count: number }>('/mail/unread-count'),
+    searchRecipients: (q: string) => api.get<RecipientSearchResult[]>(`/mail/search-recipients?q=${encodeURIComponent(q)}`),
+};
