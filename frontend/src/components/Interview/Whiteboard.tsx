@@ -12,6 +12,7 @@ import {
     Trash2,
     Palette
 } from 'lucide-react';
+import { Socket } from 'socket.io-client';
 
 /* ────────── Types ────────── */
 type Tool = 'pencil' | 'rectangle' | 'circle' | 'line' | 'arrow' | 'eraser' | 'text';
@@ -30,6 +31,12 @@ interface DrawElement {
     text?: string;
 }
 
+interface WhiteboardProps {
+    socket: Socket | null;
+    interviewId: string;
+    role: 'student' | 'recruiter';
+}
+
 const TOOLS: { key: Tool; icon: typeof Pencil; label: string }[] = [
     { key: 'pencil', icon: Pencil, label: 'Pencil' },
     { key: 'rectangle', icon: Square, label: 'Rectangle' },
@@ -44,7 +51,7 @@ const COLORS = ['#ffffff', '#00e5c8', '#f87171', '#facc15', '#60a5fa', '#a78bfa'
 const STROKE_WIDTHS = [2, 4, 6, 8];
 
 /* ────────── Component ────────── */
-export default function Whiteboard() {
+export default function Whiteboard({ socket, interviewId }: WhiteboardProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -68,6 +75,21 @@ export default function Whiteboard() {
     const [textValue, setTextValue] = useState('');
     const textInputRef = useRef<HTMLInputElement>(null);
 
+    const isRemoteUpdate = useRef(false);
+    const syncTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    /* ── Sync helper: broadcast elements to the other side ── */
+    const broadcastElements = useCallback((els: DrawElement[]) => {
+        if (!socket || isRemoteUpdate.current) return;
+        if (syncTimeout.current) clearTimeout(syncTimeout.current);
+        syncTimeout.current = setTimeout(() => {
+            socket.emit('whiteboard-sync', {
+                interviewId,
+                elements: els,
+            });
+        }, 100);
+    }, [socket, interviewId]);
+
     /* ── Canvas sizing ── */
     useEffect(() => {
         const resize = () => {
@@ -87,6 +109,22 @@ export default function Whiteboard() {
         redraw([...elements, ...(currentElement ? [currentElement] : [])]);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [elements, currentElement]);
+
+    /* ── Listen for remote whiteboard changes ── */
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleWhiteboardSync = (data: { elements: DrawElement[] }) => {
+            isRemoteUpdate.current = true;
+            setElements(data.elements);
+            isRemoteUpdate.current = false;
+        };
+
+        socket.on('whiteboard-sync', handleWhiteboardSync);
+        return () => {
+            socket.off('whiteboard-sync', handleWhiteboardSync);
+        };
+    }, [socket]);
 
     /* ── Drawing engine ── */
     const redraw = useCallback(
@@ -226,8 +264,11 @@ export default function Whiteboard() {
     const handleMouseUp = () => {
         if (!isDrawing || !currentElement) return;
         setIsDrawing(false);
-        setElements(prev => [...prev, currentElement]);
+        const newElements = [...elements, currentElement];
+        setElements(newElements);
         setCurrentElement(null);
+        // Broadcast the completed stroke
+        broadcastElements(newElements);
     };
 
     const commitText = () => {
@@ -237,19 +278,21 @@ export default function Whiteboard() {
         }
         setUndoStack(prev => [...prev, elements]);
         setRedoStack([]);
-        setElements(prev => [
-            ...prev,
+        const newElements = [
+            ...elements,
             {
                 id: Math.random().toString(36).slice(2),
-                tool: 'text',
+                tool: 'text' as Tool,
                 points: [{ x: textInput.x, y: textInput.y }],
                 color,
                 strokeWidth,
                 text: textValue,
             },
-        ]);
+        ];
+        setElements(newElements);
         setTextInput({ x: 0, y: 0, visible: false });
         setTextValue('');
+        broadcastElements(newElements);
     };
 
     /* ── Undo / Redo ── */
@@ -259,6 +302,7 @@ export default function Whiteboard() {
         setRedoStack(r => [...r, elements]);
         setElements(prev);
         setUndoStack(u => u.slice(0, -1));
+        broadcastElements(prev);
     };
 
     const redo = () => {
@@ -267,12 +311,14 @@ export default function Whiteboard() {
         setUndoStack(u => [...u, elements]);
         setElements(next);
         setRedoStack(r => r.slice(0, -1));
+        broadcastElements(next);
     };
 
     const clearCanvas = () => {
         setUndoStack(prev => [...prev, elements]);
         setRedoStack([]);
         setElements([]);
+        broadcastElements([]);
     };
 
     /* ── Keyboard shortcuts ── */

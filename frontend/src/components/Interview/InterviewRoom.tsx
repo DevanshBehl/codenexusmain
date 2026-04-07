@@ -131,19 +131,24 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
     }, [isDataLoaded, interviewData]);
 
     /* ────────── Video Stream Binding ────────── */
+    // Use requestAnimationFrame to wait for React to mount the new <video> refs after mode switch
     useEffect(() => {
-        if (mediasoup.localStream) {
-            if (localVideoRef.current) localVideoRef.current.srcObject = mediasoup.localStream;
-            if (pipLocalRef.current) pipLocalRef.current.srcObject = mediasoup.localStream;
-        }
-    }, [mediasoup.localStream, mode, pipMinimized, isInLobby]);
-
-    useEffect(() => {
-        if (mediasoup.remoteStream) {
-            if (remoteVideoRef.current) remoteVideoRef.current.srcObject = mediasoup.remoteStream;
-            if (pipRemoteRef.current) pipRemoteRef.current.srcObject = mediasoup.remoteStream;
-        }
-    }, [mediasoup.remoteStream, mode, pipMinimized, isInLobby]);
+        const bindStreams = () => {
+            if (mediasoup.localStream) {
+                if (localVideoRef.current) localVideoRef.current.srcObject = mediasoup.localStream;
+                if (pipLocalRef.current) pipLocalRef.current.srcObject = mediasoup.localStream;
+            }
+            if (mediasoup.remoteStream) {
+                if (remoteVideoRef.current) remoteVideoRef.current.srcObject = mediasoup.remoteStream;
+                if (pipRemoteRef.current) pipRemoteRef.current.srcObject = mediasoup.remoteStream;
+            }
+        };
+        // Bind immediately for stream changes
+        bindStreams();
+        // Also bind after a frame to catch newly mounted refs from mode transitions
+        const rafId = requestAnimationFrame(bindStreams);
+        return () => cancelAnimationFrame(rafId);
+    }, [mediasoup.localStream, mediasoup.remoteStream, mode, pipMinimized, isInLobby]);
 
     /* ────────── Socket Interactions ────────── */
     useEffect(() => {
@@ -152,22 +157,30 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
         socket.emit('join-room', { interviewId: id });
 
         socket.on('chat-message', (data: any) => {
-            // map backend ChatMessage to what the UI expects
             const formattedMsg = { 
                 text: data.text, 
                 sender: data.senderName, 
                 time: new Date(data.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
             };
-            setChatMessages(prev => [...prev, formattedMsg]);
+            setChatMessages((prev: any[]) => [...prev, formattedMsg]);
         });
 
-        socket.on('push-question', (qId) => {
-            setPushedQuestions(prev => [...prev, qId]);
+        socket.on('push-question', (qId: string) => {
+            setPushedQuestions((prev: string[]) => [...prev, qId]);
+        });
+
+        // Synchronized mode switching: when the other participant changes mode, follow them
+        socket.on('mode-change', (data: { mode: string }) => {
+            const newMode = data.mode as Mode;
+            if (['video', 'ide', 'whiteboard'].includes(newMode)) {
+                setMode(newMode);
+            }
         });
 
         return () => {
             socket.off('chat-message');
             socket.off('push-question');
+            socket.off('mode-change');
         };
     }, [socket, id, isInLobby]);
 
@@ -208,11 +221,20 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
         }
     };
 
+    /* ────────── Synchronized Mode Switch ────────── */
+    const switchMode = (newMode: Mode) => {
+        setMode(newMode);
+        // Broadcast mode change to the other participant
+        if (socket && id) {
+            socket.emit('mode-change', { interviewId: id, mode: newMode });
+        }
+    };
+
     /* ────────── Dock items ────────── */
     const dockItems = [
-        { key: 'video' as Mode, icon: Monitor, label: 'Video Call', active: mode === 'video', onClick: () => setMode('video') },
-        { key: 'ide' as Mode, icon: Code2, label: 'IDE', active: mode === 'ide', onClick: () => setMode('ide') },
-        { key: 'whiteboard' as Mode, icon: PenTool, label: 'Whiteboard', active: mode === 'whiteboard', onClick: () => setMode('whiteboard') },
+        { key: 'video' as Mode, icon: Monitor, label: 'Video Call', active: mode === 'video', onClick: () => switchMode('video') },
+        { key: 'ide' as Mode, icon: Code2, label: 'IDE', active: mode === 'ide', onClick: () => switchMode('ide') },
+        { key: 'whiteboard' as Mode, icon: PenTool, label: 'Whiteboard', active: mode === 'whiteboard', onClick: () => switchMode('whiteboard') },
     ];
 
     /* ────────── Render lobby ────────── */
@@ -442,7 +464,7 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
                     <InterviewProblem />
                 </div>
                 <div className="col-span-3 flex flex-col min-h-0">
-                    <InterviewEditor />
+                    <InterviewEditor socket={socket} interviewId={id || ''} role={role} />
                 </div>
             </div>
         </div>
@@ -452,7 +474,7 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
     const renderWhiteboard = () => (
         <div className="flex-1 flex relative min-h-0">
             {renderVideoPip()}
-            <Whiteboard />
+            <Whiteboard socket={socket} interviewId={id || ''} role={role} />
         </div>
     );
 
@@ -490,8 +512,8 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
 
             {/* Main area */}
             <main className="flex-1 flex flex-col relative z-10 min-h-0">
-                <AnimatePresence mode="wait">
-                    <motion.div key={mode} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="flex-1 flex flex-col min-h-0">
+                <AnimatePresence>
+                    <motion.div key={mode} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.12 }} className="flex-1 flex flex-col min-h-0">
                         {mode === 'video' && renderVideoFull()}
                         {mode === 'ide' && renderIDE()}
                         {mode === 'whiteboard' && renderWhiteboard()}

@@ -278,6 +278,15 @@ export function createSocketServer(httpServer: HttpServer): Server {
             io.to(roomId).emit("chat-message", message);
         });
 
+        // ─── Mode Sync (synchronized view between participants) ───
+        socket.on("mode-change", (data: { interviewId: string; mode: string }) => {
+            const roomId = `interview-${data.interviewId}`;
+            socket.to(roomId).emit("mode-change", {
+                mode: data.mode,
+                changedBy: socket.userName,
+            });
+        });
+
         // ─── Code Sync ───
         socket.on("code-sync", (data: { interviewId: string; code: string; language: string }) => {
             const roomId = `interview-${data.interviewId}`;

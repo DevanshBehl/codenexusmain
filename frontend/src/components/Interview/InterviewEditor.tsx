@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react';
-import { Terminal, Play, Send, Settings } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Terminal, Play, Send, Settings, Lock } from 'lucide-react';
 import Editor, { type OnMount } from '@monaco-editor/react';
+import { Socket } from 'socket.io-client';
 
 /* ── Language mapping for Monaco ── */
 const LANGUAGE_MAP: Record<string, string> = {
@@ -60,21 +61,85 @@ public:
 }`,
 };
 
-export default function InterviewEditor() {
+interface InterviewEditorProps {
+    socket: Socket | null;
+    interviewId: string;
+    role: 'student' | 'recruiter';
+}
+
+export default function InterviewEditor({ socket, interviewId, role }: InterviewEditorProps) {
     const [language, setLanguage] = useState('cpp');
     const editorRef = useRef<Parameters<OnMount>[0] | null>(null);
+    const isRemoteUpdate = useRef(false);
+    const syncTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const isStudent = role === 'student';
 
     const handleEditorDidMount: OnMount = (editor) => {
         editorRef.current = editor;
-        editor.focus();
+        if (isStudent) editor.focus();
     };
 
     const handleLanguageChange = (newLang: string) => {
         setLanguage(newLang);
         if (editorRef.current) {
+            isRemoteUpdate.current = true;
             editorRef.current.setValue(DEFAULT_CODE[newLang] ?? '');
+            isRemoteUpdate.current = false;
+        }
+        // Broadcast language change with code
+        if (socket && isStudent) {
+            socket.emit('code-sync', {
+                interviewId,
+                code: DEFAULT_CODE[newLang] ?? '',
+                language: newLang,
+            });
         }
     };
+
+    // Emit code changes to the other participant (debounced)
+    const handleCodeChange = useCallback((value: string | undefined) => {
+        if (isRemoteUpdate.current || !isStudent || !socket) return;
+
+        if (syncTimeout.current) clearTimeout(syncTimeout.current);
+        syncTimeout.current = setTimeout(() => {
+            socket.emit('code-sync', {
+                interviewId,
+                code: value ?? '',
+                language,
+            });
+        }, 150); // Debounce 150ms to avoid spamming
+    }, [socket, interviewId, language, isStudent]);
+
+    // Receive code changes from the other participant
+    useEffect(() => {
+        if (!socket) return;
+
+        const handleCodeSync = (data: { code: string; language: string }) => {
+            // Update language selector if changed
+            if (data.language && data.language !== language) {
+                setLanguage(data.language);
+            }
+            // Update editor content
+            if (editorRef.current) {
+                isRemoteUpdate.current = true;
+                const editor = editorRef.current;
+                const model = editor.getModel();
+                if (model) {
+                    // Preserve cursor position for the viewer
+                    const position = editor.getPosition();
+                    editor.setValue(data.code);
+                    if (position) editor.setPosition(position);
+                }
+                isRemoteUpdate.current = false;
+            }
+        };
+
+        socket.on('code-sync', handleCodeSync);
+        return () => {
+            socket.off('code-sync', handleCodeSync);
+        };
+    }, [socket, language]);
 
     return (
         <section className="h-full min-h-0 border border-accent-500/30 bg-[#050505] rounded-sm overflow-hidden flex flex-col relative group hover:border-accent-500/60 transition-colors shadow-[0_0_20px_oklch(0.777_0.152_181.912_/_0.05)]">
@@ -84,7 +149,8 @@ export default function InterviewEditor() {
                     <select
                         value={language}
                         onChange={(e) => handleLanguageChange(e.target.value)}
-                        className="bg-[#222] border border-[#333] text-white text-sm rounded-sm px-3 py-1.5 focus:outline-none focus:border-accent-500/50 appearance-none font-mono cursor-pointer"
+                        disabled={!isStudent}
+                        className="bg-[#222] border border-[#333] text-white text-sm rounded-sm px-3 py-1.5 focus:outline-none focus:border-accent-500/50 appearance-none font-mono cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         <option value="cpp">C++</option>
                         <option value="java">Java</option>
@@ -94,17 +160,27 @@ export default function InterviewEditor() {
                     <button className="p-1.5 rounded-sm hover:bg-[#222] text-[#666] hover:text-white transition-colors border border-transparent hover:border-[#333]">
                         <Settings size={16} />
                     </button>
+                    {!isStudent && (
+                        <div className="flex items-center gap-1.5 bg-[#1a1a1a] border border-[#333] rounded-sm px-2.5 py-1 ml-2">
+                            <Lock size={12} className="text-[#666]" />
+                            <span className="text-[9px] font-mono text-[#666] uppercase tracking-widest">View Only</span>
+                        </div>
+                    )}
                 </div>
 
                 <div className="flex items-center gap-3">
-                    <button className="flex items-center gap-2 px-4 py-1.5 bg-[#222] hover:bg-[#333] border border-[#333] rounded-sm text-sm font-medium transition-all text-white/90">
-                        <Play size={14} className="text-green-400" />
-                        Run
-                    </button>
-                    <button className="flex items-center gap-2 px-4 py-1.5 bg-accent-500/20 hover:bg-accent-500/30 border border-accent-500/50 rounded-sm text-sm font-semibold transition-all text-accent-400">
-                        <Send size={14} />
-                        Submit
-                    </button>
+                    {isStudent && (
+                        <>
+                            <button className="flex items-center gap-2 px-4 py-1.5 bg-[#222] hover:bg-[#333] border border-[#333] rounded-sm text-sm font-medium transition-all text-white/90">
+                                <Play size={14} className="text-green-400" />
+                                Run
+                            </button>
+                            <button className="flex items-center gap-2 px-4 py-1.5 bg-accent-500/20 hover:bg-accent-500/30 border border-accent-500/50 rounded-sm text-sm font-semibold transition-all text-accent-400">
+                                <Send size={14} />
+                                Submit
+                            </button>
+                        </>
+                    )}
                 </div>
             </div>
 
@@ -118,6 +194,7 @@ export default function InterviewEditor() {
                     defaultValue={DEFAULT_CODE[language]}
                     theme="vs-dark"
                     onMount={handleEditorDidMount}
+                    onChange={handleCodeChange}
                     options={{
                         fontSize: 14,
                         fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', Menlo, Monaco, 'Courier New', monospace",
@@ -149,6 +226,8 @@ export default function InterviewEditor() {
                         padding: { top: 16, bottom: 16 },
                         overviewRulerBorder: false,
                         hideCursorInOverviewRuler: true,
+                        readOnly: !isStudent,
+                        domReadOnly: !isStudent,
                         scrollbar: {
                             vertical: 'auto',
                             horizontal: 'auto',
