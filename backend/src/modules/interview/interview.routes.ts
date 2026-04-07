@@ -12,11 +12,25 @@ router.use(authenticate as RequestHandler);
 
 // View interviews (any authenticated user can see their own)
 router.get("/", interviewController.getInterviews as RequestHandler);
-router.get("/:id", interviewController.getInterviewById as RequestHandler);
 
-// Schedule an interview (RECRUITER only)
+// Get company recruiters (COMPANY_ADMIN only)
+router.get("/company-recruiters",
+    authorize(["COMPANY_ADMIN"]) as RequestHandler,
+    interviewController.getCompanyRecruiters as RequestHandler
+);
+
+// Get students for scheduling (RECRUITER and COMPANY_ADMIN)
+router.get("/students",
+    authorize(["RECRUITER", "COMPANY_ADMIN"]) as RequestHandler,
+    interviewController.getStudents as RequestHandler
+);
+
+router.get("/:id", interviewController.getInterviewById as RequestHandler);
+router.get("/:id/join", interviewController.joinInterview as RequestHandler);
+
+// Schedule an interview (RECRUITER, COMPANY_ADMIN)
 router.post("/",
-    authorize(["RECRUITER"]) as RequestHandler,
+    authorize(["RECRUITER", "COMPANY_ADMIN"]) as RequestHandler,
     validate(scheduleInterviewSchema) as RequestHandler,
     interviewController.scheduleInterview as RequestHandler
 );

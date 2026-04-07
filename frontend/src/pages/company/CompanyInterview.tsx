@@ -1,21 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import {
-    Terminal, Mail, Presentation, Calendar, Video, Briefcase, Plus, Users, Clock, Building, X
+    Terminal, Mail, Presentation, Calendar, Video, Briefcase, Plus, Users, Clock, Building2, X, Swords, CheckCircle2, BarChart3
 } from 'lucide-react';
 import { interviewApi, type InterviewItem } from '../../lib/api';
 
-export default function RecruiterInterview() {
-    const navigate = useNavigate();
+export default function CompanyInterview() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [interviews, setInterviews] = useState<InterviewItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isScheduling, setIsScheduling] = useState(false);
+    
+    // Arrays for scheduling
     const [students, setStudents] = useState<any[]>([]);
+    const [recruiters, setRecruiters] = useState<any[]>([]);
 
     const [scheduleData, setScheduleData] = useState({
         studentId: '',
+        recruiterId: '',
         role: 'Data Structures and Algorithms',
         scheduledDate: '',
         scheduledTime: '',
@@ -24,7 +27,7 @@ export default function RecruiterInterview() {
 
     useEffect(() => {
         fetchInterviews();
-        fetchStudents();
+        fetchSchedulingData();
     }, []);
 
     const fetchInterviews = async () => {
@@ -39,12 +42,16 @@ export default function RecruiterInterview() {
         }
     };
 
-    const fetchStudents = async () => {
+    const fetchSchedulingData = async () => {
         try {
-            const res = await interviewApi.getStudents();
-            setStudents(res.data);
+            const [stdRes, recRes] = await Promise.all([
+                interviewApi.getStudents(),
+                interviewApi.getCompanyRecruiters()
+            ]);
+            setStudents(stdRes.data);
+            setRecruiters(recRes.data);
         } catch (err) {
-            console.error('Failed to load students', err);
+            console.error('Failed to load scheduling data', err);
         }
     };
 
@@ -56,24 +63,20 @@ export default function RecruiterInterview() {
             setIsScheduling(false);
             fetchInterviews();
         } catch (err: any) {
-            window.alert(err.message || 'Failed to schedule interview');
-        }
-    };
-
-    const handleJoin = async (id: string) => {
-        try {
-            await interviewApi.join(id);
-            navigate(`/recruiter/interview/${id}`);
-        } catch (err: any) {
-            window.alert(err.message || 'Cannot join this interview');
+            window.alert(err.response?.data?.message || err.message || 'Failed to schedule interview');
         }
     };
 
     const sidebarItems = [
-        { icon: Mail, label: 'MAIL', onClick: () => navigate('/recruiter/mail') },
-        { icon: Presentation, label: 'WEBINARS', onClick: () => navigate('/recruiter/webinars') },
-        { icon: Terminal, label: 'DASHBOARD', onClick: () => navigate('/recruiter/dashboard') },
-        { icon: Briefcase, label: 'INTERVIEWS', active: true, onClick: () => navigate('/recruiter/interview') },
+        { icon: Mail, label: 'MAIL', onClick: () => window.location.href = '/company/mail' },
+        { icon: Presentation, label: 'WEBINARS', onClick: () => window.location.href = '/company/ppt' },
+        { icon: Terminal, label: 'CMD CENTER', onClick: () => window.location.href = '/company/dashboard' },
+        { icon: Building2, label: 'UNIVERSITIES', onClick: () => window.location.href = '/company/dashboard' },
+        { icon: Users, label: 'CANDIDATES', onClick: () => window.location.href = '/company/dashboard' },
+        { icon: Swords, label: 'CODE ARENA', onClick: () => window.location.href = '/company/dashboard' },
+        { icon: Video, label: 'INTERVIEWS', active: true, onClick: () => window.location.href = '/company/interview' },
+        { icon: CheckCircle2, label: 'EVALUATIONS', onClick: () => window.location.href = '/company/evaluation' },
+        { icon: BarChart3, label: 'ANALYTICS', onClick: () => window.location.href = '/company/dashboard' },
     ];
 
     const formatDateTime = (dateString: string) => {
@@ -114,7 +117,7 @@ export default function RecruiterInterview() {
                 </div>
 
                 <div className="flex-1 py-6 flex flex-col gap-1 px-3 overflow-y-auto custom-scrollbar">
-                    <div className="text-[10px] font-mono text-[#555] uppercase tracking-widest px-3 mb-2">RECRUITER</div>
+                    <div className="text-[10px] font-mono text-[#555] uppercase tracking-widest px-3 mb-2">COMPANY PORTAL</div>
                     {sidebarItems.map((item, index) => (
                         <button
                             key={index}
@@ -147,10 +150,10 @@ export default function RecruiterInterview() {
             <main className="flex-1 flex flex-col h-screen overflow-hidden relative z-10">
                 <header className="h-16 border-b border-[#222] bg-[#0A0A0A]/80 backdrop-blur-md flex items-center justify-between px-8 shrink-0">
                     <div className="flex items-center gap-4">
-                        <Briefcase size={20} className="text-accent-400" />
+                        <Video size={20} className="text-accent-400" />
                         <div>
-                            <h1 className="text-sm font-bold font-sans text-white uppercase tracking-widest">Interview Management</h1>
-                            <p className="text-[10px] font-mono text-[#666]">Schedule and manage student interviews</p>
+                            <h1 className="text-sm font-bold font-sans text-white uppercase tracking-widest">Global Interviews</h1>
+                            <p className="text-[10px] font-mono text-[#666]">Overview of all scheduled company interviews</p>
                         </div>
                     </div>
                     <button
@@ -169,7 +172,7 @@ export default function RecruiterInterview() {
                             <div className="flex flex-col items-center justify-center p-12 bg-[#0A0A0A] border border-[#222] rounded-sm text-center">
                                 <Clock size={48} className="text-[#333] mb-4" />
                                 <h2 className="text-lg font-bold text-white mb-2 tracking-widest uppercase font-mono">No Interviews Scheduled</h2>
-                                <p className="text-[#888] text-sm font-mono">You haven't scheduled any interviews yet. Click the button above to get started.</p>
+                                <p className="text-[#888] text-sm font-mono">You haven't scheduled any interviews for your recruiters yet. Click the button above to get started.</p>
                             </div>
                         ) : (
                             interviews.map((interview) => {
@@ -192,6 +195,9 @@ export default function RecruiterInterview() {
                                                     <p className="text-[10px] font-mono text-accent-500 uppercase tracking-widest flex items-center gap-1 mt-1">
                                                         <Users size={12} /> Candidate: {interview.student.name} ({interview.student.branch}, CGPA: {interview.student.cgpa})
                                                     </p>
+                                                    <p className="text-[10px] font-mono text-blue-400 uppercase tracking-widest flex items-center gap-1 mt-1">
+                                                        <Briefcase size={12} /> Assigned Recruiter: {interview.recruiter.name}
+                                                    </p>
                                                 </div>
                                                 <span className={`px-2 py-0.5 text-[9px] font-mono border rounded-sm tracking-widest uppercase ${isUpcoming ? 'text-green-400 border-green-500/20 bg-green-500/10' : 'text-[#555] border-[#333] bg-[#111]'}`}>
                                                     {interview.status}
@@ -199,14 +205,9 @@ export default function RecruiterInterview() {
                                             </div>
 
                                             <div className="flex items-center mt-auto">
-                                                {isUpcoming && (
-                                                    <button
-                                                        onClick={() => handleJoin(interview.id)}
-                                                        className="ml-auto text-[10px] font-mono font-bold flex items-center gap-2 px-4 py-2 rounded-sm outline-none transition-all bg-accent-500 text-black hover:bg-accent-400 shadow-[0_0_15px_rgba(var(--accent-500),0.3)]"
-                                                    >
-                                                        <Video size={14} /> Join Interview
-                                                    </button>
-                                                )}
+                                                <span className="text-[10px] font-mono text-[#555] italic">
+                                                    Note: Only the assigned recruiter can join the live room.
+                                                </span>
                                                 {interview.status === 'COMPLETED' && (
                                                     <button
                                                         className="ml-auto text-[10px] font-mono font-bold flex items-center gap-2 px-4 py-2 rounded-sm outline-none transition-all bg-[#111] text-[#888] border border-[#333] hover:text-white"
@@ -256,6 +257,21 @@ export default function RecruiterInterview() {
                                             <option value="">-- Choose Student --</option>
                                             {students.map(s => (
                                                 <option key={s.id} value={s.id}>{s.name} ({s.branch}, CGPA: {s.cgpa})</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-xs font-mono text-[#888] mb-1">Assign to Recruiter</label>
+                                        <select
+                                            required
+                                            value={scheduleData.recruiterId}
+                                            onChange={e => setScheduleData({ ...scheduleData, recruiterId: e.target.value })}
+                                            className="w-full bg-[#111] border border-[#333] rounded-sm px-3 py-2 text-sm text-white focus:outline-none focus:border-accent-500"
+                                        >
+                                            <option value="">-- Choose Recruiter --</option>
+                                            {recruiters.map(r => (
+                                                <option key={r.id} value={r.id}>{r.name} ({r.user?.email})</option>
                                             ))}
                                         </select>
                                     </div>

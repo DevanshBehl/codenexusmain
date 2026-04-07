@@ -5,7 +5,8 @@ import { ApiResponse } from "../../utils/api-response.js";
 export const scheduleInterview = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = req.user?.id;
-        const interview = await interviewService.scheduleInterview(userId as string, req.body);
+        const role = req.user?.role;
+        const interview = await interviewService.scheduleInterview(userId as string, role as string, req.body);
         res.status(201).json(new ApiResponse(201, interview, "Interview scheduled successfully"));
     } catch (e) {
         next(e);
@@ -60,6 +61,38 @@ export const saveRecording = async (req: Request, res: Response, next: NextFunct
         const role = req.user?.role;
         const recording = await interviewService.saveRecording(userId as string, role as string, req.params.id as string, req.body);
         res.status(200).json(new ApiResponse(200, recording, "Recording saved successfully"));
+    } catch (e) {
+        next(e);
+    }
+}
+
+export const joinInterview = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.id;
+        const role = req.user?.role;
+        const result = await interviewService.joinInterview(userId as string, role as string, req.params.id as string);
+        res.status(200).json(new ApiResponse(200, result, "Interview joined successfully"));
+    } catch (e) {
+        next(e);
+    }
+}
+
+export const getStudents = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.id;
+        const role = req.user?.role;
+        const students = await interviewService.getStudentsForScheduling(userId as string, role as string);
+        res.status(200).json(new ApiResponse(200, students, "Students fetched successfully"));
+    } catch (e) {
+        next(e);
+    }
+}
+
+export const getCompanyRecruiters = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.id;
+        const recruiters = await interviewService.getCompanyRecruiters(userId as string);
+        res.status(200).json(new ApiResponse(200, recruiters, "Recruiters fetched successfully"));
     } catch (e) {
         next(e);
     }

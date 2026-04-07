@@ -2,6 +2,7 @@ import { z } from "zod";
 
 export const scheduleInterviewSchema = z.object({
     body: z.object({
+        recruiterId: z.string().optional(),
         studentId: z.string().uuid("Invalid student ID"),
         role: z.string().min(1, "Role is required"),
         scheduledDate: z.string().min(1, "Scheduled date is required"),

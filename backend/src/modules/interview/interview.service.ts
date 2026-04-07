@@ -2,19 +2,32 @@ import { prisma } from "../../lib/prisma.js";
 import { ApiError } from "../../utils/api-error.js";
 import { ScheduleInterviewInput, UpdateInterviewInput, SaveRecordingInput } from "./interview.schema.js";
 
-export const scheduleInterview = async (userId: string, data: ScheduleInterviewInput) => {
-    const recruiter = await prisma.recruiter.findUnique({
-        where: { userId }
-    });
-    if (!recruiter) {
-        throw new ApiError(403, "Only recruiters can schedule interviews");
+export const scheduleInterview = async (userId: string, role: string, data: ScheduleInterviewInput) => {
+    let recruiterId = "";
+
+    if (role === "COMPANY_ADMIN") {
+        if (!data.recruiterId) throw new ApiError(400, "Recruiter ID is required when scheduling as a company");
+        const company = await prisma.company.findUnique({ where: { userId } });
+        if (!company) throw new ApiError(403, "Company not found");
+
+        const recruiter = await prisma.recruiter.findUnique({ where: { id: data.recruiterId } });
+        if (!recruiter || recruiter.companyId !== company.id) {
+            throw new ApiError(403, "Recruiter not found or does not belong to your company");
+        }
+        recruiterId = recruiter.id;
+    } else if (role === "RECRUITER") {
+        const recruiter = await prisma.recruiter.findUnique({ where: { userId } });
+        if (!recruiter) throw new ApiError(403, "Only recruiters can schedule interviews");
+        recruiterId = recruiter.id;
+    } else {
+        throw new ApiError(403, "Not authorized to schedule interviews");
     }
 
     const scheduledAt = new Date(`${data.scheduledDate}T${data.scheduledTime}:00`);
 
     return await prisma.interview.create({
         data: {
-            recruiterId: recruiter.id,
+            recruiterId,
             studentId: data.studentId,
             role: data.role,
             scheduledAt,
@@ -146,4 +159,60 @@ export const saveRecording = async (userId: string, userRole: string, interviewI
             }
         });
     }
+}
+
+export const joinInterview = async (userId: string, userRole: string, id: string) => {
+    const interview = await prisma.interview.findUnique({
+        where: { id },
+        include: {
+            student: { select: { userId: true, name: true } },
+            recruiter: { select: { userId: true, name: true } },
+        }
+    });
+
+    if (!interview) throw new ApiError(404, "Interview not found");
+
+    if (userRole === "STUDENT" && interview.student.userId !== userId) {
+        throw new ApiError(403, "You are not authorized to join this interview");
+    }
+
+    if (userRole === "RECRUITER" && interview.recruiter.userId !== userId) {
+        throw new ApiError(403, "You are not authorized to join this interview");
+    }
+
+    return { success: true };
+}
+
+export const getStudentsForScheduling = async (userId: string, role: string) => {
+    if (role !== "COMPANY_ADMIN" && role !== "RECRUITER") {
+        throw new ApiError(403, "Not authorized to access students");
+    }
+
+    // For simplicity, returning all available students
+    return await prisma.student.findMany({
+        where: { status: "AVAILABLE" },
+        select: {
+            id: true,
+            name: true,
+            branch: true,
+            cgpa: true,
+            university: { select: { name: true } }
+        }
+    });
+}
+
+export const getCompanyRecruiters = async (userId: string) => {
+    const company = await prisma.company.findUnique({ where: { userId } });
+    if (!company) throw new ApiError(404, "Company not found");
+
+    return await prisma.recruiter.findMany({
+        where: { companyId: company.id },
+        select: {
+            id: true,
+            name: true,
+            user: {
+                select: { email: true }
+            }
+        }
+    });
 }

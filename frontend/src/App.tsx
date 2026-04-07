@@ -16,9 +16,12 @@ import Contest from './pages/student/Contest';
 import DesignArena from './pages/student/DesignArena';
 import UniversityDashboard from './pages/university/Dashboard';
 import CompanyDashboard from './pages/company/Dashboard';
+import CompanyInterview from './pages/company/CompanyInterview';
 import CreateContest from './pages/company/CreateContest';
 import RecruiterDashboard from './pages/recruiter/Dashboard';
 import RecruiterInterview from './pages/recruiter/RecruiterInterview';
+// @ts-ignore
+import InterviewRoom from './components/Interview/InterviewRoom';
 import CompanyEvaluation from './pages/company/Evaluation';
 import SchedulePPT from './pages/company/SchedulePPT';
 import WebinarRoom from './pages/shared/WebinarRoom';
@@ -87,6 +90,7 @@ function App() {
           <Route path="/student/interview" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentInterview /></ProtectedRoute>} />
           <Route path="/student/projects" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentProjects /></ProtectedRoute>} />
           <Route path="/student/profile" element={<ProtectedRoute allowedRoles={['STUDENT']}><StudentProfile /></ProtectedRoute>} />
+          <Route path="/student/interview/:id" element={<ProtectedRoute allowedRoles={['STUDENT']}><InterviewRoom role="student" /></ProtectedRoute>} />
           <Route path="/student/contest" element={<ProtectedRoute allowedRoles={['STUDENT']}><Contest /></ProtectedRoute>} />
           <Route path="/student/recording" element={<ProtectedRoute allowedRoles={['STUDENT']}><Recordings userRole="STUDENT" /></ProtectedRoute>} />
           <Route path="/student/webinars" element={<ProtectedRoute allowedRoles={['STUDENT']}><WebinarList userRole="STUDENT" /></ProtectedRoute>} />
@@ -107,11 +111,13 @@ function App() {
           <Route path="/company/recording" element={<ProtectedRoute allowedRoles={['COMPANY_ADMIN']}><Recordings userRole="COMPANY" /></ProtectedRoute>} />
           <Route path="/company/ppt" element={<ProtectedRoute allowedRoles={['COMPANY_ADMIN']}><SchedulePPT /></ProtectedRoute>} />
           <Route path="/company/webinar" element={<ProtectedRoute allowedRoles={['COMPANY_ADMIN']}><WebinarRoom userRole="COMPANY" /></ProtectedRoute>} />
+          <Route path="/company/interview" element={<ProtectedRoute allowedRoles={['COMPANY_ADMIN']}><CompanyInterview /></ProtectedRoute>} />
 
           {/* Recruiter Routes */}
           <Route path="/recruiter/dashboard" element={<ProtectedRoute allowedRoles={['RECRUITER']}><RecruiterDashboard /></ProtectedRoute>} />
           <Route path="/recruiter/mail/*" element={<ProtectedRoute allowedRoles={['RECRUITER']}><Mail /></ProtectedRoute>} />
           <Route path="/recruiter/interview" element={<ProtectedRoute allowedRoles={['RECRUITER']}><RecruiterInterview /></ProtectedRoute>} />
+          <Route path="/recruiter/interview/:id" element={<ProtectedRoute allowedRoles={['RECRUITER']}><InterviewRoom role="recruiter" /></ProtectedRoute>} />
           <Route path="/recruiter/recording" element={<ProtectedRoute allowedRoles={['RECRUITER']}><Recordings userRole="RECRUITER" /></ProtectedRoute>} />
         </Routes>
       </Router>

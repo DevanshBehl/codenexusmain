@@ -369,3 +369,40 @@ export const mailApi = {
     getUnreadCount: () => api.get<{ unread_count: number }>('/mail/unread-count'),
     searchRecipients: (q: string) => api.get<RecipientSearchResult[]>(`/mail/search-recipients?q=${encodeURIComponent(q)}`),
 };
+
+// ─── Interview APIs ───
+export interface InterviewItem {
+    id: string;
+    recruiterId: string;
+    studentId: string;
+    role: string;
+    scheduledAt: string;
+    type: 'TECHNICAL' | 'HR' | 'SYSTEM_DESIGN';
+    status: 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
+    createdAt: string;
+    updatedAt: string;
+    student: { id: string; name: string; branch: string; cgpa: number };
+    recruiter: { name: string; company: { name: string } };
+    recording?: any;
+}
+
+export interface ScheduleInterviewPayload {
+    studentId: string;
+    recruiterId?: string;
+    role: string;
+    scheduledDate: string;
+    scheduledTime: string;
+    type: 'TECHNICAL' | 'HR' | 'SYSTEM_DESIGN';
+}
+
+export const interviewApi = {
+    getAll: () => api.get<InterviewItem[]>('/interviews'),
+    getById: (id: string) => api.get<InterviewItem>(`/interviews/${id}`),
+    schedule: (data: ScheduleInterviewPayload) => api.post<InterviewItem>('/interviews', data),
+    update: (id: string, data: any) => api.patch<InterviewItem>(`/interviews/${id}`, data),
+    delete: (id: string) => api.del(`/interviews/${id}`),
+    join: (id: string) => api.get<{ success: boolean }>(`/interviews/${id}/join`),
+    saveRecording: (id: string, data: any) => api.post(`/interviews/${id}/recording`, data),
+    getStudents: () => api.get<any[]>('/interviews/students'),
+    getCompanyRecruiters: () => api.get<any[]>('/interviews/company-recruiters'),
+};

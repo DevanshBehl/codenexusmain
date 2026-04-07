@@ -8,16 +8,7 @@ import {
 } from 'lucide-react';
 import InterviewRoom from '../../components/Interview/InterviewRoom';
 
-interface Interview {
-    id: string;
-    title: string;
-    companyName: string;
-    date: string;
-    time: string;
-    duration: string;
-    agenda: string;
-    status: 'UPCOMING' | 'COMPLETED';
-}
+import { interviewApi, type InterviewItem } from '../../lib/api';
 
 export default function StudentInterview() {
     const navigate = useNavigate();
@@ -31,38 +22,22 @@ export default function StudentInterview() {
         return () => clearInterval(timer);
     }, []);
 
-    const mockInterviews: Interview[] = [
-        {
-            id: 'int-1',
-            title: 'Technical Round 1 - SDE',
-            companyName: 'Google',
-            date: '2026-04-12',
-            time: '10:00',
-            duration: '60 mins',
-            agenda: 'Data Structures and Algorithms focusing on Arrays, Strings, and Dynamic Programming.',
-            status: 'UPCOMING'
-        },
-        {
-            id: 'int-2',
-            title: 'System Design Interview (Demo)',
-            companyName: 'Microsoft',
-            date: new Date().toISOString().split('T')[0],
-            time: new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' }),
-            duration: '45 mins',
-            agenda: 'Design a distributed rate limiter and scalable chat application.',
-            status: 'UPCOMING'
-        },
-        {
-            id: 'int-3',
-            title: 'HR Round',
-            companyName: 'Stripe',
-            date: '2026-03-20',
-            time: '15:30',
-            duration: '30 mins',
-            agenda: 'Behavioral questions, engineering culture fit, and expected compensation.',
-            status: 'COMPLETED'
-        }
-    ];
+    const [interviews, setInterviews] = useState<InterviewItem[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchInterviews = async () => {
+            try {
+                const res = await interviewApi.getAll();
+                setInterviews(res.data);
+            } catch (err) {
+                window.alert('Failed to load interviews');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchInterviews();
+    }, []);
 
     const sidebarItems = [
         { icon: Mail, label: 'MAIL', onClick: () => navigate('/student/mail') },
@@ -84,9 +59,22 @@ export default function StudentInterview() {
         return diffMinutes <= 5;
     };
 
-    if (activeInterview) {
-        return <InterviewRoom role="student" />;
-    }
+    const formatDateTime = (dateString: string) => {
+        const date = new Date(dateString);
+        return {
+            dateStr: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric'}),
+            timeStr: date.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' })
+        };
+    };
+
+    const handleJoin = async (id: string) => {
+        try {
+            await interviewApi.join(id);
+            navigate(`/student/interview/${id}`);
+        } catch (err: any) {
+            window.alert(err.message || 'Cannot join this interview yet');
+        }
+    };
 
     return (
         <div className="h-screen w-full bg-[#050505] font-sans text-white flex overflow-hidden">
@@ -161,46 +149,51 @@ export default function StudentInterview() {
 
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-8">
                     <div className="max-w-5xl mx-auto space-y-6">
-                        {mockInterviews.length === 0 ? (
+                        {isLoading ? (
+                            <div className="flex justify-center p-8"><span className="text-[#888] font-mono text-xs animate-pulse">Loading interviews...</span></div>
+                        ) : interviews.length === 0 ? (
                             <div className="flex flex-col items-center justify-center p-12 bg-[#0A0A0A] border border-[#222] rounded-sm text-center">
                                 <Clock size={48} className="text-[#333] mb-4" />
                                 <h2 className="text-lg font-bold text-white mb-2 tracking-widest uppercase font-mono">No Interviews Scheduled</h2>
                                 <p className="text-[#888] text-sm font-mono">You do not have any upcoming interviews at the moment. Check back later.</p>
                             </div>
                         ) : (
-                            mockInterviews.map((interview) => {
-                                const isJoinable = canJoinInterview(interview.date, interview.time);
+                            interviews.map((interview) => {
+                                const { dateStr, timeStr } = formatDateTime(interview.scheduledAt);
+                                // For simplicity, all interviews created here with default 60m duration logic
+                                const isJoinable = canJoinInterview(interview.scheduledAt.split('T')[0], timeStr);
+                                const isUpcoming = interview.status === 'SCHEDULED';
                                 
                                 return (
                                     <div key={interview.id} className="bg-[#0A0A0A] border border-[#222] rounded-sm p-6 flex flex-col md:flex-row gap-6 hover:border-[#333] transition-colors shadow-lg">
                                         <div className="md:w-1/4 shrink-0 flex flex-col justify-center items-center p-4 bg-[#111] border border-[#222] rounded-sm relative overflow-hidden">
-                                            <div className={`absolute top-0 right-0 w-16 h-16 rotate-45 translate-x-8 -translate-y-8 ${interview.status === 'UPCOMING' ? 'bg-accent-500/5' : 'bg-[#222]/20'}`}></div>
-                                            <Calendar size={24} className={interview.status === 'UPCOMING' ? 'text-accent-400 mb-2' : 'text-[#555] mb-2'} />
-                                            <span className="text-sm font-bold text-white tracking-widest font-mono">{new Date(interview.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric'})}</span>
-                                            <span className="text-[10px] font-mono text-[#888] mt-1">{interview.time} ({interview.duration})</span>
+                                            <div className={`absolute top-0 right-0 w-16 h-16 rotate-45 translate-x-8 -translate-y-8 ${isUpcoming ? 'bg-accent-500/5' : 'bg-[#222]/20'}`}></div>
+                                            <Calendar size={24} className={isUpcoming ? 'text-accent-400 mb-2' : 'text-[#555] mb-2'} />
+                                            <span className="text-sm font-bold text-white tracking-widest font-mono">{dateStr}</span>
+                                            <span className="text-[10px] font-mono text-[#888] mt-1">{timeStr} (60 mins)</span>
                                         </div>
                                         
                                         <div className="flex-1 flex flex-col">
                                             <div className="flex justify-between items-start mb-2">
                                                 <div>
-                                                    <h3 className={`text-lg font-bold font-sans ${interview.status === 'UPCOMING' ? 'text-white' : 'text-[#888]'}`}>{interview.title}</h3>
+                                                    <h3 className={`text-lg font-bold font-sans ${isUpcoming ? 'text-white' : 'text-[#888]'}`}>{interview.role} - {interview.type}</h3>
                                                     <p className="text-[10px] font-mono text-accent-500 uppercase tracking-widest flex items-center gap-1 mt-1">
-                                                        <Building size={12} /> {interview.companyName}
+                                                        <Building size={12} /> {interview.recruiter.company.name}
                                                     </p>
                                                 </div>
-                                                <span className={`px-2 py-0.5 text-[9px] font-mono border rounded-sm tracking-widest uppercase ${interview.status === 'UPCOMING' ? 'text-green-400 border-green-500/20 bg-green-500/10' : 'text-[#555] border-[#333] bg-[#111]'}`}>
+                                                <span className={`px-2 py-0.5 text-[9px] font-mono border rounded-sm tracking-widest uppercase ${isUpcoming ? 'text-green-400 border-green-500/20 bg-green-500/10' : 'text-[#555] border-[#333] bg-[#111]'}`}>
                                                     {interview.status}
                                                 </span>
                                             </div>
                                             
                                             <p className="text-xs text-[#888] font-sans leading-relaxed mb-4 line-clamp-2">
-                                                {interview.agenda}
+                                                Technical interview for {interview.role} position at {interview.recruiter.company.name}.
                                             </p>
                                             
                                             <div className="flex items-center mt-auto">
-                                                {interview.status === 'UPCOMING' && (
+                                                {isUpcoming && (
                                                     <button 
-                                                        onClick={() => setActiveInterview(interview.id)}
+                                                        onClick={() => handleJoin(interview.id)}
                                                         disabled={!isJoinable}
                                                         className={`ml-auto text-[10px] font-mono font-bold flex items-center gap-2 px-4 py-2 rounded-sm outline-none transition-all ${
                                                             isJoinable
