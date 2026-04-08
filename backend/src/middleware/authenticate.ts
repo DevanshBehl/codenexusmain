@@ -1,12 +1,11 @@
 import { Request, Response, NextFunction, RequestHandler } from 'express';
 import jwt from 'jsonwebtoken';
-import { env } from '../config/env.js';
-import { ApiError } from '../utils/api-error.js';
-import { Role } from '../generated/prisma/enums.js';
+import { env } from "../config/env.js";
+import { ApiError } from "../utils/api-error.js";
 
 interface JwtPayload {
     id: string;
-    role: Role;
+    role: string;
     cnid?: string;
 }
 
@@ -24,7 +23,7 @@ export const authenticate: RequestHandler = (req, res, next) => {
 
         req.user = {
             id: decoded.id as string,
-            role: decoded.role as Role,
+            role: String(decoded.role),
             cnid: decoded.cnid as string,
         };
 

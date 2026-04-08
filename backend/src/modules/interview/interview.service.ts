@@ -1,6 +1,8 @@
 import { prisma } from "../../lib/prisma.js";
 import { ApiError } from "../../utils/api-error.js";
 import { ScheduleInterviewInput, UpdateInterviewInput, SaveRecordingInput } from "./interview.schema.js";
+import { getRecordingStatus, stopRecording } from "../../lib/recording.manager.js";
+import fs from "fs";
 
 export const scheduleInterview = async (userId: string, role: string, data: ScheduleInterviewInput) => {
     let recruiterId = "";
@@ -126,7 +128,7 @@ export const deleteInterview = async (userId: string, userRole: string, id: stri
 }
 
 export const saveRecording = async (userId: string, userRole: string, interviewId: string, data: SaveRecordingInput) => {
-    const interview = await prisma.interview.findUnique({ where: { id: interviewId }, include: { recruiter: true, recording: true } });
+    const interview = await prisma.interview.findUnique({ where: { id: interviewId }, include: { recruiter: true, recording: true, interviewRecording: true } });
     if (!interview) throw new ApiError(404, "Interview not found");
 
     if (userRole === "RECRUITER") {
@@ -136,27 +138,50 @@ export const saveRecording = async (userId: string, userRole: string, interviewI
         }
     }
 
+    // Stop recording if still active
+    await stopRecording(interviewId);
+
+    const serverRecording = await prisma.interviewRecording.findUnique({
+        where: { interview_id: interviewId },
+    });
+
+    const updateData: any = {
+        rating: data.rating ?? interview.recording?.rating ?? 0.0,
+        verdict: data.verdict ?? interview.recording?.verdict ?? "PENDING",
+        notes: data.notes ?? interview.recording?.notes,
+    };
+
+    if (data.videoUrl) {
+        updateData.videoUrl = data.videoUrl;
+    }
+
+    if (data.durationStr) {
+        updateData.durationStr = data.durationStr;
+    }
+
     if (interview.recording) {
         return await prisma.recording.update({
             where: { interviewId },
-            data: {
-                videoUrl: data.videoUrl,
-                durationStr: data.durationStr,
-                rating: data.rating ?? interview.recording.rating,
-                verdict: data.verdict ?? interview.recording.verdict,
-                notes: data.notes ?? interview.recording.notes
-            }
+            data: updateData,
         });
     } else {
+        const createData: any = {
+            interviewId,
+            rating: data.rating ?? 0.0,
+            verdict: data.verdict ?? "PENDING",
+            notes: data.notes || null,
+        };
+
+        if (data.videoUrl) {
+            createData.videoUrl = data.videoUrl;
+        }
+
+        if (data.durationStr) {
+            createData.durationStr = data.durationStr;
+        }
+
         return await prisma.recording.create({
-            data: {
-                interviewId,
-                videoUrl: data.videoUrl,
-                durationStr: data.durationStr,
-                rating: data.rating ?? 0.0,
-                verdict: data.verdict ?? "PENDING",
-                notes: data.notes || null
-            }
+            data: createData,
         });
     }
 }
@@ -216,3 +241,76 @@ export const getCompanyRecruiters = async (userId: string) => {
         }
     });
 }
+
+export const getServerRecordingStatus = async (userId: string, userRole: string, interviewId: string) => {
+    const interview = await prisma.interview.findUnique({
+        where: { id: interviewId },
+        include: {
+            recruiter: { include: { user: true } },
+            student: { include: { user: true } },
+        },
+    });
+
+    if (!interview) throw new ApiError(404, "Interview not found");
+
+    const isRecruiter = userRole === "RECRUITER" && interview.recruiter.userId === userId;
+    const isCompanyAdmin = userRole === "COMPANY_ADMIN";
+    const isStudent = userRole === "STUDENT" && interview.student.userId === userId;
+
+    if (!isRecruiter && !isCompanyAdmin && !isStudent) {
+        throw new ApiError(403, "Not authorized to access this recording");
+    }
+
+    if (isStudent) {
+        throw new ApiError(403, "Students cannot access server recordings");
+    }
+
+    const status = await getRecordingStatus(interviewId);
+
+    return {
+        status: status.status,
+        started_at: status.started_at,
+        completed_at: status.completed_at,
+        duration_seconds: status.duration_seconds,
+        file_size_bytes: status.file_size_bytes,
+    };
+};
+
+export const downloadServerRecording = async (userId: string, userRole: string, interviewId: string) => {
+    const interview = await prisma.interview.findUnique({
+        where: { id: interviewId },
+        include: {
+            recruiter: { include: { user: true } },
+            student: { include: { user: true } },
+        },
+    });
+
+    if (!interview) throw new ApiError(404, "Interview not found");
+
+    const isRecruiter = userRole === "RECRUITER" && interview.recruiter.userId === userId;
+    const isCompanyAdmin = userRole === "COMPANY_ADMIN";
+
+    if (!isRecruiter && !isCompanyAdmin) {
+        throw new ApiError(403, "Only recruiter or company admin can download recordings");
+    }
+
+    const recording = await prisma.interviewRecording.findUnique({
+        where: { interview_id: interviewId },
+    });
+
+    if (!recording) throw new ApiError(404, "Recording not found");
+    if (recording.status !== "completed") throw new ApiError(400, "Recording not ready for download");
+    if (!recording.file_path) throw new ApiError(404, "Recording file path not found");
+
+    if (!fs.existsSync(recording.file_path)) {
+        throw new ApiError(404, "Recording file not found on disk");
+    }
+
+    const fileName = `interview-${interviewId}-${new Date().toISOString().split('T')[0]}.mp4`;
+
+    return {
+        filePath: recording.file_path,
+        fileName,
+        fileSize: recording.file_size_bytes ? Number(recording.file_size_bytes) : undefined,
+    };
+};

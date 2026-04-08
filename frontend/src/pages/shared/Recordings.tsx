@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import {
     Terminal, Building2, Users, Mail, Presentation,
     Calendar, Video, Code2, Play, CheckCircle2, Briefcase,
-    PenTool, Box, Star, ChevronLeft, ChevronRight, Swords
+    PenTool, Box, Star, ChevronLeft, ChevronRight, Swords, Loader2
 } from 'lucide-react';
 import VideoPlayer from '../../components/VideoPlayer';
+import { interviewApi } from '../../lib/api';
 
 /* ────────── Types & Mock Data ────────── */
 export type UserRole = 'STUDENT' | 'UNIVERSITY' | 'COMPANY' | 'RECRUITER';
@@ -21,11 +22,22 @@ interface Recording {
     rating: number;
     type: string;
     verdict: string;
-    videoUrl?: string; // Optional actual video URL
+    videoUrl?: string;
 }
 
 interface RecordingsProps {
     userRole: UserRole;
+}
+
+interface InterviewItem {
+    id: string;
+    status: string;
+    role: string;
+    type: string;
+    scheduledAt: string;
+    student: { id: string; name: string; branch: string; cgpa: number };
+    recruiter: { name: string; company: { name: string } };
+    recording?: { status: string; file_size_bytes: number };
 }
 
 export default function Recordings({ userRole }: RecordingsProps) {
@@ -35,53 +47,46 @@ export default function Recordings({ userRole }: RecordingsProps) {
         isOpen: false,
         title: '',
     });
+    const [recordings, setRecordings] = useState<Recording[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const mockRecordings: Recording[] = [
-        {
-            id: 'r1',
-            student: 'Priya Patel',
-            university: 'IIT Bombay',
-            role: 'Software Engineer',
-            date: 'Mar 15, 2026',
-            duration: '45 min',
-            rating: 4.5,
-            type: 'TECHNICAL',
-            verdict: 'SELECTED',
-        },
-        {
-            id: 'r2',
-            student: 'Vikram Singh',
-            university: 'NIT Trichy',
-            role: 'Systems Engineer',
-            date: 'Mar 14, 2026',
-            duration: '52 min',
-            rating: 4.8,
-            type: 'SYSTEM DESIGN',
-            verdict: 'SELECTED',
-        },
-        {
-            id: 'r3',
-            student: 'Kavya Iyer',
-            university: 'IIT Bombay',
-            role: 'Backend Engineer',
-            date: 'Mar 13, 2026',
-            duration: '38 min',
-            rating: 3.5,
-            type: 'TECHNICAL',
-            verdict: 'PENDING',
-        },
-        {
-            id: 'r4',
-            student: 'Arjun Nair',
-            university: 'BITS Pilani',
-            role: 'Frontend Developer',
-            date: 'Mar 12, 2026',
-            duration: '40 min',
-            rating: 2.8,
-            type: 'HR',
-            verdict: 'REJECTED',
-        },
-    ];
+    useEffect(() => {
+        const fetchRecordings = async () => {
+            try {
+                setLoading(true);
+                const response = await interviewApi.getAll();
+                const interviews: InterviewItem[] = response.data;
+
+                const recordingsData: Recording[] = interviews
+                    .filter(interview => interview.recording && interview.recording.status === 'completed')
+                    .map(interview => ({
+                        id: interview.id,
+                        student: interview.student.name,
+                        university: interview.student.branch || 'Unknown',
+                        role: interview.role,
+                        date: new Date(interview.scheduledAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                        duration: interview.recording?.file_size_bytes 
+                            ? `${Math.round(interview.recording.file_size_bytes / 1024 / 1024)} MB` 
+                            : 'N/A',
+                        rating: 0,
+                        type: interview.type,
+                        verdict: interview.status === 'COMPLETED' ? 'PENDING' : interview.status,
+                        videoUrl: interviewApi.getRecordingStreamUrl(interview.id),
+                    }));
+
+                setRecordings(recordingsData);
+                setError(null);
+            } catch (err) {
+                console.error('Failed to fetch recordings:', err);
+                setError('Failed to load recordings');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchRecordings();
+    }, []);
 
     /* ────────── Sidebars ────────── */
     const studentSidebarItems = [
@@ -219,50 +224,67 @@ export default function Recordings({ userRole }: RecordingsProps) {
 
                 <div className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8">
                     <div className="max-w-5xl mx-auto space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {mockRecordings.map((rec) => (
-                                <div key={rec.id} className="bg-[#0A0A0A] border border-[#222] rounded-sm p-5 hover:border-[#333] transition-colors shadow-lg flex flex-col relative overflow-hidden group">
-                                    <div className="absolute top-0 right-0 p-4 opacity-5 font-mono text-8xl font-black pointer-events-none select-none -mt-4 -mr-4 text-accent-500">
-                                        <Video size={100} />
-                                    </div>
-                                    <div className="flex justify-between items-start mb-4 relative z-10">
-                                        <div>
-                                            <h3 className="text-lg font-bold font-sans text-white group-hover:text-accent-400 transition-colors">{rec.student}</h3>
-                                            <p className="text-[10px] font-mono text-[#aaa] uppercase tracking-widest">{rec.role}</p>
+                        {loading && (
+                            <div className="flex items-center justify-center py-20">
+                                <Loader2 size={40} className="text-accent-500 animate-spin" />
+                            </div>
+                        )}
+                        {error && (
+                            <div className="text-center py-20 text-red-400 font-mono">
+                                {error}
+                            </div>
+                        )}
+                        {!loading && !error && recordings.length === 0 && (
+                            <div className="text-center py-20 text-[#666] font-mono">
+                                No recordings found
+                            </div>
+                        )}
+                        {!loading && !error && recordings.length > 0 && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {recordings.map((rec) => (
+                                    <div key={rec.id} className="bg-[#0A0A0A] border border-[#222] rounded-sm p-5 hover:border-[#333] transition-colors shadow-lg flex flex-col relative overflow-hidden group">
+                                        <div className="absolute top-0 right-0 p-4 opacity-5 font-mono text-8xl font-black pointer-events-none select-none -mt-4 -mr-4 text-accent-500">
+                                            <Video size={100} />
                                         </div>
-                                        <span className={`px-2 py-0.5 text-[9px] font-mono border rounded-sm tracking-widest uppercase ${getVerdictStyle(rec.verdict)}`}>
-                                            {rec.verdict}
-                                        </span>
-                                    </div>
+                                        <div className="flex justify-between items-start mb-4 relative z-10">
+                                            <div>
+                                                <h3 className="text-lg font-bold font-sans text-white group-hover:text-accent-400 transition-colors">{rec.student}</h3>
+                                                <p className="text-[10px] font-mono text-[#aaa] uppercase tracking-widest">{rec.role}</p>
+                                            </div>
+                                            <span className={`px-2 py-0.5 text-[9px] font-mono border rounded-sm tracking-widest uppercase ${getVerdictStyle(rec.verdict)}`}>
+                                                {rec.verdict}
+                                            </span>
+                                        </div>
 
-                                    <div className="space-y-2 mb-6 relative z-10">
-                                        <div className="flex items-center gap-2 text-[10px] font-mono text-[#666]">
-                                            <Building2 size={12} className="text-[#888]" /> {rec.university}
+                                        <div className="space-y-2 mb-6 relative z-10">
+                                            <div className="flex items-center gap-2 text-[10px] font-mono text-[#666]">
+                                                <Building2 size={12} className="text-[#888]" /> {rec.university}
+                                            </div>
+                                            <div className="flex items-center gap-2 text-[10px] font-mono text-[#666]">
+                                                <Calendar size={12} className="text-[#888]" /> {rec.date} ({rec.duration})
+                                            </div>
+                                            <div className="flex items-center gap-2 text-[10px] font-mono text-[#666]">
+                                                <Code2 size={12} className="text-[#888]" /> {rec.type}
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-2 text-[10px] font-mono text-[#666]">
-                                            <Calendar size={12} className="text-[#888]" /> {rec.date} ({rec.duration})
-                                        </div>
-                                        <div className="flex items-center gap-2 text-[10px] font-mono text-[#666]">
-                                            <Code2 size={12} className="text-[#888]" /> {rec.type}
-                                        </div>
-                                    </div>
 
-                                    <div className="mt-auto flex items-center justify-between border-t border-[#222] pt-4 relative z-10">
-                                        <div className="flex items-center gap-1">
-                                            {[...Array(5)].map((_, si) => (
-                                                <Star key={si} size={10} className={si < Math.floor(rec.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-[#333]'} />
-                                            ))}
+                                        <div className="mt-auto flex items-center justify-between border-t border-[#222] pt-4 relative z-10">
+                                            <div className="flex items-center gap-1">
+                                                {[...Array(5)].map((_, si) => (
+                                                    <Star key={si} size={10} className={si < Math.floor(rec.rating) ? 'text-yellow-400 fill-yellow-400' : 'text-[#333]'} />
+                                                ))}
+                                            </div>
+                                            <button
+                                                onClick={() => setSelectedVideo({ isOpen: true, url: rec.videoUrl, title: `Recording: ${rec.student} - ${rec.role}` })}
+                                                className="ml-auto text-[10px] font-mono font-bold flex items-center gap-2 px-3 py-1.5 rounded-sm outline-none transition-all bg-accent-500 text-black hover:bg-accent-400 shadow-[0_0_15px_rgba(var(--accent-500),0.3)]"
+                                            >
+                                                <Play size={12} className="fill-black" /> Watch Video
+                                            </button>
                                         </div>
-                                        <button
-                                            onClick={() => setSelectedVideo({ isOpen: true, title: `Recording: ${rec.student} - ${rec.role}` })}
-                                            className="ml-auto text-[10px] font-mono font-bold flex items-center gap-2 px-3 py-1.5 rounded-sm outline-none transition-all bg-accent-500 text-black hover:bg-accent-400 shadow-[0_0_15px_rgba(var(--accent-500),0.3)]"
-                                        >
-                                            <Play size={12} className="fill-black" /> Watch Video
-                                        </button>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             </main>

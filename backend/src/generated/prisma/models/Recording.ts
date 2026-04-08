@@ -200,8 +200,8 @@ export type RecordingGroupByArgs<ExtArgs extends runtime.Types.Extensions.Intern
 export type RecordingGroupByOutputType = {
   id: string
   interviewId: string
-  videoUrl: string
-  durationStr: string
+  videoUrl: string | null
+  durationStr: string | null
   rating: number
   verdict: string
   notes: string | null
@@ -234,8 +234,8 @@ export type RecordingWhereInput = {
   NOT?: Prisma.RecordingWhereInput | Prisma.RecordingWhereInput[]
   id?: Prisma.StringFilter<"Recording"> | string
   interviewId?: Prisma.StringFilter<"Recording"> | string
-  videoUrl?: Prisma.StringFilter<"Recording"> | string
-  durationStr?: Prisma.StringFilter<"Recording"> | string
+  videoUrl?: Prisma.StringNullableFilter<"Recording"> | string | null
+  durationStr?: Prisma.StringNullableFilter<"Recording"> | string | null
   rating?: Prisma.FloatFilter<"Recording"> | number
   verdict?: Prisma.StringFilter<"Recording"> | string
   notes?: Prisma.StringNullableFilter<"Recording"> | string | null
@@ -246,8 +246,8 @@ export type RecordingWhereInput = {
 export type RecordingOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   interviewId?: Prisma.SortOrder
-  videoUrl?: Prisma.SortOrder
-  durationStr?: Prisma.SortOrder
+  videoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  durationStr?: Prisma.SortOrderInput | Prisma.SortOrder
   rating?: Prisma.SortOrder
   verdict?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -261,8 +261,8 @@ export type RecordingWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.RecordingWhereInput | Prisma.RecordingWhereInput[]
   OR?: Prisma.RecordingWhereInput[]
   NOT?: Prisma.RecordingWhereInput | Prisma.RecordingWhereInput[]
-  videoUrl?: Prisma.StringFilter<"Recording"> | string
-  durationStr?: Prisma.StringFilter<"Recording"> | string
+  videoUrl?: Prisma.StringNullableFilter<"Recording"> | string | null
+  durationStr?: Prisma.StringNullableFilter<"Recording"> | string | null
   rating?: Prisma.FloatFilter<"Recording"> | number
   verdict?: Prisma.StringFilter<"Recording"> | string
   notes?: Prisma.StringNullableFilter<"Recording"> | string | null
@@ -273,8 +273,8 @@ export type RecordingWhereUniqueInput = Prisma.AtLeast<{
 export type RecordingOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   interviewId?: Prisma.SortOrder
-  videoUrl?: Prisma.SortOrder
-  durationStr?: Prisma.SortOrder
+  videoUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  durationStr?: Prisma.SortOrderInput | Prisma.SortOrder
   rating?: Prisma.SortOrder
   verdict?: Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -292,8 +292,8 @@ export type RecordingScalarWhereWithAggregatesInput = {
   NOT?: Prisma.RecordingScalarWhereWithAggregatesInput | Prisma.RecordingScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Recording"> | string
   interviewId?: Prisma.StringWithAggregatesFilter<"Recording"> | string
-  videoUrl?: Prisma.StringWithAggregatesFilter<"Recording"> | string
-  durationStr?: Prisma.StringWithAggregatesFilter<"Recording"> | string
+  videoUrl?: Prisma.StringNullableWithAggregatesFilter<"Recording"> | string | null
+  durationStr?: Prisma.StringNullableWithAggregatesFilter<"Recording"> | string | null
   rating?: Prisma.FloatWithAggregatesFilter<"Recording"> | number
   verdict?: Prisma.StringWithAggregatesFilter<"Recording"> | string
   notes?: Prisma.StringNullableWithAggregatesFilter<"Recording"> | string | null
@@ -302,8 +302,8 @@ export type RecordingScalarWhereWithAggregatesInput = {
 
 export type RecordingCreateInput = {
   id?: string
-  videoUrl: string
-  durationStr: string
+  videoUrl?: string | null
+  durationStr?: string | null
   rating?: number
   verdict?: string
   notes?: string | null
@@ -314,8 +314,8 @@ export type RecordingCreateInput = {
 export type RecordingUncheckedCreateInput = {
   id?: string
   interviewId: string
-  videoUrl: string
-  durationStr: string
+  videoUrl?: string | null
+  durationStr?: string | null
   rating?: number
   verdict?: string
   notes?: string | null
@@ -324,8 +324,8 @@ export type RecordingUncheckedCreateInput = {
 
 export type RecordingUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  videoUrl?: Prisma.StringFieldUpdateOperationsInput | string
-  durationStr?: Prisma.StringFieldUpdateOperationsInput | string
+  videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  durationStr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rating?: Prisma.FloatFieldUpdateOperationsInput | number
   verdict?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -336,8 +336,8 @@ export type RecordingUpdateInput = {
 export type RecordingUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   interviewId?: Prisma.StringFieldUpdateOperationsInput | string
-  videoUrl?: Prisma.StringFieldUpdateOperationsInput | string
-  durationStr?: Prisma.StringFieldUpdateOperationsInput | string
+  videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  durationStr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rating?: Prisma.FloatFieldUpdateOperationsInput | number
   verdict?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -347,8 +347,8 @@ export type RecordingUncheckedUpdateInput = {
 export type RecordingCreateManyInput = {
   id?: string
   interviewId: string
-  videoUrl: string
-  durationStr: string
+  videoUrl?: string | null
+  durationStr?: string | null
   rating?: number
   verdict?: string
   notes?: string | null
@@ -357,8 +357,8 @@ export type RecordingCreateManyInput = {
 
 export type RecordingUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  videoUrl?: Prisma.StringFieldUpdateOperationsInput | string
-  durationStr?: Prisma.StringFieldUpdateOperationsInput | string
+  videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  durationStr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rating?: Prisma.FloatFieldUpdateOperationsInput | number
   verdict?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -368,8 +368,8 @@ export type RecordingUpdateManyMutationInput = {
 export type RecordingUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   interviewId?: Prisma.StringFieldUpdateOperationsInput | string
-  videoUrl?: Prisma.StringFieldUpdateOperationsInput | string
-  durationStr?: Prisma.StringFieldUpdateOperationsInput | string
+  videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  durationStr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rating?: Prisma.FloatFieldUpdateOperationsInput | number
   verdict?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -456,8 +456,8 @@ export type RecordingUncheckedUpdateOneWithoutInterviewNestedInput = {
 
 export type RecordingCreateWithoutInterviewInput = {
   id?: string
-  videoUrl: string
-  durationStr: string
+  videoUrl?: string | null
+  durationStr?: string | null
   rating?: number
   verdict?: string
   notes?: string | null
@@ -466,8 +466,8 @@ export type RecordingCreateWithoutInterviewInput = {
 
 export type RecordingUncheckedCreateWithoutInterviewInput = {
   id?: string
-  videoUrl: string
-  durationStr: string
+  videoUrl?: string | null
+  durationStr?: string | null
   rating?: number
   verdict?: string
   notes?: string | null
@@ -492,8 +492,8 @@ export type RecordingUpdateToOneWithWhereWithoutInterviewInput = {
 
 export type RecordingUpdateWithoutInterviewInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  videoUrl?: Prisma.StringFieldUpdateOperationsInput | string
-  durationStr?: Prisma.StringFieldUpdateOperationsInput | string
+  videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  durationStr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rating?: Prisma.FloatFieldUpdateOperationsInput | number
   verdict?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -502,8 +502,8 @@ export type RecordingUpdateWithoutInterviewInput = {
 
 export type RecordingUncheckedUpdateWithoutInterviewInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  videoUrl?: Prisma.StringFieldUpdateOperationsInput | string
-  durationStr?: Prisma.StringFieldUpdateOperationsInput | string
+  videoUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  durationStr?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rating?: Prisma.FloatFieldUpdateOperationsInput | number
   verdict?: Prisma.StringFieldUpdateOperationsInput | string
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -578,8 +578,8 @@ export type $RecordingPayload<ExtArgs extends runtime.Types.Extensions.InternalA
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     interviewId: string
-    videoUrl: string
-    durationStr: string
+    videoUrl: string | null
+    durationStr: string | null
     rating: number
     verdict: string
     notes: string | null

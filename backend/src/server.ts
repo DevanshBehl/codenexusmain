@@ -17,8 +17,8 @@ const startServer = async () => {
         // Attach Socket.IO
         createSocketServer(httpServer);
         
-        httpServer.listen(env.PORT, () => {
-            console.log(`Server Running on port ${env.PORT}`);
+        httpServer.listen(Number(env.PORT), '0.0.0.0', () => {
+            console.log(`Server Running on 0.0.0.0:${env.PORT}`);
         });
     } catch (e) {
         console.log("failed to start server", e);

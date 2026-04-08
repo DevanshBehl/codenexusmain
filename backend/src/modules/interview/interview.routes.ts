@@ -54,4 +54,15 @@ router.post("/:id/recording",
     interviewController.saveRecording as RequestHandler
 );
 
+// Server-side recording endpoints (RECRUITER and COMPANY_ADMIN only)
+router.get("/:id/recording",
+    authorize(["RECRUITER", "COMPANY_ADMIN"]) as RequestHandler,
+    interviewController.getServerRecording as RequestHandler
+);
+
+router.get("/:id/recording/download",
+    authorize(["RECRUITER", "COMPANY_ADMIN"]) as RequestHandler,
+    interviewController.downloadServerRecording as RequestHandler
+);
+
 export default router;

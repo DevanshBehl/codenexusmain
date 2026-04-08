@@ -405,4 +405,6 @@ export const interviewApi = {
     saveRecording: (id: string, data: any) => api.post(`/interviews/${id}/recording`, data),
     getStudents: () => api.get<any[]>('/interviews/students'),
     getCompanyRecruiters: () => api.get<any[]>('/interviews/company-recruiters'),
+    getRecordingStatus: (id: string) => api.get<{ status: string; started_at: string; completed_at: string; duration_seconds: number; file_size_bytes: number }>(`/interviews/${id}/recording`),
+    getRecordingStreamUrl: (id: string) => `${import.meta.env.VITE_API_URL}/interviews/${id}/recording/download?download=false`,
 };

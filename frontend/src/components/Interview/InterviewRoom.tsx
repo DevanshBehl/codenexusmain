@@ -177,10 +177,21 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
             }
         });
 
+        // Recording events from server
+        socket.on('recording-started', () => {
+            setIsRecording(true);
+        });
+
+        socket.on('recording-stopped', () => {
+            setIsRecording(false);
+        });
+
         return () => {
             socket.off('chat-message');
             socket.off('push-question');
             socket.off('mode-change');
+            socket.off('recording-started');
+            socket.off('recording-stopped');
         };
     }, [socket, id, isInLobby]);
 
@@ -556,7 +567,15 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
                                 </button>
                             )}
                             <button
-                                onClick={() => setIsRecording(!isRecording)}
+                                onClick={() => {
+                                    if (socket && id) {
+                                        if (isRecording) {
+                                            socket.emit("stop-recording", { interviewId: id });
+                                        } else {
+                                            socket.emit("start-recording", { interviewId: id });
+                                        }
+                                    }
+                                }}
                                 className={`p-2.5 rounded-xl transition-all border ${isRecording ? 'bg-red-500/20 text-red-500 border-red-500/30' : 'text-[#888] hover:text-white hover:bg-[#222] border-transparent'}`}
                                 title={isRecording ? 'Stop Recording' : 'Start Recording'}
                             >

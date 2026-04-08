@@ -25,8 +25,8 @@ export const updateInterviewSchema = z.object({
 
 export const saveRecordingSchema = z.object({
     body: z.object({
-        videoUrl: z.string().url("Must be a valid URL"),
-        durationStr: z.string().min(1, "Duration string is required"),
+        videoUrl: z.string().url("Must be a valid URL").optional(),
+        durationStr: z.string().optional(),
         rating: z.number().min(0).max(5).optional(),
         verdict: z.enum(["SELECTED", "REJECTED", "PENDING"]).optional(),
         notes: z.string().optional()

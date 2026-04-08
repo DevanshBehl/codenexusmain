@@ -227,28 +227,44 @@ model Interview {
   id          String   @id @default(uuid())
   recruiterId String
   studentId   String
-  role        String // e.g., "SDE I"
+  role        String
   scheduledAt DateTime
-  type        String // TECHNICAL, HR, SYSTEM_DESIGN
-  status      String   @default("SCHEDULED") // SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED
+  type        String
+  status      String   @default("SCHEDULED")
 
-  recruiter Recruiter @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
-  student   Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
-
-  recording Recording?
+  recruiter           Recruiter          @relation(fields: [recruiterId], references: [id], onDelete: Cascade)
+  student             Student            @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  recording           Recording?
+  interviewRecording  InterviewRecording?
 }
 
 model Recording {
-  id          String   @id @default(uuid())
-  interviewId String   @unique
-  videoUrl    String
-  durationStr String
-  rating      Float    @default(0.0)
-  verdict     String   @default("PENDING") // SELECTED, REJECTED, PENDING
-  notes       String?  @db.Text
-  createdAt   DateTime @default(now())
+  id                 String   @id @default(uuid())
+  interviewId        String   @unique
+  videoUrl           String?
+  durationStr        String?
+  rating             Float    @default(0.0)
+  verdict            String   @default("PENDING")
+  notes              String?  @db.Text
+  createdAt          DateTime @default(now())
 
   interview Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+}
+
+model InterviewRecording {
+  id               String    @id @default(uuid())
+  interview_id     String    @unique
+  status           String    @default("recording")
+  file_path        String?
+  file_size_bytes  BigInt?
+  duration_seconds Int?
+  started_at       DateTime  @default(now())
+  completed_at     DateTime?
+  error_message    String?
+
+  interview Interview @relation(fields: [interview_id], references: [id], onDelete: Cascade)
+
+  @@index([interview_id])
 }
 
 // ==========================================

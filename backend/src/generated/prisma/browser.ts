@@ -88,6 +88,11 @@ export type Interview = Prisma.InterviewModel
  */
 export type Recording = Prisma.RecordingModel
 /**
+ * Model InterviewRecording
+ * 
+ */
+export type InterviewRecording = Prisma.InterviewRecordingModel
+/**
  * Model Webinar
  * 
  */

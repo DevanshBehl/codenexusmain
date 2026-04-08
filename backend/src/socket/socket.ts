@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import { env } from "../config/env.js";
 import { prisma } from "../lib/prisma.js";
 import { createRoomRouter, createWebRtcTransport, transports, producers, consumers, routers } from "../lib/mediasoup.js";
+import { startRecording, addProducerToRecording, stopRecording, removeProducerFromRecording, activeSessions } from "../lib/recording.manager.js";
 
 interface AuthenticatedSocket extends Socket {
     userId?: string;
@@ -200,6 +201,15 @@ export function createSocketServer(httpServer: HttpServer): Server {
                 const roomId = `interview-${data.interviewId}`;
                 socket.to(roomId).emit("new-producer", { producerId: producer.id, userId: socket.userId });
 
+                // RECORDING HOOK — tap new producer into recording pipeline
+                const recordingSession = activeSessions.get(data.interviewId);
+                if (recordingSession) {
+                    const router = routers.get(roomId);
+                    if (router) {
+                        await addProducerToRecording(data.interviewId, producer, router);
+                    }
+                }
+
                 callback({ id: producer.id });
             } catch (err: any) {
                 callback({ error: err.message });
@@ -232,6 +242,11 @@ export function createSocketServer(httpServer: HttpServer): Server {
                 consumer.on("producerclose", () => {
                    consumers.delete(consumer.id);
                    socket.emit("consumer-closed", { consumerId: consumer.id });
+
+                   // RECORDING HOOK — remove track from recording when producer closes
+                   removeProducerFromRecording(data.interviewId, data.producerId).catch(err => {
+                       console.error("[Socket] Error removing producer from recording:", err);
+                   });
                 });
 
                 callback({
@@ -328,8 +343,68 @@ export function createSocketServer(httpServer: HttpServer): Server {
                     endedBy: socket.userName,
                     role: socket.userRole,
                 });
+
+                // RECORDING HOOK — stop recording when interview officially ends
+                await stopRecording(data.interviewId);
             } catch (err) {
                 console.error("[Socket] end-interview error:", err);
+            }
+        });
+
+        // ─── Recording Controls (Recruiter only) ───
+        socket.on("start-recording", async (data: { interviewId: string }, callback) => {
+            try {
+                if (socket.userRole !== "RECRUITER") {
+                    callback?.({ error: "Only recruiter can start recording" });
+                    return;
+                }
+
+                if (activeSessions.has(data.interviewId)) {
+                    callback?.({ error: "Recording already in progress" });
+                    return;
+                }
+
+                const interview = await prisma.interview.findUnique({
+                    where: { id: data.interviewId },
+                });
+
+                if (!interview) {
+                    callback?.({ error: "Interview not found" });
+                    return;
+                }
+
+                const roomId = `interview-${data.interviewId}`;
+                const router = await createRoomRouter(data.interviewId);
+                await startRecording(data.interviewId, router);
+
+                io.to(roomId).emit("recording-started", { interviewId: data.interviewId });
+                callback?.({ success: true });
+            } catch (err: any) {
+                console.error("[Socket] start-recording error:", err);
+                callback?.({ error: err.message });
+            }
+        });
+
+        socket.on("stop-recording", async (data: { interviewId: string }, callback) => {
+            try {
+                if (socket.userRole !== "RECRUITER") {
+                    callback?.({ error: "Only recruiter can stop recording" });
+                    return;
+                }
+
+                const session = activeSessions.get(data.interviewId);
+                if (!session) {
+                    callback?.({ error: "No active recording" });
+                    return;
+                }
+
+                const roomId = `interview-${data.interviewId}`;
+                await stopRecording(data.interviewId);
+                io.to(roomId).emit("recording-stopped", { interviewId: data.interviewId });
+                callback?.({ success: true });
+            } catch (err: any) {
+                console.error("[Socket] stop-recording error:", err);
+                callback?.({ error: err.message });
             }
         });
 

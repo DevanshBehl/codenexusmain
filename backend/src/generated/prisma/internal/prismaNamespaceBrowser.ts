@@ -65,6 +65,7 @@ export const ModelName = {
   JobApplication: 'JobApplication',
   Interview: 'Interview',
   Recording: 'Recording',
+  InterviewRecording: 'InterviewRecording',
   Webinar: 'Webinar',
   WebinarTargetUniversity: 'WebinarTargetUniversity',
   Mail: 'Mail',
@@ -278,6 +279,21 @@ export const RecordingScalarFieldEnum = {
 } as const
 
 export type RecordingScalarFieldEnum = (typeof RecordingScalarFieldEnum)[keyof typeof RecordingScalarFieldEnum]
+
+
+export const InterviewRecordingScalarFieldEnum = {
+  id: 'id',
+  interview_id: 'interview_id',
+  status: 'status',
+  file_path: 'file_path',
+  file_size_bytes: 'file_size_bytes',
+  duration_seconds: 'duration_seconds',
+  started_at: 'started_at',
+  completed_at: 'completed_at',
+  error_message: 'error_message'
+} as const
+
+export type InterviewRecordingScalarFieldEnum = (typeof InterviewRecordingScalarFieldEnum)[keyof typeof InterviewRecordingScalarFieldEnum]
 
 
 export const WebinarScalarFieldEnum = {

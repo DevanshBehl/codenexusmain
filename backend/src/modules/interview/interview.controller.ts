@@ -97,3 +97,37 @@ export const getCompanyRecruiters = async (req: Request, res: Response, next: Ne
         next(e);
     }
 }
+
+export const getServerRecording = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.id;
+        const role = req.user?.role;
+        const status = await interviewService.getServerRecordingStatus(userId as string, role as string, req.params.id as string);
+        res.status(200).json(new ApiResponse(200, status, "Recording status fetched"));
+    } catch (e) {
+        next(e);
+    }
+}
+
+export const downloadServerRecording = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.id;
+        const role = req.user?.role;
+        const download = req.query.download !== 'false';
+        const result = await interviewService.downloadServerRecording(userId as string, role as string, req.params.id as string);
+
+        res.setHeader('Content-Type', 'video/mp4');
+        res.setHeader('Content-Disposition', download ? `attachment; filename="${result.fileName}"` : `inline; filename="${result.fileName}"`);
+        if (result.fileSize) {
+            res.setHeader('Content-Length', result.fileSize);
+        }
+
+        res.download(result.filePath, result.fileName, (err) => {
+            if (err && !res.headersSent) {
+                next(err);
+            }
+        });
+    } catch (e) {
+        next(e);
+    }
+}
