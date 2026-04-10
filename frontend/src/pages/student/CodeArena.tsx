@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { problemApi } from '../../lib/api';
+import { codeArenaApi } from '../../lib/api';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -24,27 +24,27 @@ import AskAI from '../../components/CodeArena/AskAI';
 const CodeArena = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [activeTopic, setActiveTopic] = useState('All');
-    const [problems, setProblems] = useState<{id: string; title: string; difficulty: string; points: number; topic: string; status: string;}[]>([]);
+    const [problems, setProblems] = useState<{id: string; title: string; difficulty: string; tags: string[]; acceptance_rate: number; is_solved: boolean;}[]>([]);
+    const [profileStats, setProfileStats] = useState<any>(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const fetchProblems = async () => {
+        const fetchData = async () => {
             try {
-                const res = await problemApi.getAll({ limit: 200 });
-                const data = res.data as any;
-                const list = (data.problems || data || []) as any[];
-                setProblems(list.map((p: any) => ({
-                    id: p.id,
-                    title: p.title,
-                    difficulty: p.difficulty === 'EASY' ? 'Easy' : p.difficulty === 'MEDIUM' ? 'Medium' : 'Hard',
-                    points: p.points || 100,
-                    topic: p.topic || 'General',
-                    status: 'Unsolved',
-                })));
+                const [problemsRes, profileRes] = await Promise.all([
+                    codeArenaApi.getProblems(),
+                    codeArenaApi.getProfileStats()
+                ]);
+                const data = problemsRes.data as any[];
+                setProblems(data);
+                setProfileStats(profileRes.data);
             } catch (err) {
-                console.error('Failed to fetch problems:', err);
+                console.error('Failed to fetch data:', err);
+            } finally {
+                setLoading(false);
             }
         };
-        fetchProblems();
+        fetchData();
     }, []);
 
     const sidebarItems = [
@@ -62,9 +62,10 @@ const CodeArena = () => {
         'All', 'Arrays', 'Strings', 'Linked Lists', 'Trees', 'Graphs', 'Dynamic Programming', 'Backtracking', 'Math'
     ];
 
-    const filteredProblems = activeTopic === 'All'
-        ? problems
-        : problems.filter(p => p.topic === activeTopic);
+    const filteredProblems = problems.filter((prob) => {
+        if (activeTopic !== 'All' && !(prob.tags || []).includes(activeTopic)) return false;
+        return true;
+    });
 
     const getDifficultyColor = (diff: string) => {
         switch (diff) {
@@ -75,10 +76,11 @@ const CodeArena = () => {
         }
     };
 
-    const getStatusIcon = (status: string) => {
-        if (status === 'Solved') return <CheckCircle2 size={14} className="text-green-500" />;
-        if (status === 'Attempted') return <div className="w-3.5 h-3.5 rounded-full border border-yellow-500 flex items-center justify-center"><div className="w-1.5 h-1.5 bg-yellow-500 rounded-full"></div></div>;
-        return <div className="w-3.5 h-3.5 rounded-full border border-[#444]"></div>;
+    const getStatusIcon = (is_solved: boolean) => {
+        if (is_solved) {
+            return <CheckCircle2 size={16} className="text-accent-500" />;
+        }
+        return <div className="w-4 h-4" />;
     };
 
     return (
@@ -206,16 +208,12 @@ const CodeArena = () => {
 
                             <div className="bg-[#111] border border-[#333] p-4 rounded-sm flex gap-4 items-center">
                                 <div className="text-center px-4 border-r border-[#333]">
-                                    <div className="text-xl font-bold text-white mb-1">24</div>
+                                    <div className="text-xl font-bold text-white mb-1">{profileStats?.solvedCount || 0}</div>
                                     <div className="text-[9px] font-mono text-[#666] uppercase tracking-widest">Solved</div>
                                 </div>
-                                <div className="text-center px-4 border-r border-[#333]">
-                                    <div className="text-xl font-bold text-accent-400 mb-1">10</div>
-                                    <div className="text-[9px] font-mono text-[#666] uppercase tracking-widest">Attempted</div>
-                                </div>
                                 <div className="text-center px-4">
-                                    <div className="text-xl font-bold text-white mb-1">#4289</div>
-                                    <div className="text-[9px] font-mono text-[#666] uppercase tracking-widest">Rank</div>
+                                    <div className="text-xl font-bold text-white mb-1">{profileStats?.tier || 'Unranked'}</div>
+                                    <div className="text-[9px] font-mono text-[#666] uppercase tracking-widest">Tier</div>
                                 </div>
                             </div>
                         </div>
@@ -239,7 +237,7 @@ const CodeArena = () => {
                                                 : 'bg-[#0A0A0A] border-[#333] text-[#888] hover:border-[#555] hover:text-white'
                                         }`}
                                     >
-                                        {topic} {activeTopic === topic && <span className="ml-1 text-[#555]">({problems.filter(p => topic === 'All' || p.topic === topic).length})</span>}
+                                        {topic} {activeTopic === topic && <span className="ml-1 text-[#555]">({problems.filter(p => topic === 'All' || (p.tags || []).includes(topic)).length})</span>}
                                     </button>
                                 ))}
                             </div>
@@ -281,8 +279,8 @@ const CodeArena = () => {
                                         <tr className="border-b border-[#222] bg-[#111]">
                                             <th className="py-3 px-4 font-mono text-[10px] uppercase tracking-widest text-[#666] font-normal w-12 text-center">Status</th>
                                             <th className="py-3 px-4 font-mono text-[10px] uppercase tracking-widest text-[#666] font-normal">Title</th>
-                                            <th className="py-3 px-4 font-mono text-[10px] uppercase tracking-widest text-[#666] font-normal w-32">Topic</th>
-                                            <th className="py-3 px-4 font-mono text-[10px] uppercase tracking-widest text-[#666] font-normal w-24">Points</th>
+                                            <th className="py-3 px-4 font-mono text-[10px] uppercase tracking-widest text-[#666] font-normal w-32">Tags</th>
+                                            <th className="py-3 px-4 font-mono text-[10px] uppercase tracking-widest text-[#666] font-normal w-24">Acceptance Rate</th>
                                             <th className="py-3 px-4 font-mono text-[10px] uppercase tracking-widest text-[#666] font-normal w-28">Difficulty</th>
                                         </tr>
                                     </thead>
@@ -291,7 +289,7 @@ const CodeArena = () => {
                                             <tr key={problem.id} className="border-b border-[#222] hover:bg-[#111] group transition-colors cursor-pointer">
                                                 <td className="py-4 px-4 text-center">
                                                     <div className="flex justify-center">
-                                                        {getStatusIcon(problem.status)}
+                                                        {getStatusIcon(problem.is_solved)}
                                                     </div>
                                                 </td>
                                                 <td className="py-4 px-4">
@@ -300,15 +298,20 @@ const CodeArena = () => {
                                                     </Link>
                                                 </td>
                                                 <td className="py-4 px-4">
-                                                    <span className="text-[9px] font-mono uppercase tracking-widest text-[#888]">
-                                                        {problem.topic}
-                                                    </span>
+                                                    <div className="flex gap-2 text-xs flex-wrap">
+                                                        {(problem.tags || []).slice(0, 2).map((t, idx) => (
+                                                            <span key={idx} className="text-[9px] font-mono uppercase tracking-widest text-[#888] bg-[#1a1a1a] px-2 py-0.5 rounded-sm border border-[#333]">
+                                                                {t}
+                                                            </span>
+                                                        ))}
+                                                        {(problem.tags || []).length > 2 && <span className="text-[9px] font-mono uppercase tracking-widest text-[#555]">+{problem.tags.length - 2}</span>}
+                                                    </div>
                                                 </td>
                                                 <td className="py-4 px-4 font-mono text-xs text-[#aaa]">
-                                                    {problem.points} pts
+                                                    {problem.acceptance_rate}%
                                                 </td>
                                                 <td className="py-4 px-4">
-                                                    <span className={`text-[9px] font-mono uppercase tracking-widest px-2 py-0.5 border rounded-sm ${getDifficultyColor(problem.difficulty)}`}>
+                                                    <span className={`text-[9px] font-mono uppercase tracking-widest px-2 py-0.5 border rounded-sm border-transparent ${getDifficultyColor(problem.difficulty)}`}>
                                                         {problem.difficulty}
                                                     </span>
                                                 </td>

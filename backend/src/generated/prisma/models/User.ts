@@ -204,6 +204,9 @@ export type UserWhereInput = {
   recruiterProfile?: Prisma.XOR<Prisma.RecruiterNullableScalarRelationFilter, Prisma.RecruiterWhereInput> | null
   sentMails?: Prisma.MailListRelationFilter
   receivedMails?: Prisma.MailListRelationFilter
+  caSubmissions?: Prisma.CaSubmissionListRelationFilter
+  caRunResults?: Prisma.CaRunResultListRelationFilter
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -220,6 +223,9 @@ export type UserOrderByWithRelationInput = {
   recruiterProfile?: Prisma.RecruiterOrderByWithRelationInput
   sentMails?: Prisma.MailOrderByRelationAggregateInput
   receivedMails?: Prisma.MailOrderByRelationAggregateInput
+  caSubmissions?: Prisma.CaSubmissionOrderByRelationAggregateInput
+  caRunResults?: Prisma.CaRunResultOrderByRelationAggregateInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -239,6 +245,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   recruiterProfile?: Prisma.XOR<Prisma.RecruiterNullableScalarRelationFilter, Prisma.RecruiterWhereInput> | null
   sentMails?: Prisma.MailListRelationFilter
   receivedMails?: Prisma.MailListRelationFilter
+  caSubmissions?: Prisma.CaSubmissionListRelationFilter
+  caRunResults?: Prisma.CaRunResultListRelationFilter
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryListRelationFilter
 }, "id" | "email" | "cnid">
 
 export type UserOrderByWithAggregationInput = {
@@ -281,6 +290,9 @@ export type UserCreateInput = {
   recruiterProfile?: Prisma.RecruiterCreateNestedOneWithoutUserInput
   sentMails?: Prisma.MailCreateNestedManyWithoutSenderInput
   receivedMails?: Prisma.MailCreateNestedManyWithoutRecipientInput
+  caSubmissions?: Prisma.CaSubmissionCreateNestedManyWithoutStudentInput
+  caRunResults?: Prisma.CaRunResultCreateNestedManyWithoutStudentInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -297,6 +309,9 @@ export type UserUncheckedCreateInput = {
   recruiterProfile?: Prisma.RecruiterUncheckedCreateNestedOneWithoutUserInput
   sentMails?: Prisma.MailUncheckedCreateNestedManyWithoutSenderInput
   receivedMails?: Prisma.MailUncheckedCreateNestedManyWithoutRecipientInput
+  caSubmissions?: Prisma.CaSubmissionUncheckedCreateNestedManyWithoutStudentInput
+  caRunResults?: Prisma.CaRunResultUncheckedCreateNestedManyWithoutStudentInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserUpdateInput = {
@@ -313,6 +328,9 @@ export type UserUpdateInput = {
   recruiterProfile?: Prisma.RecruiterUpdateOneWithoutUserNestedInput
   sentMails?: Prisma.MailUpdateManyWithoutSenderNestedInput
   receivedMails?: Prisma.MailUpdateManyWithoutRecipientNestedInput
+  caSubmissions?: Prisma.CaSubmissionUpdateManyWithoutStudentNestedInput
+  caRunResults?: Prisma.CaRunResultUpdateManyWithoutStudentNestedInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -329,6 +347,9 @@ export type UserUncheckedUpdateInput = {
   recruiterProfile?: Prisma.RecruiterUncheckedUpdateOneWithoutUserNestedInput
   sentMails?: Prisma.MailUncheckedUpdateManyWithoutSenderNestedInput
   receivedMails?: Prisma.MailUncheckedUpdateManyWithoutRecipientNestedInput
+  caSubmissions?: Prisma.CaSubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  caRunResults?: Prisma.CaRunResultUncheckedUpdateManyWithoutStudentNestedInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -505,6 +526,52 @@ export type UserUpdateOneWithoutReceivedMailsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutReceivedMailsInput, Prisma.UserUpdateWithoutReceivedMailsInput>, Prisma.UserUncheckedUpdateWithoutReceivedMailsInput>
 }
 
+export type UserCreateNestedOneWithoutCaSubmissionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCaSubmissionsInput, Prisma.UserUncheckedCreateWithoutCaSubmissionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCaSubmissionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutCaSubmissionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCaSubmissionsInput, Prisma.UserUncheckedCreateWithoutCaSubmissionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCaSubmissionsInput
+  upsert?: Prisma.UserUpsertWithoutCaSubmissionsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCaSubmissionsInput, Prisma.UserUpdateWithoutCaSubmissionsInput>, Prisma.UserUncheckedUpdateWithoutCaSubmissionsInput>
+}
+
+export type UserCreateNestedOneWithoutCaRunResultsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCaRunResultsInput, Prisma.UserUncheckedCreateWithoutCaRunResultsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCaRunResultsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneWithoutCaRunResultsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCaRunResultsInput, Prisma.UserUncheckedCreateWithoutCaRunResultsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCaRunResultsInput
+  upsert?: Prisma.UserUpsertWithoutCaRunResultsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCaRunResultsInput, Prisma.UserUpdateWithoutCaRunResultsInput>, Prisma.UserUncheckedUpdateWithoutCaRunResultsInput>
+}
+
+export type UserCreateNestedOneWithoutCaSubmissionSummariesInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCaSubmissionSummariesInput, Prisma.UserUncheckedCreateWithoutCaSubmissionSummariesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCaSubmissionSummariesInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutCaSubmissionSummariesNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutCaSubmissionSummariesInput, Prisma.UserUncheckedCreateWithoutCaSubmissionSummariesInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutCaSubmissionSummariesInput
+  upsert?: Prisma.UserUpsertWithoutCaSubmissionSummariesInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutCaSubmissionSummariesInput, Prisma.UserUpdateWithoutCaSubmissionSummariesInput>, Prisma.UserUncheckedUpdateWithoutCaSubmissionSummariesInput>
+}
+
 export type UserCreateWithoutUniversityProfileInput = {
   id?: string
   email: string
@@ -518,6 +585,9 @@ export type UserCreateWithoutUniversityProfileInput = {
   recruiterProfile?: Prisma.RecruiterCreateNestedOneWithoutUserInput
   sentMails?: Prisma.MailCreateNestedManyWithoutSenderInput
   receivedMails?: Prisma.MailCreateNestedManyWithoutRecipientInput
+  caSubmissions?: Prisma.CaSubmissionCreateNestedManyWithoutStudentInput
+  caRunResults?: Prisma.CaRunResultCreateNestedManyWithoutStudentInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateWithoutUniversityProfileInput = {
@@ -533,6 +603,9 @@ export type UserUncheckedCreateWithoutUniversityProfileInput = {
   recruiterProfile?: Prisma.RecruiterUncheckedCreateNestedOneWithoutUserInput
   sentMails?: Prisma.MailUncheckedCreateNestedManyWithoutSenderInput
   receivedMails?: Prisma.MailUncheckedCreateNestedManyWithoutRecipientInput
+  caSubmissions?: Prisma.CaSubmissionUncheckedCreateNestedManyWithoutStudentInput
+  caRunResults?: Prisma.CaRunResultUncheckedCreateNestedManyWithoutStudentInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserCreateOrConnectWithoutUniversityProfileInput = {
@@ -564,6 +637,9 @@ export type UserUpdateWithoutUniversityProfileInput = {
   recruiterProfile?: Prisma.RecruiterUpdateOneWithoutUserNestedInput
   sentMails?: Prisma.MailUpdateManyWithoutSenderNestedInput
   receivedMails?: Prisma.MailUpdateManyWithoutRecipientNestedInput
+  caSubmissions?: Prisma.CaSubmissionUpdateManyWithoutStudentNestedInput
+  caRunResults?: Prisma.CaRunResultUpdateManyWithoutStudentNestedInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutUniversityProfileInput = {
@@ -579,6 +655,9 @@ export type UserUncheckedUpdateWithoutUniversityProfileInput = {
   recruiterProfile?: Prisma.RecruiterUncheckedUpdateOneWithoutUserNestedInput
   sentMails?: Prisma.MailUncheckedUpdateManyWithoutSenderNestedInput
   receivedMails?: Prisma.MailUncheckedUpdateManyWithoutRecipientNestedInput
+  caSubmissions?: Prisma.CaSubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  caRunResults?: Prisma.CaRunResultUncheckedUpdateManyWithoutStudentNestedInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 export type UserCreateWithoutCompanyProfileInput = {
@@ -594,6 +673,9 @@ export type UserCreateWithoutCompanyProfileInput = {
   recruiterProfile?: Prisma.RecruiterCreateNestedOneWithoutUserInput
   sentMails?: Prisma.MailCreateNestedManyWithoutSenderInput
   receivedMails?: Prisma.MailCreateNestedManyWithoutRecipientInput
+  caSubmissions?: Prisma.CaSubmissionCreateNestedManyWithoutStudentInput
+  caRunResults?: Prisma.CaRunResultCreateNestedManyWithoutStudentInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateWithoutCompanyProfileInput = {
@@ -609,6 +691,9 @@ export type UserUncheckedCreateWithoutCompanyProfileInput = {
   recruiterProfile?: Prisma.RecruiterUncheckedCreateNestedOneWithoutUserInput
   sentMails?: Prisma.MailUncheckedCreateNestedManyWithoutSenderInput
   receivedMails?: Prisma.MailUncheckedCreateNestedManyWithoutRecipientInput
+  caSubmissions?: Prisma.CaSubmissionUncheckedCreateNestedManyWithoutStudentInput
+  caRunResults?: Prisma.CaRunResultUncheckedCreateNestedManyWithoutStudentInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserCreateOrConnectWithoutCompanyProfileInput = {
@@ -640,6 +725,9 @@ export type UserUpdateWithoutCompanyProfileInput = {
   recruiterProfile?: Prisma.RecruiterUpdateOneWithoutUserNestedInput
   sentMails?: Prisma.MailUpdateManyWithoutSenderNestedInput
   receivedMails?: Prisma.MailUpdateManyWithoutRecipientNestedInput
+  caSubmissions?: Prisma.CaSubmissionUpdateManyWithoutStudentNestedInput
+  caRunResults?: Prisma.CaRunResultUpdateManyWithoutStudentNestedInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutCompanyProfileInput = {
@@ -655,6 +743,9 @@ export type UserUncheckedUpdateWithoutCompanyProfileInput = {
   recruiterProfile?: Prisma.RecruiterUncheckedUpdateOneWithoutUserNestedInput
   sentMails?: Prisma.MailUncheckedUpdateManyWithoutSenderNestedInput
   receivedMails?: Prisma.MailUncheckedUpdateManyWithoutRecipientNestedInput
+  caSubmissions?: Prisma.CaSubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  caRunResults?: Prisma.CaRunResultUncheckedUpdateManyWithoutStudentNestedInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 export type UserCreateWithoutRecruiterProfileInput = {
@@ -670,6 +761,9 @@ export type UserCreateWithoutRecruiterProfileInput = {
   companyProfile?: Prisma.CompanyCreateNestedOneWithoutUserInput
   sentMails?: Prisma.MailCreateNestedManyWithoutSenderInput
   receivedMails?: Prisma.MailCreateNestedManyWithoutRecipientInput
+  caSubmissions?: Prisma.CaSubmissionCreateNestedManyWithoutStudentInput
+  caRunResults?: Prisma.CaRunResultCreateNestedManyWithoutStudentInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateWithoutRecruiterProfileInput = {
@@ -685,6 +779,9 @@ export type UserUncheckedCreateWithoutRecruiterProfileInput = {
   companyProfile?: Prisma.CompanyUncheckedCreateNestedOneWithoutUserInput
   sentMails?: Prisma.MailUncheckedCreateNestedManyWithoutSenderInput
   receivedMails?: Prisma.MailUncheckedCreateNestedManyWithoutRecipientInput
+  caSubmissions?: Prisma.CaSubmissionUncheckedCreateNestedManyWithoutStudentInput
+  caRunResults?: Prisma.CaRunResultUncheckedCreateNestedManyWithoutStudentInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserCreateOrConnectWithoutRecruiterProfileInput = {
@@ -716,6 +813,9 @@ export type UserUpdateWithoutRecruiterProfileInput = {
   companyProfile?: Prisma.CompanyUpdateOneWithoutUserNestedInput
   sentMails?: Prisma.MailUpdateManyWithoutSenderNestedInput
   receivedMails?: Prisma.MailUpdateManyWithoutRecipientNestedInput
+  caSubmissions?: Prisma.CaSubmissionUpdateManyWithoutStudentNestedInput
+  caRunResults?: Prisma.CaRunResultUpdateManyWithoutStudentNestedInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutRecruiterProfileInput = {
@@ -731,6 +831,9 @@ export type UserUncheckedUpdateWithoutRecruiterProfileInput = {
   companyProfile?: Prisma.CompanyUncheckedUpdateOneWithoutUserNestedInput
   sentMails?: Prisma.MailUncheckedUpdateManyWithoutSenderNestedInput
   receivedMails?: Prisma.MailUncheckedUpdateManyWithoutRecipientNestedInput
+  caSubmissions?: Prisma.CaSubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  caRunResults?: Prisma.CaRunResultUncheckedUpdateManyWithoutStudentNestedInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 export type UserCreateWithoutStudentProfileInput = {
@@ -746,6 +849,9 @@ export type UserCreateWithoutStudentProfileInput = {
   recruiterProfile?: Prisma.RecruiterCreateNestedOneWithoutUserInput
   sentMails?: Prisma.MailCreateNestedManyWithoutSenderInput
   receivedMails?: Prisma.MailCreateNestedManyWithoutRecipientInput
+  caSubmissions?: Prisma.CaSubmissionCreateNestedManyWithoutStudentInput
+  caRunResults?: Prisma.CaRunResultCreateNestedManyWithoutStudentInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateWithoutStudentProfileInput = {
@@ -761,6 +867,9 @@ export type UserUncheckedCreateWithoutStudentProfileInput = {
   recruiterProfile?: Prisma.RecruiterUncheckedCreateNestedOneWithoutUserInput
   sentMails?: Prisma.MailUncheckedCreateNestedManyWithoutSenderInput
   receivedMails?: Prisma.MailUncheckedCreateNestedManyWithoutRecipientInput
+  caSubmissions?: Prisma.CaSubmissionUncheckedCreateNestedManyWithoutStudentInput
+  caRunResults?: Prisma.CaRunResultUncheckedCreateNestedManyWithoutStudentInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserCreateOrConnectWithoutStudentProfileInput = {
@@ -792,6 +901,9 @@ export type UserUpdateWithoutStudentProfileInput = {
   recruiterProfile?: Prisma.RecruiterUpdateOneWithoutUserNestedInput
   sentMails?: Prisma.MailUpdateManyWithoutSenderNestedInput
   receivedMails?: Prisma.MailUpdateManyWithoutRecipientNestedInput
+  caSubmissions?: Prisma.CaSubmissionUpdateManyWithoutStudentNestedInput
+  caRunResults?: Prisma.CaRunResultUpdateManyWithoutStudentNestedInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutStudentProfileInput = {
@@ -807,6 +919,9 @@ export type UserUncheckedUpdateWithoutStudentProfileInput = {
   recruiterProfile?: Prisma.RecruiterUncheckedUpdateOneWithoutUserNestedInput
   sentMails?: Prisma.MailUncheckedUpdateManyWithoutSenderNestedInput
   receivedMails?: Prisma.MailUncheckedUpdateManyWithoutRecipientNestedInput
+  caSubmissions?: Prisma.CaSubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  caRunResults?: Prisma.CaRunResultUncheckedUpdateManyWithoutStudentNestedInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 export type UserCreateWithoutSentMailsInput = {
@@ -822,6 +937,9 @@ export type UserCreateWithoutSentMailsInput = {
   companyProfile?: Prisma.CompanyCreateNestedOneWithoutUserInput
   recruiterProfile?: Prisma.RecruiterCreateNestedOneWithoutUserInput
   receivedMails?: Prisma.MailCreateNestedManyWithoutRecipientInput
+  caSubmissions?: Prisma.CaSubmissionCreateNestedManyWithoutStudentInput
+  caRunResults?: Prisma.CaRunResultCreateNestedManyWithoutStudentInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateWithoutSentMailsInput = {
@@ -837,6 +955,9 @@ export type UserUncheckedCreateWithoutSentMailsInput = {
   companyProfile?: Prisma.CompanyUncheckedCreateNestedOneWithoutUserInput
   recruiterProfile?: Prisma.RecruiterUncheckedCreateNestedOneWithoutUserInput
   receivedMails?: Prisma.MailUncheckedCreateNestedManyWithoutRecipientInput
+  caSubmissions?: Prisma.CaSubmissionUncheckedCreateNestedManyWithoutStudentInput
+  caRunResults?: Prisma.CaRunResultUncheckedCreateNestedManyWithoutStudentInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserCreateOrConnectWithoutSentMailsInput = {
@@ -857,6 +978,9 @@ export type UserCreateWithoutReceivedMailsInput = {
   companyProfile?: Prisma.CompanyCreateNestedOneWithoutUserInput
   recruiterProfile?: Prisma.RecruiterCreateNestedOneWithoutUserInput
   sentMails?: Prisma.MailCreateNestedManyWithoutSenderInput
+  caSubmissions?: Prisma.CaSubmissionCreateNestedManyWithoutStudentInput
+  caRunResults?: Prisma.CaRunResultCreateNestedManyWithoutStudentInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryCreateNestedManyWithoutStudentInput
 }
 
 export type UserUncheckedCreateWithoutReceivedMailsInput = {
@@ -872,6 +996,9 @@ export type UserUncheckedCreateWithoutReceivedMailsInput = {
   companyProfile?: Prisma.CompanyUncheckedCreateNestedOneWithoutUserInput
   recruiterProfile?: Prisma.RecruiterUncheckedCreateNestedOneWithoutUserInput
   sentMails?: Prisma.MailUncheckedCreateNestedManyWithoutSenderInput
+  caSubmissions?: Prisma.CaSubmissionUncheckedCreateNestedManyWithoutStudentInput
+  caRunResults?: Prisma.CaRunResultUncheckedCreateNestedManyWithoutStudentInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUncheckedCreateNestedManyWithoutStudentInput
 }
 
 export type UserCreateOrConnectWithoutReceivedMailsInput = {
@@ -903,6 +1030,9 @@ export type UserUpdateWithoutSentMailsInput = {
   companyProfile?: Prisma.CompanyUpdateOneWithoutUserNestedInput
   recruiterProfile?: Prisma.RecruiterUpdateOneWithoutUserNestedInput
   receivedMails?: Prisma.MailUpdateManyWithoutRecipientNestedInput
+  caSubmissions?: Prisma.CaSubmissionUpdateManyWithoutStudentNestedInput
+  caRunResults?: Prisma.CaRunResultUpdateManyWithoutStudentNestedInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSentMailsInput = {
@@ -918,6 +1048,9 @@ export type UserUncheckedUpdateWithoutSentMailsInput = {
   companyProfile?: Prisma.CompanyUncheckedUpdateOneWithoutUserNestedInput
   recruiterProfile?: Prisma.RecruiterUncheckedUpdateOneWithoutUserNestedInput
   receivedMails?: Prisma.MailUncheckedUpdateManyWithoutRecipientNestedInput
+  caSubmissions?: Prisma.CaSubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  caRunResults?: Prisma.CaRunResultUncheckedUpdateManyWithoutStudentNestedInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUpsertWithoutReceivedMailsInput = {
@@ -944,6 +1077,9 @@ export type UserUpdateWithoutReceivedMailsInput = {
   companyProfile?: Prisma.CompanyUpdateOneWithoutUserNestedInput
   recruiterProfile?: Prisma.RecruiterUpdateOneWithoutUserNestedInput
   sentMails?: Prisma.MailUpdateManyWithoutSenderNestedInput
+  caSubmissions?: Prisma.CaSubmissionUpdateManyWithoutStudentNestedInput
+  caRunResults?: Prisma.CaRunResultUpdateManyWithoutStudentNestedInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUpdateManyWithoutStudentNestedInput
 }
 
 export type UserUncheckedUpdateWithoutReceivedMailsInput = {
@@ -959,6 +1095,273 @@ export type UserUncheckedUpdateWithoutReceivedMailsInput = {
   companyProfile?: Prisma.CompanyUncheckedUpdateOneWithoutUserNestedInput
   recruiterProfile?: Prisma.RecruiterUncheckedUpdateOneWithoutUserNestedInput
   sentMails?: Prisma.MailUncheckedUpdateManyWithoutSenderNestedInput
+  caSubmissions?: Prisma.CaSubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  caRunResults?: Prisma.CaRunResultUncheckedUpdateManyWithoutStudentNestedInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUncheckedUpdateManyWithoutStudentNestedInput
+}
+
+export type UserCreateWithoutCaSubmissionsInput = {
+  id?: string
+  email: string
+  password: string
+  role: $Enums.Role
+  cnid?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  studentProfile?: Prisma.StudentCreateNestedOneWithoutUserInput
+  universityProfile?: Prisma.UniversityCreateNestedOneWithoutUserInput
+  companyProfile?: Prisma.CompanyCreateNestedOneWithoutUserInput
+  recruiterProfile?: Prisma.RecruiterCreateNestedOneWithoutUserInput
+  sentMails?: Prisma.MailCreateNestedManyWithoutSenderInput
+  receivedMails?: Prisma.MailCreateNestedManyWithoutRecipientInput
+  caRunResults?: Prisma.CaRunResultCreateNestedManyWithoutStudentInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryCreateNestedManyWithoutStudentInput
+}
+
+export type UserUncheckedCreateWithoutCaSubmissionsInput = {
+  id?: string
+  email: string
+  password: string
+  role: $Enums.Role
+  cnid?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  studentProfile?: Prisma.StudentUncheckedCreateNestedOneWithoutUserInput
+  universityProfile?: Prisma.UniversityUncheckedCreateNestedOneWithoutUserInput
+  companyProfile?: Prisma.CompanyUncheckedCreateNestedOneWithoutUserInput
+  recruiterProfile?: Prisma.RecruiterUncheckedCreateNestedOneWithoutUserInput
+  sentMails?: Prisma.MailUncheckedCreateNestedManyWithoutSenderInput
+  receivedMails?: Prisma.MailUncheckedCreateNestedManyWithoutRecipientInput
+  caRunResults?: Prisma.CaRunResultUncheckedCreateNestedManyWithoutStudentInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUncheckedCreateNestedManyWithoutStudentInput
+}
+
+export type UserCreateOrConnectWithoutCaSubmissionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCaSubmissionsInput, Prisma.UserUncheckedCreateWithoutCaSubmissionsInput>
+}
+
+export type UserUpsertWithoutCaSubmissionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCaSubmissionsInput, Prisma.UserUncheckedUpdateWithoutCaSubmissionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCaSubmissionsInput, Prisma.UserUncheckedCreateWithoutCaSubmissionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCaSubmissionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCaSubmissionsInput, Prisma.UserUncheckedUpdateWithoutCaSubmissionsInput>
+}
+
+export type UserUpdateWithoutCaSubmissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  cnid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  studentProfile?: Prisma.StudentUpdateOneWithoutUserNestedInput
+  universityProfile?: Prisma.UniversityUpdateOneWithoutUserNestedInput
+  companyProfile?: Prisma.CompanyUpdateOneWithoutUserNestedInput
+  recruiterProfile?: Prisma.RecruiterUpdateOneWithoutUserNestedInput
+  sentMails?: Prisma.MailUpdateManyWithoutSenderNestedInput
+  receivedMails?: Prisma.MailUpdateManyWithoutRecipientNestedInput
+  caRunResults?: Prisma.CaRunResultUpdateManyWithoutStudentNestedInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUpdateManyWithoutStudentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCaSubmissionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  cnid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  studentProfile?: Prisma.StudentUncheckedUpdateOneWithoutUserNestedInput
+  universityProfile?: Prisma.UniversityUncheckedUpdateOneWithoutUserNestedInput
+  companyProfile?: Prisma.CompanyUncheckedUpdateOneWithoutUserNestedInput
+  recruiterProfile?: Prisma.RecruiterUncheckedUpdateOneWithoutUserNestedInput
+  sentMails?: Prisma.MailUncheckedUpdateManyWithoutSenderNestedInput
+  receivedMails?: Prisma.MailUncheckedUpdateManyWithoutRecipientNestedInput
+  caRunResults?: Prisma.CaRunResultUncheckedUpdateManyWithoutStudentNestedInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUncheckedUpdateManyWithoutStudentNestedInput
+}
+
+export type UserCreateWithoutCaRunResultsInput = {
+  id?: string
+  email: string
+  password: string
+  role: $Enums.Role
+  cnid?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  studentProfile?: Prisma.StudentCreateNestedOneWithoutUserInput
+  universityProfile?: Prisma.UniversityCreateNestedOneWithoutUserInput
+  companyProfile?: Prisma.CompanyCreateNestedOneWithoutUserInput
+  recruiterProfile?: Prisma.RecruiterCreateNestedOneWithoutUserInput
+  sentMails?: Prisma.MailCreateNestedManyWithoutSenderInput
+  receivedMails?: Prisma.MailCreateNestedManyWithoutRecipientInput
+  caSubmissions?: Prisma.CaSubmissionCreateNestedManyWithoutStudentInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryCreateNestedManyWithoutStudentInput
+}
+
+export type UserUncheckedCreateWithoutCaRunResultsInput = {
+  id?: string
+  email: string
+  password: string
+  role: $Enums.Role
+  cnid?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  studentProfile?: Prisma.StudentUncheckedCreateNestedOneWithoutUserInput
+  universityProfile?: Prisma.UniversityUncheckedCreateNestedOneWithoutUserInput
+  companyProfile?: Prisma.CompanyUncheckedCreateNestedOneWithoutUserInput
+  recruiterProfile?: Prisma.RecruiterUncheckedCreateNestedOneWithoutUserInput
+  sentMails?: Prisma.MailUncheckedCreateNestedManyWithoutSenderInput
+  receivedMails?: Prisma.MailUncheckedCreateNestedManyWithoutRecipientInput
+  caSubmissions?: Prisma.CaSubmissionUncheckedCreateNestedManyWithoutStudentInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUncheckedCreateNestedManyWithoutStudentInput
+}
+
+export type UserCreateOrConnectWithoutCaRunResultsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCaRunResultsInput, Prisma.UserUncheckedCreateWithoutCaRunResultsInput>
+}
+
+export type UserUpsertWithoutCaRunResultsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCaRunResultsInput, Prisma.UserUncheckedUpdateWithoutCaRunResultsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCaRunResultsInput, Prisma.UserUncheckedCreateWithoutCaRunResultsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCaRunResultsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCaRunResultsInput, Prisma.UserUncheckedUpdateWithoutCaRunResultsInput>
+}
+
+export type UserUpdateWithoutCaRunResultsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  cnid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  studentProfile?: Prisma.StudentUpdateOneWithoutUserNestedInput
+  universityProfile?: Prisma.UniversityUpdateOneWithoutUserNestedInput
+  companyProfile?: Prisma.CompanyUpdateOneWithoutUserNestedInput
+  recruiterProfile?: Prisma.RecruiterUpdateOneWithoutUserNestedInput
+  sentMails?: Prisma.MailUpdateManyWithoutSenderNestedInput
+  receivedMails?: Prisma.MailUpdateManyWithoutRecipientNestedInput
+  caSubmissions?: Prisma.CaSubmissionUpdateManyWithoutStudentNestedInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUpdateManyWithoutStudentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCaRunResultsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  cnid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  studentProfile?: Prisma.StudentUncheckedUpdateOneWithoutUserNestedInput
+  universityProfile?: Prisma.UniversityUncheckedUpdateOneWithoutUserNestedInput
+  companyProfile?: Prisma.CompanyUncheckedUpdateOneWithoutUserNestedInput
+  recruiterProfile?: Prisma.RecruiterUncheckedUpdateOneWithoutUserNestedInput
+  sentMails?: Prisma.MailUncheckedUpdateManyWithoutSenderNestedInput
+  receivedMails?: Prisma.MailUncheckedUpdateManyWithoutRecipientNestedInput
+  caSubmissions?: Prisma.CaSubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  caSubmissionSummaries?: Prisma.CaSubmissionSummaryUncheckedUpdateManyWithoutStudentNestedInput
+}
+
+export type UserCreateWithoutCaSubmissionSummariesInput = {
+  id?: string
+  email: string
+  password: string
+  role: $Enums.Role
+  cnid?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  studentProfile?: Prisma.StudentCreateNestedOneWithoutUserInput
+  universityProfile?: Prisma.UniversityCreateNestedOneWithoutUserInput
+  companyProfile?: Prisma.CompanyCreateNestedOneWithoutUserInput
+  recruiterProfile?: Prisma.RecruiterCreateNestedOneWithoutUserInput
+  sentMails?: Prisma.MailCreateNestedManyWithoutSenderInput
+  receivedMails?: Prisma.MailCreateNestedManyWithoutRecipientInput
+  caSubmissions?: Prisma.CaSubmissionCreateNestedManyWithoutStudentInput
+  caRunResults?: Prisma.CaRunResultCreateNestedManyWithoutStudentInput
+}
+
+export type UserUncheckedCreateWithoutCaSubmissionSummariesInput = {
+  id?: string
+  email: string
+  password: string
+  role: $Enums.Role
+  cnid?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  studentProfile?: Prisma.StudentUncheckedCreateNestedOneWithoutUserInput
+  universityProfile?: Prisma.UniversityUncheckedCreateNestedOneWithoutUserInput
+  companyProfile?: Prisma.CompanyUncheckedCreateNestedOneWithoutUserInput
+  recruiterProfile?: Prisma.RecruiterUncheckedCreateNestedOneWithoutUserInput
+  sentMails?: Prisma.MailUncheckedCreateNestedManyWithoutSenderInput
+  receivedMails?: Prisma.MailUncheckedCreateNestedManyWithoutRecipientInput
+  caSubmissions?: Prisma.CaSubmissionUncheckedCreateNestedManyWithoutStudentInput
+  caRunResults?: Prisma.CaRunResultUncheckedCreateNestedManyWithoutStudentInput
+}
+
+export type UserCreateOrConnectWithoutCaSubmissionSummariesInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutCaSubmissionSummariesInput, Prisma.UserUncheckedCreateWithoutCaSubmissionSummariesInput>
+}
+
+export type UserUpsertWithoutCaSubmissionSummariesInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutCaSubmissionSummariesInput, Prisma.UserUncheckedUpdateWithoutCaSubmissionSummariesInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutCaSubmissionSummariesInput, Prisma.UserUncheckedCreateWithoutCaSubmissionSummariesInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutCaSubmissionSummariesInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutCaSubmissionSummariesInput, Prisma.UserUncheckedUpdateWithoutCaSubmissionSummariesInput>
+}
+
+export type UserUpdateWithoutCaSubmissionSummariesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  cnid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  studentProfile?: Prisma.StudentUpdateOneWithoutUserNestedInput
+  universityProfile?: Prisma.UniversityUpdateOneWithoutUserNestedInput
+  companyProfile?: Prisma.CompanyUpdateOneWithoutUserNestedInput
+  recruiterProfile?: Prisma.RecruiterUpdateOneWithoutUserNestedInput
+  sentMails?: Prisma.MailUpdateManyWithoutSenderNestedInput
+  receivedMails?: Prisma.MailUpdateManyWithoutRecipientNestedInput
+  caSubmissions?: Prisma.CaSubmissionUpdateManyWithoutStudentNestedInput
+  caRunResults?: Prisma.CaRunResultUpdateManyWithoutStudentNestedInput
+}
+
+export type UserUncheckedUpdateWithoutCaSubmissionSummariesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.StringFieldUpdateOperationsInput | string
+  password?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  cnid?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  studentProfile?: Prisma.StudentUncheckedUpdateOneWithoutUserNestedInput
+  universityProfile?: Prisma.UniversityUncheckedUpdateOneWithoutUserNestedInput
+  companyProfile?: Prisma.CompanyUncheckedUpdateOneWithoutUserNestedInput
+  recruiterProfile?: Prisma.RecruiterUncheckedUpdateOneWithoutUserNestedInput
+  sentMails?: Prisma.MailUncheckedUpdateManyWithoutSenderNestedInput
+  receivedMails?: Prisma.MailUncheckedUpdateManyWithoutRecipientNestedInput
+  caSubmissions?: Prisma.CaSubmissionUncheckedUpdateManyWithoutStudentNestedInput
+  caRunResults?: Prisma.CaRunResultUncheckedUpdateManyWithoutStudentNestedInput
 }
 
 
@@ -969,11 +1372,17 @@ export type UserUncheckedUpdateWithoutReceivedMailsInput = {
 export type UserCountOutputType = {
   sentMails: number
   receivedMails: number
+  caSubmissions: number
+  caRunResults: number
+  caSubmissionSummaries: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sentMails?: boolean | UserCountOutputTypeCountSentMailsArgs
   receivedMails?: boolean | UserCountOutputTypeCountReceivedMailsArgs
+  caSubmissions?: boolean | UserCountOutputTypeCountCaSubmissionsArgs
+  caRunResults?: boolean | UserCountOutputTypeCountCaRunResultsArgs
+  caSubmissionSummaries?: boolean | UserCountOutputTypeCountCaSubmissionSummariesArgs
 }
 
 /**
@@ -1000,6 +1409,27 @@ export type UserCountOutputTypeCountReceivedMailsArgs<ExtArgs extends runtime.Ty
   where?: Prisma.MailWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCaSubmissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CaSubmissionWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCaRunResultsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CaRunResultWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountCaSubmissionSummariesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CaSubmissionSummaryWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1015,6 +1445,9 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   recruiterProfile?: boolean | Prisma.User$recruiterProfileArgs<ExtArgs>
   sentMails?: boolean | Prisma.User$sentMailsArgs<ExtArgs>
   receivedMails?: boolean | Prisma.User$receivedMailsArgs<ExtArgs>
+  caSubmissions?: boolean | Prisma.User$caSubmissionsArgs<ExtArgs>
+  caRunResults?: boolean | Prisma.User$caRunResultsArgs<ExtArgs>
+  caSubmissionSummaries?: boolean | Prisma.User$caSubmissionSummariesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1056,6 +1489,9 @@ export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   recruiterProfile?: boolean | Prisma.User$recruiterProfileArgs<ExtArgs>
   sentMails?: boolean | Prisma.User$sentMailsArgs<ExtArgs>
   receivedMails?: boolean | Prisma.User$receivedMailsArgs<ExtArgs>
+  caSubmissions?: boolean | Prisma.User$caSubmissionsArgs<ExtArgs>
+  caRunResults?: boolean | Prisma.User$caRunResultsArgs<ExtArgs>
+  caSubmissionSummaries?: boolean | Prisma.User$caSubmissionSummariesArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1070,6 +1506,9 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     recruiterProfile: Prisma.$RecruiterPayload<ExtArgs> | null
     sentMails: Prisma.$MailPayload<ExtArgs>[]
     receivedMails: Prisma.$MailPayload<ExtArgs>[]
+    caSubmissions: Prisma.$CaSubmissionPayload<ExtArgs>[]
+    caRunResults: Prisma.$CaRunResultPayload<ExtArgs>[]
+    caSubmissionSummaries: Prisma.$CaSubmissionSummaryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1479,6 +1918,9 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   recruiterProfile<T extends Prisma.User$recruiterProfileArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$recruiterProfileArgs<ExtArgs>>): Prisma.Prisma__RecruiterClient<runtime.Types.Result.GetResult<Prisma.$RecruiterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   sentMails<T extends Prisma.User$sentMailsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$sentMailsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MailPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   receivedMails<T extends Prisma.User$receivedMailsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$receivedMailsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MailPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  caSubmissions<T extends Prisma.User$caSubmissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$caSubmissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CaSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  caRunResults<T extends Prisma.User$caRunResultsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$caRunResultsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CaRunResultPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  caSubmissionSummaries<T extends Prisma.User$caSubmissionSummariesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$caSubmissionSummariesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CaSubmissionSummaryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2029,6 +2471,78 @@ export type User$receivedMailsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.MailScalarFieldEnum | Prisma.MailScalarFieldEnum[]
+}
+
+/**
+ * User.caSubmissions
+ */
+export type User$caSubmissionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CaSubmission
+   */
+  select?: Prisma.CaSubmissionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CaSubmission
+   */
+  omit?: Prisma.CaSubmissionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CaSubmissionInclude<ExtArgs> | null
+  where?: Prisma.CaSubmissionWhereInput
+  orderBy?: Prisma.CaSubmissionOrderByWithRelationInput | Prisma.CaSubmissionOrderByWithRelationInput[]
+  cursor?: Prisma.CaSubmissionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CaSubmissionScalarFieldEnum | Prisma.CaSubmissionScalarFieldEnum[]
+}
+
+/**
+ * User.caRunResults
+ */
+export type User$caRunResultsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CaRunResult
+   */
+  select?: Prisma.CaRunResultSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CaRunResult
+   */
+  omit?: Prisma.CaRunResultOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CaRunResultInclude<ExtArgs> | null
+  where?: Prisma.CaRunResultWhereInput
+  orderBy?: Prisma.CaRunResultOrderByWithRelationInput | Prisma.CaRunResultOrderByWithRelationInput[]
+  cursor?: Prisma.CaRunResultWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CaRunResultScalarFieldEnum | Prisma.CaRunResultScalarFieldEnum[]
+}
+
+/**
+ * User.caSubmissionSummaries
+ */
+export type User$caSubmissionSummariesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CaSubmissionSummary
+   */
+  select?: Prisma.CaSubmissionSummarySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CaSubmissionSummary
+   */
+  omit?: Prisma.CaSubmissionSummaryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CaSubmissionSummaryInclude<ExtArgs> | null
+  where?: Prisma.CaSubmissionSummaryWhereInput
+  orderBy?: Prisma.CaSubmissionSummaryOrderByWithRelationInput | Prisma.CaSubmissionSummaryOrderByWithRelationInput[]
+  cursor?: Prisma.CaSubmissionSummaryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CaSubmissionSummaryScalarFieldEnum | Prisma.CaSubmissionSummaryScalarFieldEnum[]
 }
 
 /**

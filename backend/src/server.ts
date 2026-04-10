@@ -4,6 +4,7 @@ import { env } from "./config/env.js";
 import { prisma } from "./lib/prisma.js";
 import { createSocketServer } from "./socket/socket.js";
 import { createWorkers } from "./lib/mediasoup.js";
+import { initSubmissionWorker } from "./modules/codearena/submissionQueue.js";
 
 const startServer = async () => {
     try {
@@ -13,6 +14,9 @@ const startServer = async () => {
         
         // Initialize Mediasoup
         await createWorkers();
+
+        // Initialize Background Workers
+        initSubmissionWorker();
 
         // Attach Socket.IO
         createSocketServer(httpServer);

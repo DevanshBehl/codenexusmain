@@ -421,3 +421,35 @@ export const interviewApi = {
         return URL.createObjectURL(blob);
     },
 };
+
+// ==========================================
+// Code Arena API
+// ==========================================
+export const codeArenaApi = {
+    getProblems: (difficulty?: string, tags?: string) => {
+        let qs = '';
+        if (difficulty || tags) {
+            const params = new URLSearchParams();
+            if (difficulty) params.append('difficulty', difficulty);
+            if (tags) params.append('tags', tags);
+            qs = `?${params.toString()}`;
+        }
+        return api.get(`/codearena/problems${qs}`);
+    },
+    getProblem: (id: string) => api.get(`/codearena/problems/${id}`),
+    
+    runCode: (problemId: string, language: string, code: string, customInput?: string) => 
+        api.post(`/codearena/submissions/run`, { problemId, language, code, customInput }),
+        
+    submitCode: (problemId: string, language: string, code: string) => 
+        api.post(`/codearena/submissions/submit`, { problemId, language, code }),
+        
+    getSubmission: (id: string) => api.get(`/codearena/submissions/${id}`),
+    getSubmissions: (problemId?: string) => {
+        const params = problemId ? `?problemId=${problemId}` : '';
+        return api.get(`/codearena/submissions${params}`);
+    },
+
+    getLeaderboard: () => api.get(`/codearena/leaderboard`),
+    getProfileStats: () => api.get(`/codearena/leaderboard/profile`),
+};

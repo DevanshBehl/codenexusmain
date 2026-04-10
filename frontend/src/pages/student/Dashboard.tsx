@@ -126,10 +126,10 @@ const StudentDashboard = () => {
 
                 {/* Navigation Items */}
                 <div className="flex-1 py-6 flex flex-col gap-1 px-3 overflow-y-auto custom-scrollbar">
-                    {sidebarItems.map((item, index) => (
+                    {sidebarItems.map((item: any, index: number) => (
                         <button
                             key={index}
-                            onClick={() => { if (item.onClick()) item.onClick(); else if (item.path) window.location.href = item.path; }}
+                            onClick={() => { if (item.path) window.location.href = item.path; }}
 
                             className={`flex items-center px-3 py-2.5 rounded-sm transition-all duration-200 group relative
                                 ${item.active

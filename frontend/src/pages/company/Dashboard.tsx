@@ -170,7 +170,7 @@ const CompanyDashboard = () => {
                     {sidebarItems.map((item, index) => (
                         <button
                             key={index}
-                            onClick={() => { if(item.onClick) item.onClick(); else if(item.path) window.location.href=item.path; }}
+                            onClick={() => { if ((item as any).onClick) (item as any).onClick(); else if ((item as any).path) window.location.href = (item as any).path; }}
 
                             className={`flex items-center px-3 py-2.5 rounded-sm transition-all duration-200 group relative
                                 ${item.active

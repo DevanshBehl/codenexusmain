@@ -6,6 +6,8 @@ import { prisma } from "../lib/prisma.js";
 import { createRoomRouter, createWebRtcTransport, transports, producers, consumers, routers } from "../lib/mediasoup.js";
 import { startRecording, addProducerToRecording, stopRecording, removeProducerFromRecording, activeSessions } from "../lib/recording.manager.js";
 
+let ioInstance: Server | null = null;
+
 interface AuthenticatedSocket extends Socket {
     userId?: string;
     userRole?: string;
@@ -302,6 +304,16 @@ export function createSocketServer(httpServer: HttpServer): Server {
             });
         });
 
+        // ─── Code Arena Submission Rooms ───
+        socket.on('join_submission', ({ submissionId }) => {
+            socket.join(`submission:${submissionId}`);
+            console.log(`[Socket] User ${socket.userId} joined submission room: submission:${submissionId}`);
+        });
+        socket.on('leave_submission', ({ submissionId }) => {
+            socket.leave(`submission:${submissionId}`);
+            console.log(`[Socket] User ${socket.userId} left submission room: submission:${submissionId}`);
+        });
+
         // ─── Code Sync ───
         socket.on("code-sync", (data: { interviewId: string; code: string; language: string }) => {
             const roomId = `interview-${data.interviewId}`;
@@ -423,5 +435,10 @@ export function createSocketServer(httpServer: HttpServer): Server {
         });
     });
 
+    ioInstance = io;
     return io;
+}
+
+export function getIo() {
+    return ioInstance;
 }

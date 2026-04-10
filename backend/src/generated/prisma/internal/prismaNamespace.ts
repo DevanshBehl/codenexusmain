@@ -402,7 +402,12 @@ export const ModelName = {
   Webinar: 'Webinar',
   WebinarTargetUniversity: 'WebinarTargetUniversity',
   Mail: 'Mail',
-  MailPermissionViolation: 'MailPermissionViolation'
+  MailPermissionViolation: 'MailPermissionViolation',
+  CaProblem: 'CaProblem',
+  CaTestCase: 'CaTestCase',
+  CaSubmission: 'CaSubmission',
+  CaRunResult: 'CaRunResult',
+  CaSubmissionSummary: 'CaSubmissionSummary'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -418,7 +423,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "university" | "company" | "companyUniversity" | "recruiter" | "student" | "project" | "contest" | "problem" | "testCase" | "submission" | "jobApplication" | "interview" | "recording" | "interviewRecording" | "webinar" | "webinarTargetUniversity" | "mail" | "mailPermissionViolation"
+    modelProps: "user" | "university" | "company" | "companyUniversity" | "recruiter" | "student" | "project" | "contest" | "problem" | "testCase" | "submission" | "jobApplication" | "interview" | "recording" | "interviewRecording" | "webinar" | "webinarTargetUniversity" | "mail" | "mailPermissionViolation" | "caProblem" | "caTestCase" | "caSubmission" | "caRunResult" | "caSubmissionSummary"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1828,6 +1833,376 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    CaProblem: {
+      payload: Prisma.$CaProblemPayload<ExtArgs>
+      fields: Prisma.CaProblemFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CaProblemFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaProblemPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CaProblemFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaProblemPayload>
+        }
+        findFirst: {
+          args: Prisma.CaProblemFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaProblemPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CaProblemFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaProblemPayload>
+        }
+        findMany: {
+          args: Prisma.CaProblemFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaProblemPayload>[]
+        }
+        create: {
+          args: Prisma.CaProblemCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaProblemPayload>
+        }
+        createMany: {
+          args: Prisma.CaProblemCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CaProblemCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaProblemPayload>[]
+        }
+        delete: {
+          args: Prisma.CaProblemDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaProblemPayload>
+        }
+        update: {
+          args: Prisma.CaProblemUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaProblemPayload>
+        }
+        deleteMany: {
+          args: Prisma.CaProblemDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CaProblemUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CaProblemUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaProblemPayload>[]
+        }
+        upsert: {
+          args: Prisma.CaProblemUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaProblemPayload>
+        }
+        aggregate: {
+          args: Prisma.CaProblemAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCaProblem>
+        }
+        groupBy: {
+          args: Prisma.CaProblemGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CaProblemGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CaProblemCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CaProblemCountAggregateOutputType> | number
+        }
+      }
+    }
+    CaTestCase: {
+      payload: Prisma.$CaTestCasePayload<ExtArgs>
+      fields: Prisma.CaTestCaseFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CaTestCaseFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaTestCasePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CaTestCaseFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaTestCasePayload>
+        }
+        findFirst: {
+          args: Prisma.CaTestCaseFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaTestCasePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CaTestCaseFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaTestCasePayload>
+        }
+        findMany: {
+          args: Prisma.CaTestCaseFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaTestCasePayload>[]
+        }
+        create: {
+          args: Prisma.CaTestCaseCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaTestCasePayload>
+        }
+        createMany: {
+          args: Prisma.CaTestCaseCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CaTestCaseCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaTestCasePayload>[]
+        }
+        delete: {
+          args: Prisma.CaTestCaseDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaTestCasePayload>
+        }
+        update: {
+          args: Prisma.CaTestCaseUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaTestCasePayload>
+        }
+        deleteMany: {
+          args: Prisma.CaTestCaseDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CaTestCaseUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CaTestCaseUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaTestCasePayload>[]
+        }
+        upsert: {
+          args: Prisma.CaTestCaseUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaTestCasePayload>
+        }
+        aggregate: {
+          args: Prisma.CaTestCaseAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCaTestCase>
+        }
+        groupBy: {
+          args: Prisma.CaTestCaseGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CaTestCaseGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CaTestCaseCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CaTestCaseCountAggregateOutputType> | number
+        }
+      }
+    }
+    CaSubmission: {
+      payload: Prisma.$CaSubmissionPayload<ExtArgs>
+      fields: Prisma.CaSubmissionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CaSubmissionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CaSubmissionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionPayload>
+        }
+        findFirst: {
+          args: Prisma.CaSubmissionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CaSubmissionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionPayload>
+        }
+        findMany: {
+          args: Prisma.CaSubmissionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionPayload>[]
+        }
+        create: {
+          args: Prisma.CaSubmissionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionPayload>
+        }
+        createMany: {
+          args: Prisma.CaSubmissionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CaSubmissionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionPayload>[]
+        }
+        delete: {
+          args: Prisma.CaSubmissionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionPayload>
+        }
+        update: {
+          args: Prisma.CaSubmissionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionPayload>
+        }
+        deleteMany: {
+          args: Prisma.CaSubmissionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CaSubmissionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CaSubmissionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionPayload>[]
+        }
+        upsert: {
+          args: Prisma.CaSubmissionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionPayload>
+        }
+        aggregate: {
+          args: Prisma.CaSubmissionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCaSubmission>
+        }
+        groupBy: {
+          args: Prisma.CaSubmissionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CaSubmissionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CaSubmissionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CaSubmissionCountAggregateOutputType> | number
+        }
+      }
+    }
+    CaRunResult: {
+      payload: Prisma.$CaRunResultPayload<ExtArgs>
+      fields: Prisma.CaRunResultFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CaRunResultFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaRunResultPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CaRunResultFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaRunResultPayload>
+        }
+        findFirst: {
+          args: Prisma.CaRunResultFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaRunResultPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CaRunResultFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaRunResultPayload>
+        }
+        findMany: {
+          args: Prisma.CaRunResultFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaRunResultPayload>[]
+        }
+        create: {
+          args: Prisma.CaRunResultCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaRunResultPayload>
+        }
+        createMany: {
+          args: Prisma.CaRunResultCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CaRunResultCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaRunResultPayload>[]
+        }
+        delete: {
+          args: Prisma.CaRunResultDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaRunResultPayload>
+        }
+        update: {
+          args: Prisma.CaRunResultUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaRunResultPayload>
+        }
+        deleteMany: {
+          args: Prisma.CaRunResultDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CaRunResultUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CaRunResultUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaRunResultPayload>[]
+        }
+        upsert: {
+          args: Prisma.CaRunResultUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaRunResultPayload>
+        }
+        aggregate: {
+          args: Prisma.CaRunResultAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCaRunResult>
+        }
+        groupBy: {
+          args: Prisma.CaRunResultGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CaRunResultGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CaRunResultCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CaRunResultCountAggregateOutputType> | number
+        }
+      }
+    }
+    CaSubmissionSummary: {
+      payload: Prisma.$CaSubmissionSummaryPayload<ExtArgs>
+      fields: Prisma.CaSubmissionSummaryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CaSubmissionSummaryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionSummaryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CaSubmissionSummaryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionSummaryPayload>
+        }
+        findFirst: {
+          args: Prisma.CaSubmissionSummaryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionSummaryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CaSubmissionSummaryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionSummaryPayload>
+        }
+        findMany: {
+          args: Prisma.CaSubmissionSummaryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionSummaryPayload>[]
+        }
+        create: {
+          args: Prisma.CaSubmissionSummaryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionSummaryPayload>
+        }
+        createMany: {
+          args: Prisma.CaSubmissionSummaryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CaSubmissionSummaryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionSummaryPayload>[]
+        }
+        delete: {
+          args: Prisma.CaSubmissionSummaryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionSummaryPayload>
+        }
+        update: {
+          args: Prisma.CaSubmissionSummaryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionSummaryPayload>
+        }
+        deleteMany: {
+          args: Prisma.CaSubmissionSummaryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CaSubmissionSummaryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CaSubmissionSummaryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionSummaryPayload>[]
+        }
+        upsert: {
+          args: Prisma.CaSubmissionSummaryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CaSubmissionSummaryPayload>
+        }
+        aggregate: {
+          args: Prisma.CaSubmissionSummaryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCaSubmissionSummary>
+        }
+        groupBy: {
+          args: Prisma.CaSubmissionSummaryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CaSubmissionSummaryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CaSubmissionSummaryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CaSubmissionSummaryCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2129,6 +2504,86 @@ export const MailPermissionViolationScalarFieldEnum = {
 export type MailPermissionViolationScalarFieldEnum = (typeof MailPermissionViolationScalarFieldEnum)[keyof typeof MailPermissionViolationScalarFieldEnum]
 
 
+export const CaProblemScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  description: 'description',
+  difficulty: 'difficulty',
+  tags: 'tags',
+  constraints: 'constraints',
+  input_format: 'input_format',
+  output_format: 'output_format',
+  time_limit_ms: 'time_limit_ms',
+  memory_limit_mb: 'memory_limit_mb',
+  is_published: 'is_published',
+  created_at: 'created_at'
+} as const
+
+export type CaProblemScalarFieldEnum = (typeof CaProblemScalarFieldEnum)[keyof typeof CaProblemScalarFieldEnum]
+
+
+export const CaTestCaseScalarFieldEnum = {
+  id: 'id',
+  problem_id: 'problem_id',
+  input: 'input',
+  expected_output: 'expected_output',
+  is_sample: 'is_sample',
+  order_index: 'order_index'
+} as const
+
+export type CaTestCaseScalarFieldEnum = (typeof CaTestCaseScalarFieldEnum)[keyof typeof CaTestCaseScalarFieldEnum]
+
+
+export const CaSubmissionScalarFieldEnum = {
+  id: 'id',
+  problem_id: 'problem_id',
+  student_cnid: 'student_cnid',
+  language: 'language',
+  code: 'code',
+  status: 'status',
+  judge0_tokens: 'judge0_tokens',
+  time_taken_ms: 'time_taken_ms',
+  memory_used_kb: 'memory_used_kb',
+  test_cases_passed: 'test_cases_passed',
+  test_cases_total: 'test_cases_total',
+  error_message: 'error_message',
+  submitted_at: 'submitted_at'
+} as const
+
+export type CaSubmissionScalarFieldEnum = (typeof CaSubmissionScalarFieldEnum)[keyof typeof CaSubmissionScalarFieldEnum]
+
+
+export const CaRunResultScalarFieldEnum = {
+  id: 'id',
+  student_cnid: 'student_cnid',
+  problem_id: 'problem_id',
+  language: 'language',
+  code: 'code',
+  custom_input: 'custom_input',
+  actual_output: 'actual_output',
+  expected: 'expected',
+  status: 'status',
+  time_ms: 'time_ms',
+  memory_kb: 'memory_kb',
+  ran_at: 'ran_at'
+} as const
+
+export type CaRunResultScalarFieldEnum = (typeof CaRunResultScalarFieldEnum)[keyof typeof CaRunResultScalarFieldEnum]
+
+
+export const CaSubmissionSummaryScalarFieldEnum = {
+  student_cnid: 'student_cnid',
+  problem_id: 'problem_id',
+  is_solved: 'is_solved',
+  best_time_ms: 'best_time_ms',
+  total_attempts: 'total_attempts',
+  last_submitted_at: 'last_submitted_at'
+} as const
+
+export type CaSubmissionSummaryScalarFieldEnum = (typeof CaSubmissionSummaryScalarFieldEnum)[keyof typeof CaSubmissionSummaryScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2363,6 +2818,11 @@ export type GlobalOmitConfig = {
   webinarTargetUniversity?: Prisma.WebinarTargetUniversityOmit
   mail?: Prisma.MailOmit
   mailPermissionViolation?: Prisma.MailPermissionViolationOmit
+  caProblem?: Prisma.CaProblemOmit
+  caTestCase?: Prisma.CaTestCaseOmit
+  caSubmission?: Prisma.CaSubmissionOmit
+  caRunResult?: Prisma.CaRunResultOmit
+  caSubmissionSummary?: Prisma.CaSubmissionSummaryOmit
 }
 
 /* Types for Logging */

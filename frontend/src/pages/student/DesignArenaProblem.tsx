@@ -239,7 +239,7 @@ Design a URL shortening service like bit.ly.
 
                         {/* Whiteboard Container */}
                         <div className="flex-1 relative bg-[#050505] flex flex-col">
-                           <Whiteboard />
+                            <Whiteboard socket={null as any} interviewId="" role="student" />
                         </div>
 
                         {/* Editor Action Bar (Bottom) */}

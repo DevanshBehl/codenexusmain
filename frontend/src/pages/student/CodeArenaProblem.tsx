@@ -26,7 +26,8 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import AskAI from '../../components/CodeArena/AskAI';
-import { problemApi } from '../../lib/api';
+import { codeArenaApi } from '../../lib/api';
+import { io } from 'socket.io-client';
 
 const LANGUAGE_MAP: Record<string, string> = {
     cpp: 'cpp',
@@ -98,33 +99,74 @@ const CodeArenaProblem = () => {
     const [isConsoleOpen, setIsConsoleOpen] = useState(false);
     const [runState, setRunState] = useState<'idle' | 'running' | 'success'>('idle');
     const [submitState, setSubmitState] = useState<'idle' | 'submitting' | 'success'>('idle');
+    const [code, setCode] = useState(DEFAULT_CODE[language]);
+    const [runResult, setRunResult] = useState<any>(null);
 
-    const handleRun = () => {
+    useEffect(() => {
+        setCode(DEFAULT_CODE[language]);
+    }, [language]);
+
+    useEffect(() => {
+        const token = localStorage.getItem('token');
+        const socket = io('http://localhost:5000/codearena', {
+            auth: { token }
+        });
+
+        socket.on('submission_result', (data) => {
+            console.log('Submission result:', data);
+            setRunResult(data.result);
+            if (data.isSubmission) {
+                setSubmitState('success');
+                if (data.result.status === 'Accepted') {
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                }
+            } else {
+                setRunState('success');
+            }
+        });
+
+        socket.on('submission_status', (data) => {
+            console.log('Status:', data);
+        });
+
+        return () => { socket.disconnect(); };
+    }, []);
+
+    const handleRun = async () => {
+        if (!id) return;
         setIsConsoleOpen(true);
         setRunState('running');
-        setTimeout(() => {
-            setRunState('success');
-        }, 1200);
+        setRunResult(null);
+        try {
+            await codeArenaApi.runCode(id, language, code);
+        } catch (err) {
+            console.error(err);
+            setRunState('idle');
+        }
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
+        if (!id) return;
         setSubmitState('submitting');
         setIsConsoleOpen(false);
-        setTimeout(() => {
-            setSubmitState('success');
-            confetti({
-                particleCount: 100,
-                spread: 70,
-                origin: { y: 0.6 }
-            });
-        }, 1500);
+        setRunResult(null);
+        try {
+            await codeArenaApi.submitCode(id, language, code);
+        } catch (err) {
+            console.error(err);
+            setSubmitState('idle');
+        }
     };
 
     useEffect(() => {
         if (!id) return;
         const fetchProblem = async () => {
             try {
-                const res = await problemApi.getById(id);
+                const res = await codeArenaApi.getProblem(id);
                 setProblemData(res.data);
             } catch (err) {
                 console.error("Failed to load problem", err);
@@ -380,7 +422,8 @@ const CodeArenaProblem = () => {
                                 height="100%"
                                 defaultLanguage={LANGUAGE_MAP[language]}
                                 language={LANGUAGE_MAP[language]}
-                                defaultValue={DEFAULT_CODE[language]}
+                                value={code}
+                                onChange={(val) => setCode(val || '')}
                                 theme="vs-dark"
                                 options={{
                                     fontSize: 13,
@@ -440,23 +483,21 @@ const CodeArenaProblem = () => {
                                             animate={{ scale: 1, opacity: 1 }}
                                             className="bg-[#111] border border-[#333] p-8 flex flex-col items-center rounded-sm max-w-md w-full text-center shadow-2xl"
                                         >
-                                            <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mb-6">
-                                                <CheckCircle className="text-green-500" size={32} />
+                                            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-6 ${runResult?.status === 'Accepted' ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
+                                                {runResult?.status === 'Accepted' ? <CheckCircle className="text-green-500" size={32} /> : <XCircle className="text-red-500" size={32} />}
                                             </div>
-                                            <h2 className="text-3xl font-bold font-sans tracking-tight text-white mb-2 uppercase">Accepted</h2>
+                                            <h2 className="text-3xl font-bold font-sans tracking-tight text-white mb-2 uppercase">{runResult?.status || 'Accepted'}</h2>
                                             <p className="text-[#888] font-mono text-xs uppercase tracking-widest mb-6">
-                                                All test cases passed successfully
+                                                {runResult?.status === 'Accepted' ? 'All test cases passed successfully' : 'Some test cases failed'}
                                             </p>
                                             <div className="w-full bg-[#0a0a0a] border border-[#222] rounded-sm p-4 flex justify-between mb-8">
                                                 <div className="text-left font-mono">
                                                     <div className="text-[#666] text-[10px] uppercase tracking-widest mb-1">Runtime</div>
-                                                    <div className="text-accent-400 font-bold text-lg">0 ms</div>
-                                                    <div className="text-[#555] text-[9px] uppercase tracking-widest">Beats 100.00%</div>
+                                                    <div className="text-accent-400 font-bold text-lg">{runResult?.time || 0} s</div>
                                                 </div>
                                                 <div className="text-right font-mono border-l border-[#222] pl-4">
                                                     <div className="text-[#666] text-[10px] uppercase tracking-widest mb-1">Memory</div>
-                                                    <div className="text-accent-400 font-bold text-lg">42.1 MB</div>
-                                                    <div className="text-[#555] text-[9px] uppercase tracking-widest">Beats 98.42%</div>
+                                                    <div className="text-accent-400 font-bold text-lg">{runResult?.memory || 0} KB</div>
                                                 </div>
                                             </div>
                                             <button 
@@ -497,15 +538,15 @@ const CodeArenaProblem = () => {
                                         ) : (
                                             <div className="flex flex-col gap-4">
                                                 <div className="flex items-center gap-2">
-                                                    <h3 className="text-red-500 font-sans font-bold text-xl tracking-tight uppercase">Wrong Answer</h3>
-                                                    <span className="bg-red-500/10 text-red-500 border border-red-500/20 px-2 py-0.5 text-[9px] font-mono uppercase tracking-widest rounded-sm">Example Test Cases</span>
+                                                    <h3 className={`${runResult?.status === 'Accepted' ? 'text-green-500' : 'text-red-500'} font-sans font-bold text-xl tracking-tight uppercase`}>{runResult?.status || 'Wrong Answer'}</h3>
+                                                    <span className={`${runResult?.status === 'Accepted' ? 'bg-green-500/10 text-green-500 border-green-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'} border px-2 py-0.5 text-[9px] font-mono uppercase tracking-widest rounded-sm`}>Example Test Cases</span>
                                                 </div>
                                                 <div className="flex gap-4 border-b border-[#222] pb-4 overflow-x-auto custom-scrollbar">
-                                                    {problem?.testCases?.map((tc: any, idx: number) => (
+                                                    {runResult?.testResults?.map((tc: any, idx: number) => (
                                                         <div key={idx} className="bg-[#111] border border-[#222] rounded-sm p-3 min-w-[200px] flex-shrink-0">
                                                             <div className="flex justify-between items-center mb-2">
                                                                 <span className="text-[#888] font-mono text-[9px] uppercase tracking-widest">Case {idx + 1}</span>
-                                                                <XCircle size={10} className="text-red-500" />
+                                                                {tc.passed ? <CheckCircle size={10} className="text-green-500" /> : <XCircle size={10} className="text-red-500" />}
                                                             </div>
                                                             <div className="flex flex-col gap-2">
                                                                 <div>
@@ -513,17 +554,23 @@ const CodeArenaProblem = () => {
                                                                     <div className="text-[#aaa] font-mono text-[10px] bg-[#0a0a0a] p-1 border border-[#222]">{tc.input}</div>
                                                                 </div>
                                                                 <div>
-                                                                    <div className="text-[#555] font-mono text-[9px] uppercase tracking-widest mb-0.5">My Output</div>
-                                                                    <div className="text-[#aaa] font-mono text-[10px] bg-[#0a0a0a] p-1 border border-[#222]">{tc.output}</div>
+                                                                    <div className="text-[#555] font-mono text-[9px] uppercase tracking-widest mb-0.5">Expected Output</div>
+                                                                    <div className="text-[#aaa] font-mono text-[10px] bg-[#0a0a0a] p-1 border border-[#222]">{tc.expectedOutput}</div>
                                                                 </div>
+                                                                {!tc.passed && (
+                                                                    <div>
+                                                                        <div className="text-[#555] font-mono text-[9px] uppercase tracking-widest mb-0.5">My Output</div>
+                                                                        <div className="text-red-400 font-mono text-[10px] bg-[#0a0a0a] p-1 border border-[#222]">{tc.actualOutput || tc.error}</div>
+                                                                    </div>
+                                                                )}
                                                             </div>
                                                         </div>
                                                     ))}
-                                                    {(!problem?.testCases || problem.testCases.length === 0) && (
-                                                       <div className="text-red-400 font-mono text-[10px] uppercase">Internal tests failed. Please try again.</div>
+                                                    {(!runResult?.testResults || runResult.testResults.length === 0) && (
+                                                       <div className="text-red-400 font-mono text-[10px] uppercase whitespace-pre">{runResult?.compile_output || runResult?.error || 'Internal tests failed. Please try again.'}</div>
                                                     )}
                                                 </div>
-                                                <div className="font-mono text-[10px] text-[#555] uppercase tracking-widest">Done in 0ms</div>
+                                                <div className="font-mono text-[10px] text-[#555] uppercase tracking-widest">Done in {runResult?.time || 0}s</div>
                                             </div>
                                         )}
                                     </div>

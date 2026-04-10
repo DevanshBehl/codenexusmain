@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { codeArenaApi } from '../../lib/api';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -33,14 +34,22 @@ const CodeArenaSubmissions = () => {
         { icon: Box, label: 'PROJECTS', path: '/student/projects' },
     ];
 
-    const submissionsData = [
-        { id: '1042', time: '10 mins ago', problem: 'Two Sum', problemId: '1', status: 'Accepted', runtime: '5 ms', memory: '10.2 MB', language: 'C++' },
-        { id: '1041', time: '15 mins ago', problem: 'Two Sum', problemId: '1', status: 'Wrong Answer', runtime: 'N/A', memory: 'N/A', language: 'C++' },
-        { id: '1040', time: '2 hours ago', problem: 'Merge K Sorted Lists', problemId: '23', status: 'Time Limit Exceeded', runtime: 'N/A', memory: 'N/A', language: 'Python 3' },
-        { id: '1039', time: '1 day ago', problem: 'Container With Most Water', problemId: '11', status: 'Accepted', runtime: '52 ms', memory: '55.4 MB', language: 'Java' },
-        { id: '1038', time: '2 days ago', problem: 'Valid Parentheses', problemId: '20', status: 'Accepted', runtime: '48 ms', memory: '42.1 MB', language: 'JavaScript' },
-        { id: '1037', time: '2 days ago', problem: 'Valid Parentheses', problemId: '20', status: 'Compile Error', runtime: 'N/A', memory: 'N/A', language: 'JavaScript' },
-    ];
+    const [submissionsData, setSubmissionsData] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchSubmissions = async () => {
+            try {
+                const res = await codeArenaApi.getSubmissions();
+                setSubmissionsData((res.data as any).submissions || []);
+            } catch (error) {
+                console.error("Failed to fetch submissions", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchSubmissions();
+    }, []);
 
     const getStatusDetails = (status: string) => {
         switch (status) {
@@ -150,15 +159,29 @@ const CodeArenaSubmissions = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {submissionsData.map((sub, idx) => {
+                                    {loading ? (
+                                        <tr><td colSpan={6} className="text-center py-8 text-[#888]">Loading submissions...</td></tr>
+                                    ) : submissionsData.length === 0 ? (
+                                        <tr><td colSpan={6} className="text-center py-8 text-[#888]">No submissions yet</td></tr>
+                                    ) : submissionsData.map((sub, idx) => {
                                         const statusObj = getStatusDetails(sub.status);
+                                        // Attempt to extract top-level runtime/memory or average from test cases
+                                        let runtime = 'N/A';
+                                        let memory = 'N/A';
+                                        if (sub.testResults && Array.isArray(sub.testResults) && sub.testResults.length > 0) {
+                                            const totalTime = sub.testResults.reduce((acc: number, cur: any) => acc + (parseFloat(cur.time) || 0), 0);
+                                            const maxMem = sub.testResults.reduce((acc: number, cur: any) => Math.max(acc, (parseFloat(cur.memory) || 0)), 0);
+                                            if (totalTime > 0) runtime = `${totalTime.toFixed(3)} s`;
+                                            if (maxMem > 0) memory = `${maxMem} KB`;
+                                        }
+
                                         return (
                                             <tr key={idx} className="border-b border-[#222] hover:bg-[#111] transition-colors">
                                                 <td className="py-4 px-6 font-mono text-xs text-[#888]">
-                                                    {sub.time}
+                                                    {new Date(sub.createdAt).toLocaleString()}
                                                 </td>
                                                 <td className="py-4 px-6 font-sans font-bold text-sm text-white hover:text-accent-400 transition-colors cursor-pointer">
-                                                    <Link to={`/student/codearena/${sub.problemId}`}>{sub.problem}</Link>
+                                                    <Link to={`/student/codearena/${sub.problem?.id}`}>{sub.problem?.title || 'Unknown'}</Link>
                                                 </td>
                                                 <td className="py-4 px-6 font-mono text-xs">
                                                     <div className={`flex items-center gap-2 font-bold ${statusObj.color}`}>
@@ -167,10 +190,10 @@ const CodeArenaSubmissions = () => {
                                                     </div>
                                                 </td>
                                                 <td className="py-4 px-6 font-mono text-xs text-[#aaa]">
-                                                    {sub.runtime}
+                                                    {runtime}
                                                 </td>
                                                 <td className="py-4 px-6 font-mono text-xs text-[#aaa]">
-                                                    {sub.memory}
+                                                    {memory}
                                                 </td>
                                                 <td className="py-4 px-6">
                                                     <span className="text-[9px] font-mono uppercase tracking-widest text-[#888] bg-[#1a1a1a] px-2 py-0.5 border border-[#333] rounded-sm">

@@ -41,6 +41,11 @@ model User {
   // Mail relations
   sentMails       Mail[] @relation("MailSender")
   receivedMails   Mail[] @relation("MailRecipient")
+
+  // CodeArena relations
+  caSubmissions         CaSubmission[]
+  caRunResults          CaRunResult[]
+  caSubmissionSummaries CaSubmissionSummary[]
 }
 
 // ==========================================
@@ -336,4 +341,104 @@ model MailPermissionViolation {
 
   @@index([sender_cnid, timestamp])
   @@index([timestamp])
+}
+
+// ==========================================
+// 7. CODE ARENA (LEETCODE PRACTICE MODULE)
+// ==========================================
+
+model CaProblem {
+  id              String   @id @default(uuid()) @db.Uuid
+  title           String   @db.VarChar(300)
+  slug            String   @unique @db.VarChar(300)
+  description     String   @db.Text
+  difficulty      String   @db.VarChar(10)
+  tags            String[]
+  constraints     String?  @db.Text
+  input_format    String?  @db.Text
+  output_format   String?  @db.Text
+  time_limit_ms   Int      @default(2000)
+  memory_limit_mb Int      @default(256)
+  is_published    Boolean  @default(false)
+  created_at      DateTime @default(now())
+
+  testCases          CaTestCase[]
+  submissions        CaSubmission[]
+  runResults         CaRunResult[]
+  submissionSummaries CaSubmissionSummary[]
+
+  @@map("ca_problems")
+}
+
+model CaTestCase {
+  id              String   @id @default(uuid()) @db.Uuid
+  problem_id      String   @db.Uuid
+  input           String   @db.Text
+  expected_output String   @db.Text
+  is_sample       Boolean  @default(false)
+  order_index     Int      @default(0)
+
+  problem CaProblem @relation(fields: [problem_id], references: [id], onDelete: Cascade)
+
+  @@index([problem_id, is_sample, order_index])
+  @@map("ca_test_cases")
+}
+
+model CaSubmission {
+  id                String   @id @default(uuid()) @db.Uuid
+  problem_id        String   @db.Uuid
+  student_cnid      String?
+  language          String   @db.VarChar(30)
+  code              String   @db.Text
+  status            String   @default("pending") @db.VarChar(30)
+  judge0_tokens     String[]
+  time_taken_ms     Int?
+  memory_used_kb    Int?
+  test_cases_passed Int      @default(0)
+  test_cases_total  Int      @default(0)
+  error_message     String?  @db.Text
+  submitted_at      DateTime @default(now())
+
+  problem CaProblem @relation(fields: [problem_id], references: [id])
+  student User?     @relation(fields: [student_cnid], references: [cnid])
+
+  @@index([student_cnid, problem_id])
+  @@index([status])
+  @@map("ca_submissions")
+}
+
+model CaRunResult {
+  id            String   @id @default(uuid()) @db.Uuid
+  student_cnid  String?
+  problem_id    String   @db.Uuid
+  language      String?  @db.VarChar(30)
+  code          String?  @db.Text
+  custom_input  String?  @db.Text
+  actual_output String?  @db.Text
+  expected      String?  @db.Text
+  status        String?  @db.VarChar(30)
+  time_ms       Int?
+  memory_kb     Int?
+  ran_at        DateTime @default(now())
+
+  problem CaProblem @relation(fields: [problem_id], references: [id])
+  student User?     @relation(fields: [student_cnid], references: [cnid])
+
+  @@map("ca_run_results")
+}
+
+model CaSubmissionSummary {
+  student_cnid      String
+  problem_id        String   @db.Uuid
+  is_solved         Boolean  @default(false)
+  best_time_ms      Int?
+  total_attempts    Int      @default(0)
+  last_submitted_at DateTime?
+
+  student User      @relation(fields: [student_cnid], references: [cnid])
+  problem CaProblem @relation(fields: [problem_id], references: [id])
+
+  @@id([student_cnid, problem_id])
+  @@index([student_cnid, is_solved])
+  @@map("ca_submission_summary")
 }

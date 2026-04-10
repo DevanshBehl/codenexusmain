@@ -11,7 +11,7 @@ const Interview = () => {
             {/* Main 3-Column Layout */}
             <main className="flex-1 grid grid-cols-1 md:grid-cols-4 gap-4 p-4 min-h-0 z-10">
                 <InterviewProblem />
-                <InterviewEditor />
+                <InterviewEditor socket={null as any} interviewId="" role="student" />
                 <InterviewVideoChat />
             </main>
 

@@ -136,3 +136,28 @@ export type Mail = Prisma.MailModel
  * 
  */
 export type MailPermissionViolation = Prisma.MailPermissionViolationModel
+/**
+ * Model CaProblem
+ * 
+ */
+export type CaProblem = Prisma.CaProblemModel
+/**
+ * Model CaTestCase
+ * 
+ */
+export type CaTestCase = Prisma.CaTestCaseModel
+/**
+ * Model CaSubmission
+ * 
+ */
+export type CaSubmission = Prisma.CaSubmissionModel
+/**
+ * Model CaRunResult
+ * 
+ */
+export type CaRunResult = Prisma.CaRunResultModel
+/**
+ * Model CaSubmissionSummary
+ * 
+ */
+export type CaSubmissionSummary = Prisma.CaSubmissionSummaryModel

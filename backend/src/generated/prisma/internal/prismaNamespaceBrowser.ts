@@ -69,7 +69,12 @@ export const ModelName = {
   Webinar: 'Webinar',
   WebinarTargetUniversity: 'WebinarTargetUniversity',
   Mail: 'Mail',
-  MailPermissionViolation: 'MailPermissionViolation'
+  MailPermissionViolation: 'MailPermissionViolation',
+  CaProblem: 'CaProblem',
+  CaTestCase: 'CaTestCase',
+  CaSubmission: 'CaSubmission',
+  CaRunResult: 'CaRunResult',
+  CaSubmissionSummary: 'CaSubmissionSummary'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -348,6 +353,86 @@ export const MailPermissionViolationScalarFieldEnum = {
 } as const
 
 export type MailPermissionViolationScalarFieldEnum = (typeof MailPermissionViolationScalarFieldEnum)[keyof typeof MailPermissionViolationScalarFieldEnum]
+
+
+export const CaProblemScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  slug: 'slug',
+  description: 'description',
+  difficulty: 'difficulty',
+  tags: 'tags',
+  constraints: 'constraints',
+  input_format: 'input_format',
+  output_format: 'output_format',
+  time_limit_ms: 'time_limit_ms',
+  memory_limit_mb: 'memory_limit_mb',
+  is_published: 'is_published',
+  created_at: 'created_at'
+} as const
+
+export type CaProblemScalarFieldEnum = (typeof CaProblemScalarFieldEnum)[keyof typeof CaProblemScalarFieldEnum]
+
+
+export const CaTestCaseScalarFieldEnum = {
+  id: 'id',
+  problem_id: 'problem_id',
+  input: 'input',
+  expected_output: 'expected_output',
+  is_sample: 'is_sample',
+  order_index: 'order_index'
+} as const
+
+export type CaTestCaseScalarFieldEnum = (typeof CaTestCaseScalarFieldEnum)[keyof typeof CaTestCaseScalarFieldEnum]
+
+
+export const CaSubmissionScalarFieldEnum = {
+  id: 'id',
+  problem_id: 'problem_id',
+  student_cnid: 'student_cnid',
+  language: 'language',
+  code: 'code',
+  status: 'status',
+  judge0_tokens: 'judge0_tokens',
+  time_taken_ms: 'time_taken_ms',
+  memory_used_kb: 'memory_used_kb',
+  test_cases_passed: 'test_cases_passed',
+  test_cases_total: 'test_cases_total',
+  error_message: 'error_message',
+  submitted_at: 'submitted_at'
+} as const
+
+export type CaSubmissionScalarFieldEnum = (typeof CaSubmissionScalarFieldEnum)[keyof typeof CaSubmissionScalarFieldEnum]
+
+
+export const CaRunResultScalarFieldEnum = {
+  id: 'id',
+  student_cnid: 'student_cnid',
+  problem_id: 'problem_id',
+  language: 'language',
+  code: 'code',
+  custom_input: 'custom_input',
+  actual_output: 'actual_output',
+  expected: 'expected',
+  status: 'status',
+  time_ms: 'time_ms',
+  memory_kb: 'memory_kb',
+  ran_at: 'ran_at'
+} as const
+
+export type CaRunResultScalarFieldEnum = (typeof CaRunResultScalarFieldEnum)[keyof typeof CaRunResultScalarFieldEnum]
+
+
+export const CaSubmissionSummaryScalarFieldEnum = {
+  student_cnid: 'student_cnid',
+  problem_id: 'problem_id',
+  is_solved: 'is_solved',
+  best_time_ms: 'best_time_ms',
+  total_attempts: 'total_attempts',
+  last_submitted_at: 'last_submitted_at'
+} as const
+
+export type CaSubmissionSummaryScalarFieldEnum = (typeof CaSubmissionSummaryScalarFieldEnum)[keyof typeof CaSubmissionSummaryScalarFieldEnum]
 
 
 export const SortOrder = {
