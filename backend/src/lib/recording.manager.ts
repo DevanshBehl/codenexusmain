@@ -3,7 +3,10 @@ import fs from 'fs';
 import path from 'path';
 import { prisma } from './prisma.js';
 
-const RECORDING_BASE_PATH = process.env.RECORDING_BASE_PATH || '/recordings';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const RECORDING_BASE_PATH = process.env.RECORDING_BASE_PATH || path.join(__dirname, '..', '..', '..', 'recordings');
 const RECORDING_RTP_PORT_MIN = parseInt(process.env.RECORDING_RTP_PORT_MIN || '20000', 10);
 const RECORDING_RTP_PORT_MAX = parseInt(process.env.RECORDING_RTP_PORT_MAX || '20200', 10);
 
@@ -23,6 +26,7 @@ interface RecordingSession {
     logPath: string;
     startedAt: Date;
     portPool: Set<number>;
+    retryCount: number;
 }
 
 const activeSessions = new Map<string, RecordingSession>();
@@ -112,6 +116,7 @@ async function startRecording(interviewId: string, router: any): Promise<Recordi
         logPath,
         startedAt: new Date(),
         portPool: new Set(),
+        retryCount: 0,
     };
 
     activeSessions.set(interviewId, session);
@@ -271,9 +276,22 @@ async function spawnFFmpeg(interviewId: string): Promise<void> {
                     },
                 });
             } else {
+                const session = activeSessions.get(interviewId);
+                if (session && session.retryCount < 1) {
+                    console.log(`[Recording] FFmpeg failed. Retrying (Attempt ${session.retryCount + 1})...`);
+                    session.retryCount++;
+                    session.ffmpegProcess = null;
+                    setTimeout(() => {
+                        spawnFFmpeg(interviewId).catch(err => {
+                            console.error(`[Recording] Retry failed:`, err);
+                        });
+                    }, 1000);
+                    return; // Don't cleanup or mark as failed yet
+                }
+
                 let errorMessage = `FFmpeg exited with code ${code}`;
                 try {
-                    const logContent = fs.readFileSync(session.logPath, 'utf-8');
+                    const logContent = fs.readFileSync(session?.logPath || '', 'utf-8');
                     const last500 = logContent.slice(-500);
                     errorMessage = last500 || errorMessage;
                 } catch {}

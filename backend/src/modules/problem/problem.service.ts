@@ -1,6 +1,7 @@
 import { prisma } from "../../lib/prisma.js";
 import { ApiError } from "../../utils/api-error.js";
 import { CreateProblemInput, UpdateProblemInput, CreateSubmissionInput } from "./problem.schema.js";
+import { submissionQueue } from "../codearena/submissionQueue.js";
 
 export const createProblem = async (userId: string, data: CreateProblemInput) => {
     const company = await prisma.company.findUnique({
@@ -184,8 +185,7 @@ export const createSubmission = async (userId: string, problemId: string, data: 
     });
     if (!problem) throw new ApiError(404, "Problem not found");
 
-    // "Paused Functioning": We stub the execution and just save the pending submission record.
-    return await prisma.submission.create({
+    const submission = await prisma.submission.create({
         data: {
             studentId: student.id,
             problemId: problem.id,
@@ -196,6 +196,10 @@ export const createSubmission = async (userId: string, problemId: string, data: 
             status: "PENDING"
         }
     });
+
+    await submissionQueue.add({ submissionId: submission.id, isContestSubmission: true });
+    
+    return submission;
 }
 
 export const getSubmissions = async (userId: string, problemId: string) => {

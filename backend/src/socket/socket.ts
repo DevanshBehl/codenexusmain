@@ -135,6 +135,14 @@ export function createSocketServer(httpServer: HttpServer): Server {
                     },
                 });
 
+                // Send existing producers so late-joiner can consume them
+                const existingProducers = Array.from(producers.values())
+                    .filter(p => p.appData.interviewId === interviewId && p.appData.userId !== socket.userId)
+                    .map(p => ({ producerId: p.id, userId: p.appData.userId }));
+                if (existingProducers.length > 0) {
+                    socket.emit("existing-producers", { producers: existingProducers });
+                }
+
                 // Update interview status to IN_PROGRESS if both participants are present
                 if (roomSockets.length >= 2 && interview.status === "SCHEDULED") {
                     await prisma.interview.update({
@@ -198,6 +206,7 @@ export function createSocketServer(httpServer: HttpServer): Server {
                 
                 const producer = await transport.produce({ kind: data.kind, rtpParameters: data.rtpParameters });
                 producer.appData.userId = socket.userId;
+                producer.appData.interviewId = data.interviewId;
                 producers.set(producer.id, producer);
 
                 const roomId = `interview-${data.interviewId}`;
@@ -206,7 +215,7 @@ export function createSocketServer(httpServer: HttpServer): Server {
                 // RECORDING HOOK — tap new producer into recording pipeline
                 const recordingSession = activeSessions.get(data.interviewId);
                 if (recordingSession) {
-                    const router = routers.get(roomId);
+                    const router = await createRoomRouter(data.interviewId);
                     if (router) {
                         await addProducerToRecording(data.interviewId, producer, router);
                     }
@@ -272,9 +281,8 @@ export function createSocketServer(httpServer: HttpServer): Server {
         });
 
         socket.on("getProducers", (data: { interviewId: string }, callback) => {
-             // In a real app we would map interviewId -> router -> producers.
              const producerList = Array.from(producers.values())
-                 .filter(p => p.appData.userId !== socket.userId)
+                 .filter(p => p.appData.interviewId === data.interviewId && p.appData.userId !== socket.userId)
                  .map(p => ({
                      producerId: p.id,
                      userId: p.appData.userId
@@ -388,6 +396,13 @@ export function createSocketServer(httpServer: HttpServer): Server {
                 const roomId = `interview-${data.interviewId}`;
                 const router = await createRoomRouter(data.interviewId);
                 await startRecording(data.interviewId, router);
+
+                // Capture any producers that already exist in the room
+                for (const [, producer] of producers) {
+                    if (producer.appData.interviewId === data.interviewId) {
+                        await addProducerToRecording(data.interviewId, producer, router);
+                    }
+                }
 
                 io.to(roomId).emit("recording-started", { interviewId: data.interviewId });
                 callback?.({ success: true });

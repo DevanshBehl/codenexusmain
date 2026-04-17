@@ -15,29 +15,52 @@ export const submissionQueue = new Queue('codearena:submissions', queueOpts);
 
 export function initSubmissionWorker() {
     submissionQueue.process(Number(process.env.BULL_CONCURRENCY || 5), async (job: any) => {
-        const { submissionId } = job.data;
+        const { submissionId, isContestSubmission } = job.data;
         if (!submissionId) return;
 
         try {
-            // 1. Fetch submission + problem + test cases
-            const submission = await prisma.caSubmission.findUnique({
-                where: { id: submissionId },
-                include: { problem: { include: { testCases: { orderBy: { order_index: 'asc' } } } } }
-            });
+            let submission: any;
+            let problem: any;
+            let testCases: any[];
 
-            if (!submission || !submission.problem) {
+            if (isContestSubmission) {
+                // Contest system models
+                submission = await prisma.submission.findUnique({
+                    where: { id: submissionId },
+                    include: { problem: { include: { testCases: { orderBy: { id: 'asc' } } } } }
+                });
+                problem = submission?.problem;
+                testCases = problem?.testCases?.map((tc: any) => ({
+                    input: tc.input,
+                    expected_output: tc.output,
+                })) || [];
+            } else {
+                // CodeArena system models
+                submission = await prisma.caSubmission.findUnique({
+                    where: { id: submissionId },
+                    include: { problem: { include: { testCases: { orderBy: { order_index: 'asc' } } } } }
+                });
+                problem = submission?.problem;
+                testCases = problem?.testCases || [];
+            }
+
+            if (!submission || !problem) {
                 console.error(`Submission ${submissionId} not found`);
                 return;
             }
 
-            const problem = submission.problem;
-            const testCases = problem.testCases;
-
             // 2. Set to Processing
-            await prisma.caSubmission.update({
-                where: { id: submissionId },
-                data: { status: 'processing' }
-            });
+            if (isContestSubmission) {
+                await prisma.submission.update({
+                    where: { id: submissionId },
+                    data: { status: 'processing' }
+                });
+            } else {
+                await prisma.caSubmission.update({
+                    where: { id: submissionId },
+                    data: { status: 'processing' }
+                });
+            }
 
             const ioClient = getIo();
             if(ioClient) ioClient.to(`submission:${submissionId}`).emit('submission_status', { status: 'processing' });
@@ -52,17 +75,19 @@ export function initSubmissionWorker() {
                     language_id: Number(languageId) || 71,
                     stdin: tc.input,
                     expected_output: tc.expected_output,
-                    time_limit_ms: problem.time_limit_ms,
-                    memory_limit_mb: problem.memory_limit_mb
+                    time_limit_ms: problem.time_limit_ms || 2000,
+                    memory_limit_mb: problem.memory_limit_mb || 256
                 });
                 tokens.push(token);
             }
 
-            // Save tokens to submission
-            await prisma.caSubmission.update({
-                where: { id: submissionId },
-                data: { judge0_tokens: tokens }
-            });
+            // Save tokens if it's CaSubmission
+            if (!isContestSubmission) {
+                await prisma.caSubmission.update({
+                    where: { id: submissionId },
+                    data: { judge0_tokens: tokens }
+                });
+            }
 
             // 4. Poll results
             const results = [];
@@ -83,21 +108,33 @@ export function initSubmissionWorker() {
             const { verdict, error } = determineVerdict(results);
 
             // 6. Update Submission Final Status
-            await prisma.caSubmission.update({
-                where: { id: submissionId },
-                data: {
-                    status: verdict,
-                    test_cases_passed: passed,
-                    test_cases_total: tokens.length,
-                    time_taken_ms: Math.round(timeUsed),
-                    memory_used_kb: Math.round(memoryUsed),
-                    error_message: error || null
-                }
-            });
+            if (isContestSubmission) {
+                await prisma.submission.update({
+                    where: { id: submissionId },
+                    data: {
+                        status: verdict,
+                        passed: passed,
+                        total: tokens.length,
+                    }
+                });
+            } else {
+                await prisma.caSubmission.update({
+                    where: { id: submissionId },
+                    data: {
+                        status: verdict,
+                        test_cases_passed: passed,
+                        test_cases_total: tokens.length,
+                        time_taken_ms: Math.round(timeUsed),
+                        memory_used_kb: Math.round(memoryUsed),
+                        error_message: error || null
+                    }
+                });
+            }
 
             // 7. Update User's Profile Summary
-            if (submission.student_cnid) {
-                const isSolved = verdict === 'accepted';
+            // 7. Update User's Profile Summary (CodeArena only)
+            if (!isContestSubmission && submission.student_cnid) {
+                const isSolved = verdict === 'accepted' || verdict === 'Accepted';
                 const summary = await prisma.caSubmissionSummary.findUnique({
                     where: {
                         student_cnid_problem_id: {
@@ -150,13 +187,20 @@ export function initSubmissionWorker() {
             }
 
         } catch (error: any) {
-            console.error(`Error processing submission ${submissionId}:`, error);
-            await prisma.caSubmission.update({
-                where: { id: submissionId },
-                data: { status: 'runtime_error', error_message: 'Internal processing error' }
-            });
+            console.error(`Error processing submission ${job.data.submissionId}:`, error);
+            if (job.data.isContestSubmission) {
+                await prisma.submission.update({
+                    where: { id: job.data.submissionId },
+                    data: { status: 'runtime_error' }
+                });
+            } else {
+                await prisma.caSubmission.update({
+                    where: { id: job.data.submissionId },
+                    data: { status: 'runtime_error', error_message: 'Internal processing error' }
+                });
+            }
             const ioClient3 = getIo();
-            if (ioClient3) ioClient3.to(`submission:${submissionId}`).emit('submission_result', {
+            if (ioClient3) ioClient3.to(`submission:${job.data.submissionId}`).emit('submission_result', {
                 status: 'runtime_error',
                 error_message: 'Internal processing error'
             });

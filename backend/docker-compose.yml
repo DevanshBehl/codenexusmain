@@ -16,6 +16,15 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
+  app-redis:
+    image: redis:7-alpine
+    container_name: app_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - app-redis-data:/data
+
   # ============================================================
   # Judge0 CE — Self-Hosted Code Execution Engine
   # ============================================================
@@ -115,5 +124,6 @@ networks:
 
 volumes:
   pgdata:
+  app-redis-data:
   judge0-redis-data:
   judge0-pg-data:

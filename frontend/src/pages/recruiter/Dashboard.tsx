@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { dashboardApi, type RecruiterDashboardData } from '../../lib/api';
 import {
     Terminal,
     Users,
@@ -29,230 +30,22 @@ import {
     Mail
 } from 'lucide-react';
 
-/* ────────── Types & Mock Data ────────── */
+/* ────────── Types ────────── */
 type TabType = 'INTERVIEWS' | 'RECORDINGS';
-type StudentFilter = 'ALL' | 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
 
-interface Project {
-    title: string;
-    description: string;
-    techStack: string[];
-}
-
-interface Candidate {
-    id: string;
-    name: string;
-    role: string;
-    date: string;
-    time: string;
-    status: 'Upcoming' | 'In Progress' | 'Completed';
-    gender: 'male' | 'female';
-    academics: string;
-    cgpa: string;
-    specialization: string;
-    codeArenaScore: number;
-    universityRank: number;
-    projects: Project[];
-    university: string;
-}
-
-const SCHEDULED_INTERVIEWS: Candidate[] = [
-    {
-        id: '1',
-        name: 'Alex Johnson',
-        role: 'Frontend Engineer',
-        date: 'Mar 25',
-        time: '14:00',
-        status: 'Upcoming',
-        gender: 'male',
-        academics: 'B.Tech in Computer Science',
-        cgpa: '8.9/10',
-        specialization: 'Frontend Development & UI/UX',
-        codeArenaScore: 1845,
-        universityRank: 12,
-        university: 'IIT Delhi',
-        projects: [
-            {
-                title: 'E-commerce React Dashboard',
-                description: 'A full-featured admin dashboard built with React, Redux, and TailwindCSS for managing products, orders, and users.',
-                techStack: ['React', 'Redux', 'TailwindCSS', 'Firebase']
-            },
-            {
-                title: 'Real-time Chat App',
-                description: 'WebSocket-based chat application with typing indicators, read receipts, and room management.',
-                techStack: ['Node.js', 'Socket.io', 'React']
-            }
-        ]
-    },
-    {
-        id: '2',
-        name: 'Sarah Chen',
-        role: 'Backend Engineer',
-        date: 'Mar 26',
-        time: '10:30',
-        status: 'Upcoming',
-        gender: 'female',
-        academics: 'M.S. in Software Engineering',
-        cgpa: '3.8/4.0',
-        specialization: 'Distributed Systems & API Design',
-        codeArenaScore: 2150,
-        universityRank: 3,
-        university: 'IIT Bombay',
-        projects: [
-            {
-                title: 'Microservices Payment Gateway',
-                description: 'Designed a resilient payment gateway using Go and gRPC, capable of handling 5000+ TPS with 99.99% uptime.',
-                techStack: ['Go', 'gRPC', 'PostgreSQL', 'Redis', 'Kafka']
-            }
-        ]
-    },
-    {
-        id: '3',
-        name: 'Michael Rodriguez',
-        role: 'Full Stack Engineer',
-        date: 'Mar 28',
-        time: '16:00',
-        status: 'Upcoming',
-        gender: 'male',
-        academics: 'B.S. in Information Technology',
-        cgpa: '3.6/4.0',
-        specialization: 'Web Applications & Database Optimization',
-        codeArenaScore: 1680,
-        universityRank: 45,
-        university: 'NIT Trichy',
-        projects: [
-            {
-                title: 'Social Media Analytics Tool',
-                description: 'Full stack app aggregating social metrics, visualizing trends using D3.js and a Python backend.',
-                techStack: ['Python', 'Django', 'React', 'D3.js']
-            },
-            {
-                title: 'Task Management System',
-                description: 'Kanban board application with drag-and-drop functionality and offline sync capabilities.',
-                techStack: ['TypeScript', 'Next.js', 'Prisma']
-            }
-        ]
-    }
-];
-
-interface SolvedQuestion {
-    title: string;
-    testCasesPassed: number;
-    totalTestCases: number;
-    codeSubmission: string;
-}
-
-interface Recording {
-    id: string;
-    student: string;
-    university: string;
-    role: string;
-    date: string;
-    duration: string;
-    rating: number;
-    type: string;
-    verdict: string;
-    notes: string;
-    questions: SolvedQuestion[];
-}
-
-const RECORDINGS: Recording[] = [
-    { 
-        id: 'r1',
-        student: 'Priya Patel', 
-        university: 'IIT Bombay', 
-        role: 'SWE', 
-        date: 'Mar 15, 2026', 
-        duration: '45 min', 
-        rating: 4.5, 
-        type: 'TECHNICAL', 
-        verdict: 'SELECTED',
-        notes: "Very strong problem-solving skills. Communicated her thought process clearly. Identified edge cases up front. Code structure was optimal.",
-        questions: [
-            {
-                title: 'Two Sum',
-                totalTestCases: 15,
-                testCasesPassed: 15,
-                codeSubmission: "function twoSum(nums, target) {\n  const map = new Map();\n  for (let i = 0; i < nums.length; i++) {\n    const complement = target - nums[i];\n    if (map.has(complement)) {\n      return [map.get(complement), i];\n    }\n    map.set(nums[i], i);\n  }\n  return [];\n}"
-            },
-            {
-                title: 'Reverse Linked List',
-                totalTestCases: 10,
-                testCasesPassed: 10,
-                codeSubmission: "function reverseList(head) {\n  let prev = null;\n  let curr = head;\n  while (curr) {\n    let nextTemp = curr.next;\n    curr.next = prev;\n    prev = curr;\n    curr = nextTemp;\n  }\n  return prev;\n}"
-            }
-        ]
-    },
-    { 
-        id: 'r2',
-        student: 'Vikram Singh', 
-        university: 'NIT Trichy', 
-        role: 'Systems Eng.', 
-        date: 'Mar 14, 2026', 
-        duration: '52 min', 
-        rating: 4.8, 
-        type: 'TECHNICAL', 
-        verdict: 'SELECTED',
-        notes: "Exceptional knowledge of core CS concepts and systems design. Solved the LRU Cache with perfect concurrency considerations.",
-        questions: [
-            {
-                title: 'LRU Cache',
-                totalTestCases: 20,
-                testCasesPassed: 20,
-                codeSubmission: "class LRUCache {\n  constructor(capacity) {\n    this.capacity = capacity;\n    this.cache = new Map();\n  }\n  get(key) {\n    if (!this.cache.has(key)) return -1;\n    const val = this.cache.get(key);\n    this.cache.delete(key);\n    this.cache.set(key, val);\n    return val;\n  }\n  put(key, value) {\n    if (this.cache.has(key)) this.cache.delete(key);\n    this.cache.set(key, value);\n    if (this.cache.size > this.capacity) {\n      this.cache.delete(this.cache.keys().next().value);\n    }\n  }\n}"
-            }
-        ]
-    },
-    { 
-        id: 'r3',
-        student: 'Kavya Iyer', 
-        university: 'IIT Bombay', 
-        role: 'Backend Eng.', 
-        date: 'Mar 13, 2026', 
-        duration: '38 min', 
-        rating: 3.5, 
-        type: 'TECHNICAL', 
-        verdict: 'PENDING',
-        notes: "Struggled a bit initially with DP but brute force solution worked. We talked through memoization but ran out of time to implement fully.",
-        questions: [
-            {
-                title: 'Climbing Stairs',
-                totalTestCases: 15,
-                testCasesPassed: 10,
-                codeSubmission: "function climbStairs(n) {\n  // TLE on large inputs\n  if (n <= 2) return n;\n  return climbStairs(n - 1) + climbStairs(n - 2);\n}"
-            }
-        ]
-    },
-    { 
-        id: 'r4',
-        student: 'Arjun Nair', 
-        university: 'BITS Pilani', 
-        role: 'SDE I', 
-        date: 'Mar 12, 2026', 
-        duration: '40 min', 
-        rating: 2.8, 
-        type: 'TECHNICAL', 
-        verdict: 'REJECTED',
-        notes: "Candidate was unable to grasp the optimal solution even after several hints. The basic string manipulation question was left incomplete.",
-        questions: [
-            {
-                title: 'Valid Palindrome',
-                totalTestCases: 10,
-                testCasesPassed: 4,
-                codeSubmission: "function isPalindrome(s) {\n  const cleanStr = s.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();\n  // Did not finish two-pointer logic\n  for(let i=0; i<cleanStr.length; i++){\n    \n  }\n}"
-            }
-        ]
-    },
-];
-
-/* ────────── Component ────────── */
 export default function RecruiterDashboard() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [activeTab, setActiveTab] = useState<TabType>('INTERVIEWS');
-    const [studentFilter, setStudentFilter] = useState<StudentFilter>('ALL');
     const [searchQuery, setSearchQuery] = useState('');
-    const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
-    const [selectedReport, setSelectedReport] = useState<Recording | null>(null);
+    const [selectedInterviewIdx, setSelectedInterviewIdx] = useState<number | null>(null);
+    const [selectedRecordingIdx, setSelectedRecordingIdx] = useState<number | null>(null);
+    const [data, setData] = useState<RecruiterDashboardData | null>(null);
+
+    useEffect(() => {
+        dashboardApi.recruiter()
+            .then(res => setData(res.data))
+            .catch(() => { });
+    }, []);
 
     const sidebarItems = [
         { icon: Mail, label: 'MAIL', onClick: () => window.location.href = '/recruiter/mail' },
@@ -262,12 +55,28 @@ export default function RecruiterDashboard() {
         { icon: FileText, label: 'PROFILE', onClick: () => window.location.href = '/recruiter/profile' },
     ];
 
-    const filteredInterviews = SCHEDULED_INTERVIEWS.filter(s => {
-        const matchesSearch = s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            s.university.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            s.role.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesSearch;
+    const recruiterName = data?.profile.name || '—';
+    const recruiterInitials = recruiterName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || 'RC';
+    const companyName = data?.profile.company || '';
+
+    const scheduledInterviews = data?.scheduledInterviews || [];
+    const recordings = data?.recordings || [];
+
+    const filteredInterviews = scheduledInterviews.filter(s => {
+        const q = searchQuery.toLowerCase();
+        return !q ||
+            s.student.name.toLowerCase().includes(q) ||
+            s.student.university.toLowerCase().includes(q) ||
+            s.role.toLowerCase().includes(q);
     });
+
+    const selectedCandidate = selectedInterviewIdx !== null ? scheduledInterviews[selectedInterviewIdx] : null;
+    const selectedReport = selectedRecordingIdx !== null ? recordings[selectedRecordingIdx] : null;
+
+    const formatDate = (iso: string) => {
+        const d = new Date(iso);
+        return d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    };
 
     const getVerdictStyle = (verdict: string) => {
         switch (verdict) {
@@ -282,6 +91,10 @@ export default function RecruiterDashboard() {
         { key: 'INTERVIEWS', label: 'Upcoming Interviews', icon: Calendar },
         { key: 'RECORDINGS', label: 'My Recordings', icon: Play },
     ];
+
+    const avgRating = recordings.length > 0
+        ? (recordings.reduce((sum, r) => sum + r.rating, 0) / recordings.length).toFixed(1)
+        : '—';
 
     return (
         <div className="h-screen w-full bg-[#050505] font-sans text-white selection:bg-accent-500/30 selection:text-white relative overflow-hidden flex">
@@ -328,12 +141,12 @@ export default function RecruiterDashboard() {
                                 if (item.onClick) item.onClick();
                             }}
                             className={`flex items-center px-3 py-2.5 rounded-sm transition-all duration-200 group relative
-                                ${item.active && index === 0
+                                ${item.active
                                     ? 'bg-[#111] border border-[#333] border-l-2 border-l-accent-500 text-white'
                                     : 'border border-transparent text-[#888] hover:bg-[#111] hover:border-[#222] hover:text-white'
                                 }`}
                         >
-                            <item.icon size={16} className={`min-w-[16px] ${item.active && index === 0 ? 'text-accent-400' : 'group-hover:text-white transition-colors'}`} />
+                            <item.icon size={16} className={`min-w-[16px] ${item.active ? 'text-accent-400' : 'group-hover:text-white transition-colors'}`} />
                             <AnimatePresence>
                                 {isSidebarOpen && (
                                     <motion.span
@@ -353,7 +166,7 @@ export default function RecruiterDashboard() {
                 <div className="p-4 border-t border-[#222]">
                     <div className="flex items-center group cursor-pointer hover:bg-[#111] p-2 rounded-sm border border-transparent hover:border-[#333] transition-colors">
                         <div className="w-8 h-8 rounded-sm bg-[#1a1a1a] border border-[#333] flex items-center justify-center text-white font-mono text-xs font-bold shrink-0">
-                            HR
+                            {recruiterInitials}
                         </div>
                         <AnimatePresence>
                             {isSidebarOpen && (
@@ -364,7 +177,7 @@ export default function RecruiterDashboard() {
                                     className="ml-3 overflow-hidden flex-1 flex items-center justify-between"
                                 >
                                     <div>
-                                        <p className="text-xs font-mono text-white whitespace-nowrap uppercase tracking-wider">John Doe</p>
+                                        <p className="text-xs font-mono text-white whitespace-nowrap uppercase tracking-wider">{recruiterName}</p>
                                         <p className="text-[10px] font-mono text-accent-500 whitespace-nowrap">RECRUITER</p>
                                     </div>
                                     <LogOut size={14} className="text-[#555] group-hover:text-red-400 transition-colors" />
@@ -389,10 +202,10 @@ export default function RecruiterDashboard() {
                                 RECRUITER PORTAL
                             </div>
                             <h1 className="text-3xl md:text-5xl font-bold text-white tracking-tight uppercase">
-                                <span className="text-accent-400 font-serif italic">My</span> Dashboard
+                                <span className="text-accent-400 font-serif italic">{recruiterName.split(' ')[0] || 'My'}</span> Dashboard
                             </h1>
                             <p className="text-[#888] font-mono text-xs mt-2">
-                                /home/recruiter/dashboard
+                                {companyName ? `${companyName} · Recruiter` : '/home/recruiter/dashboard'}
                             </p>
                         </div>
                     </div>
@@ -402,30 +215,32 @@ export default function RecruiterDashboard() {
                         <div className="bg-[#0A0A0A] border border-[#222] p-5 rounded-sm group hover:border-[#333] transition-colors relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-1 h-full bg-[#111] group-hover:bg-accent-500 transition-colors"></div>
                             <h3 className="text-[10px] uppercase font-mono tracking-widest text-[#888] mb-1">Upcoming</h3>
-                            <div className="text-3xl font-bold font-sans tracking-tight">{SCHEDULED_INTERVIEWS.length}</div>
+                            <div className="text-3xl font-bold font-sans tracking-tight">{data?.stats.scheduledInterviews ?? 0}</div>
                             <div className="text-[10px] font-mono text-green-400 mt-2 flex items-center gap-1">
-                                <TrendingUp size={10} /> Next one in 2 hrs
+                                <TrendingUp size={10} /> scheduled interviews
                             </div>
                         </div>
                         <div className="bg-[#0A0A0A] border border-[#222] p-5 rounded-sm group hover:border-[#333] transition-colors relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-1 h-full bg-[#111] group-hover:bg-accent-500 transition-colors"></div>
                             <h3 className="text-[10px] uppercase font-mono tracking-widest text-[#888] mb-1">Completed</h3>
-                            <div className="text-3xl font-bold font-sans tracking-tight">{RECORDINGS.length}</div>
+                            <div className="text-3xl font-bold font-sans tracking-tight">{data?.stats.completedInterviews ?? 0}</div>
                             <div className="text-[10px] font-mono text-[#555] mt-2 flex items-center gap-1">
-                                <CheckCircle2 size={10} /> past 30 days
+                                <CheckCircle2 size={10} /> total completed
+                            </div>
+                        </div>
+                        <div className="bg-[#0A0A0A] border border-[#222] p-5 rounded-sm group hover:border-[#333] transition-colors relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-1 h-full bg-[#111] group-hover:bg-accent-500 transition-colors"></div>
+                            <h3 className="text-[10px] uppercase font-mono tracking-widest text-[#888] mb-1">Recordings</h3>
+                            <div className="text-3xl font-bold font-sans tracking-tight">{data?.stats.recordings ?? 0}</div>
+                            <div className="text-[10px] font-mono text-accent-400 mt-2 flex items-center gap-1">
+                                <Play size={10} /> saved recordings
                             </div>
                         </div>
                         <div className="bg-[#0A0A0A] border border-[#222] p-5 rounded-sm group hover:border-[#333] transition-colors relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-1 h-full bg-[#111] group-hover:bg-accent-500 transition-colors"></div>
                             <h3 className="text-[10px] uppercase font-mono tracking-widest text-[#888] mb-1">Avg Rating</h3>
-                            <div className="text-3xl font-bold font-sans tracking-tight text-yellow-400 flex items-center"><Star size={24} className="fill-yellow-400 mr-2" /> 3.9</div>
+                            <div className="text-3xl font-bold font-sans tracking-tight text-yellow-400 flex items-center"><Star size={24} className="fill-yellow-400 mr-2" /> {avgRating}</div>
                             <div className="text-[10px] font-mono text-[#555] mt-2">from your given ratings</div>
-                        </div>
-                        <div className="bg-[#0A0A0A] border border-[#222] p-5 rounded-sm group hover:border-[#333] transition-colors relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-1 h-full bg-[#111] group-hover:bg-accent-500 transition-colors"></div>
-                            <h3 className="text-[10px] uppercase font-mono tracking-widest text-[#888] mb-1">Time Spent</h3>
-                            <div className="text-3xl font-bold font-sans tracking-tight text-accent-400">12h</div>
-                            <div className="text-[10px] font-mono text-[#555] mt-2">in interviews this week</div>
                         </div>
                     </div>
 
@@ -477,70 +292,59 @@ export default function RecruiterDashboard() {
                                                         className="bg-[#050505] border border-[#333] rounded-sm pl-7 pr-3 py-1.5 text-[10px] font-mono text-white placeholder:text-[#555] outline-none focus:border-accent-500 transition-colors w-48"
                                                     />
                                                 </div>
-                                                <div className="flex items-center gap-1">
-                                                    <Filter size={10} className="text-[#555]" />
-                                                    {(['ALL', 'SCHEDULED', 'COMPLETED', 'CANCELLED'] as const).map((f) => (
-                                                        <button
-                                                            key={f}
-                                                            onClick={() => setStudentFilter(f)}
-                                                            className={`text-[9px] font-mono uppercase tracking-widest px-2 py-1 border rounded-sm transition-colors ${
-                                                                studentFilter === f
-                                                                    ? 'border-accent-500/50 text-accent-400 bg-accent-500/10'
-                                                                    : 'border-[#333] text-[#666] hover:text-white hover:border-[#555]'
-                                                            }`}
-                                                        >
-                                                            {f}
-                                                        </button>
-                                                    ))}
-                                                </div>
                                             </div>
                                         </div>
 
                                         <div className="divide-y divide-[#1a1a1a]">
-                                            {filteredInterviews.map((interview, i) => (
-                                                <div key={i} className="flex flex-col md:flex-row md:items-center justify-between p-5 hover:bg-[#050505] transition-colors group">
-                                                    <div className="flex items-start gap-4">
-                                                        <div className="w-10 h-10 rounded-sm bg-[#111] border border-[#333] flex items-center justify-center text-accent-400 font-mono text-sm font-bold shrink-0">
-                                                            {interview.name.charAt(0)}
-                                                        </div>
-                                                        <div>
-                                                            <div className="flex items-center gap-3 mb-1">
-                                                                <h4 className="font-sans font-bold text-sm text-white group-hover:text-accent-400 transition-colors">{interview.name}</h4>
-                                                                <span className="text-[9px] font-mono px-2 py-0.5 border rounded-sm uppercase tracking-widest border-accent-500/50 text-accent-400 bg-accent-500/10">
-                                                                    {interview.status}
-                                                                </span>
-                                                            </div>
-                                                            <div className="flex items-center gap-3 text-[10px] font-mono text-[#666] uppercase tracking-widest mt-1 mb-2">
-                                                                <span>{interview.university}</span>
-                                                                <span>•</span>
-                                                                <span>{interview.role}</span>
-                                                            </div>
-                                                            <button
-                                                                onClick={() => setSelectedCandidate(interview)}
-                                                                className="text-xs text-accent-400 hover:text-accent-300 transition-colors underline underline-offset-2 flex items-center gap-1"
-                                                            >
-                                                                <Users size={12} /> View Profile
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                    <div className="flex items-center gap-6 mt-3 md:mt-0">
-                                                        <div className="text-right">
-                                                            <div className="text-xs font-mono text-white flex items-center gap-2 mb-1">
-                                                                <Calendar size={12} className="text-accent-500" /> {interview.date}
-                                                            </div>
-                                                            <div className="text-[10px] font-mono text-[#aaa] flex items-center gap-2 justify-end">
-                                                                <Clock size={12} className="text-accent-500" /> {interview.time}
-                                                            </div>
-                                                        </div>
-                                                        <Link
-                                                            to={`/recruiter/interview?participant=${interview.id}&time=${interview.date}T${interview.time}:00`}
-                                                            className="flex items-center justify-center gap-2 bg-accent-500/10 hover:bg-accent-500/20 border border-accent-500/30 rounded-sm px-4 py-2 text-xs font-bold font-mono tracking-widest text-accent-400 transition-colors"
-                                                        >
-                                                            <Video size={14} /> JOIN
-                                                        </Link>
-                                                    </div>
+                                            {filteredInterviews.length === 0 && (
+                                                <div className="text-center py-16 text-[#555] font-mono text-xs uppercase tracking-widest">
+                                                    No upcoming interviews
                                                 </div>
-                                            ))}
+                                            )}
+                                            {filteredInterviews.map((interview, i) => {
+                                                const originalIdx = scheduledInterviews.indexOf(interview);
+                                                return (
+                                                    <div key={interview.id} className="flex flex-col md:flex-row md:items-center justify-between p-5 hover:bg-[#050505] transition-colors group">
+                                                        <div className="flex items-start gap-4">
+                                                            <div className="w-10 h-10 rounded-sm bg-[#111] border border-[#333] flex items-center justify-center text-accent-400 font-mono text-sm font-bold shrink-0">
+                                                                {interview.student.name.charAt(0)}
+                                                            </div>
+                                                            <div>
+                                                                <div className="flex items-center gap-3 mb-1">
+                                                                    <h4 className="font-sans font-bold text-sm text-white group-hover:text-accent-400 transition-colors">{interview.student.name}</h4>
+                                                                    <span className="text-[9px] font-mono px-2 py-0.5 border rounded-sm uppercase tracking-widest border-accent-500/50 text-accent-400 bg-accent-500/10">
+                                                                        {interview.type}
+                                                                    </span>
+                                                                </div>
+                                                                <div className="flex items-center gap-3 text-[10px] font-mono text-[#666] uppercase tracking-widest mt-1 mb-2">
+                                                                    <span>{interview.student.university}</span>
+                                                                    <span>•</span>
+                                                                    <span>{interview.role}</span>
+                                                                </div>
+                                                                <button
+                                                                    onClick={() => setSelectedInterviewIdx(originalIdx)}
+                                                                    className="text-xs text-accent-400 hover:text-accent-300 transition-colors underline underline-offset-2 flex items-center gap-1"
+                                                                >
+                                                                    <Users size={12} /> View Profile
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-6 mt-3 md:mt-0">
+                                                            <div className="text-right">
+                                                                <div className="text-xs font-mono text-white flex items-center gap-2 mb-1">
+                                                                    <Calendar size={12} className="text-accent-500" /> {formatDate(interview.scheduledAt)}
+                                                                </div>
+                                                            </div>
+                                                            <Link
+                                                                to={`/recruiter/interview/${interview.id}`}
+                                                                className="flex items-center justify-center gap-2 bg-accent-500/10 hover:bg-accent-500/20 border border-accent-500/30 rounded-sm px-4 py-2 text-xs font-bold font-mono tracking-widest text-accent-400 transition-colors"
+                                                            >
+                                                                <Video size={14} /> JOIN
+                                                            </Link>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 </div>
@@ -556,25 +360,34 @@ export default function RecruiterDashboard() {
                                         </h3>
                                     </div>
                                     <div className="divide-y divide-[#1a1a1a]">
-                                        {RECORDINGS.map((rec, i) => (
-                                            <div key={i} className="flex flex-col md:flex-row md:items-center justify-between p-5 hover:bg-[#050505] transition-colors group cursor-pointer">
+                                        {recordings.length === 0 && (
+                                            <div className="text-center py-16 text-[#555] font-mono text-xs uppercase tracking-widest">
+                                                No recordings yet
+                                            </div>
+                                        )}
+                                        {recordings.map((rec, i) => (
+                                            <div key={rec.id} className="flex flex-col md:flex-row md:items-center justify-between p-5 hover:bg-[#050505] transition-colors group cursor-pointer">
                                                 <div className="flex items-start gap-4 flex-1">
                                                     <div className="w-10 h-10 rounded-sm bg-[#111] border border-[#333] flex items-center justify-center shrink-0 group-hover:border-accent-500/50 transition-colors">
                                                         <Play size={16} className="text-[#555] group-hover:text-accent-400 transition-colors ml-0.5" />
                                                     </div>
                                                     <div>
-                                                        <h4 className="font-sans font-bold text-sm text-white group-hover:text-accent-400 transition-colors">{rec.student}</h4>
+                                                        <h4 className="font-sans font-bold text-sm text-white group-hover:text-accent-400 transition-colors">{rec.student.name}</h4>
                                                         <div className="flex items-center gap-3 text-[10px] font-mono text-[#666] uppercase tracking-widest mt-1">
-                                                            <span>{rec.university}</span>
+                                                            <span>{rec.student.university}</span>
                                                             <span>•</span>
                                                             <span>{rec.role}</span>
                                                             <span>•</span>
                                                             <span>{rec.type}</span>
                                                         </div>
                                                         <div className="flex items-center gap-3 text-[10px] font-mono text-[#555] mt-2">
-                                                            <span>{rec.date}</span>
-                                                            <span>•</span>
-                                                            <span>{rec.duration}</span>
+                                                            <span>{formatDate(rec.scheduledAt)}</span>
+                                                            {rec.duration && (
+                                                                <>
+                                                                    <span>•</span>
+                                                                    <span>{rec.duration}</span>
+                                                                </>
+                                                            )}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -589,8 +402,8 @@ export default function RecruiterDashboard() {
                                                     <span className={`text-[9px] font-mono px-2 py-1 border rounded-sm uppercase tracking-widest ${getVerdictStyle(rec.verdict)}`}>
                                                         {rec.verdict}
                                                     </span>
-                                                    <button 
-                                                        onClick={() => setSelectedReport(rec)}
+                                                    <button
+                                                        onClick={() => setSelectedRecordingIdx(i)}
                                                         className="px-3 py-1.5 bg-[#111] border border-[#333] rounded-sm hover:border-accent-500 transition-colors flex items-center gap-2 group/btn"
                                                     >
                                                         <Eye size={14} className="text-[#888] group-hover/btn:text-accent-400" />
@@ -615,7 +428,7 @@ export default function RecruiterDashboard() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={() => setSelectedCandidate(null)}
+                        onClick={() => setSelectedInterviewIdx(null)}
                         className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 md:p-6"
                     >
                         <motion.div
@@ -632,11 +445,11 @@ export default function RecruiterDashboard() {
                                 </div>
                                 <div className="flex items-center gap-4 relative z-10">
                                     <div className="w-14 h-14 rounded-sm bg-gradient-to-br from-[#222] to-[#111] border border-[#333] flex items-center justify-center text-2xl font-bold font-mono text-white/80 shadow-inner">
-                                        {selectedCandidate.name.charAt(0)}
+                                        {selectedCandidate.student.name.charAt(0)}
                                     </div>
                                     <div>
                                         <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                                            {selectedCandidate.name}
+                                            {selectedCandidate.student.name}
                                             <span className="text-[10px] bg-accent-500/20 text-accent-400 px-2 py-0.5 rounded-sm font-mono font-normal uppercase tracking-widest border border-accent-500/30">
                                                 Verified
                                             </span>
@@ -645,7 +458,7 @@ export default function RecruiterDashboard() {
                                     </div>
                                 </div>
                                 <button
-                                    onClick={() => setSelectedCandidate(null)}
+                                    onClick={() => setSelectedInterviewIdx(null)}
                                     className="p-2 bg-[#111] hover:bg-[#222] rounded-sm text-[#666] hover:text-white transition-colors border border-[#333] relative z-10"
                                 >
                                     <X size={18} />
@@ -661,28 +474,28 @@ export default function RecruiterDashboard() {
                                             <GraduationCap size={48} />
                                         </div>
                                         <span className="text-[#888] text-[10px] font-mono uppercase tracking-widest relative z-10">CGPA</span>
-                                        <span className="text-xl font-bold text-white relative z-10">{selectedCandidate.cgpa}</span>
+                                        <span className="text-xl font-bold text-white relative z-10">{selectedCandidate.student.cgpa}</span>
                                     </div>
                                     <div className="bg-[#111] border border-[#222] rounded-sm p-4 flex flex-col gap-2 relative overflow-hidden group">
                                         <div className="absolute -right-2 -bottom-2 text-[#222] transition-transform group-hover:scale-110">
                                             <TrendingUp size={48} />
                                         </div>
-                                        <span className="text-[#888] text-[10px] font-mono uppercase tracking-widest relative z-10">Score</span>
-                                        <span className="text-xl font-bold text-accent-400 relative z-10">{selectedCandidate.codeArenaScore}</span>
+                                        <span className="text-[#888] text-[10px] font-mono uppercase tracking-widest relative z-10">Branch</span>
+                                        <span className="text-lg font-bold text-accent-400 relative z-10">{selectedCandidate.student.branch}</span>
                                     </div>
                                     <div className="bg-[#111] border border-[#222] rounded-sm p-4 flex flex-col gap-2 relative overflow-hidden group">
                                         <div className="absolute -right-2 -bottom-2 text-[#222] transition-transform group-hover:scale-110">
                                             <Trophy size={48} />
                                         </div>
-                                        <span className="text-[#888] text-[10px] font-mono uppercase tracking-widest relative z-10">Uni Rank</span>
-                                        <span className="text-xl font-bold text-white relative z-10">#{selectedCandidate.universityRank}</span>
+                                        <span className="text-[#888] text-[10px] font-mono uppercase tracking-widest relative z-10">Problems</span>
+                                        <span className="text-xl font-bold text-white relative z-10">{selectedCandidate.student.solvedProblems.length}</span>
                                     </div>
                                     <div className="bg-[#111] border border-[#222] rounded-sm p-4 flex flex-col gap-2 relative overflow-hidden group">
                                         <div className="absolute -right-2 -bottom-2 text-[#222] transition-transform group-hover:scale-110">
                                             <Star size={48} />
                                         </div>
-                                        <span className="text-[#888] text-[10px] font-mono uppercase tracking-widest relative z-10">Status</span>
-                                        <span className="text-sm font-bold text-green-400 relative z-10 mt-1 uppercase tracking-widest font-mono">{selectedCandidate.status}</span>
+                                        <span className="text-[#888] text-[10px] font-mono uppercase tracking-widest relative z-10">Interview</span>
+                                        <span className="text-sm font-bold text-green-400 relative z-10 mt-1 uppercase tracking-widest font-mono">{selectedCandidate.type}</span>
                                     </div>
                                 </div>
 
@@ -691,10 +504,10 @@ export default function RecruiterDashboard() {
                                     <section>
                                         <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#aaa] mb-3 flex items-center gap-2">
                                             <Award size={14} className="text-accent-500" />
-                                            Academics
+                                            University
                                         </h3>
                                         <div className="bg-[#0A0A0A] border border-[#222] rounded-sm p-4">
-                                            <p className="font-sans text-sm font-bold text-white/90">{selectedCandidate.academics}</p>
+                                            <p className="font-sans text-sm font-bold text-white/90">{selectedCandidate.student.university}</p>
                                         </div>
                                     </section>
                                     <section>
@@ -703,7 +516,7 @@ export default function RecruiterDashboard() {
                                             Key Specialization
                                         </h3>
                                         <div className="bg-[#0A0A0A] border border-[#222] rounded-sm p-4">
-                                            <p className="font-sans text-sm font-bold text-white/90">{selectedCandidate.specialization}</p>
+                                            <p className="font-sans text-sm font-bold text-white/90">{selectedCandidate.student.specialization || 'Not specified'}</p>
                                         </div>
                                     </section>
                                 </div>
@@ -712,39 +525,83 @@ export default function RecruiterDashboard() {
                                 <section>
                                     <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#aaa] mb-4 flex items-center gap-2">
                                         <Briefcase size={14} className="text-accent-500" />
-                                        Featured Projects ({selectedCandidate.projects.length})
+                                        Featured Projects ({selectedCandidate.student.projects.length})
                                     </h3>
                                     <div className="space-y-4">
-                                        {selectedCandidate.projects.map((project, idx) => (
-                                            <div key={idx} className="bg-[#0A0A0A] border border-[#222] hover:border-[#333] rounded-sm p-5 transition-colors">
+                                        {selectedCandidate.student.projects.length === 0 && (
+                                            <div className="text-center py-8 text-[#555] font-mono text-xs uppercase tracking-widest">
+                                                No projects listed
+                                            </div>
+                                        )}
+                                        {selectedCandidate.student.projects.map((project) => (
+                                            <div key={project.id} className="bg-[#0A0A0A] border border-[#222] hover:border-[#333] rounded-sm p-5 transition-colors">
                                                 <h4 className="font-bold font-sans text-white text-md mb-2">{project.title}</h4>
                                                 <p className="text-[#888] text-xs font-mono leading-relaxed mb-4">
                                                     {project.description}
                                                 </p>
                                                 <div className="flex flex-wrap gap-2">
-                                                    {project.techStack.map(tech => (
+                                                    {project.techStack.split(',').map((tech: string) => tech.trim()).filter(Boolean).map(tech => (
                                                         <span key={tech} className="px-2 py-0.5 bg-[#111] border border-[#333] text-[#aaa] text-[9px] uppercase tracking-widest font-mono rounded-sm">
                                                             {tech}
                                                         </span>
                                                     ))}
+                                                </div>
+                                                <div className="flex gap-3 mt-3">
+                                                    {project.githubLink && (
+                                                        <a href={project.githubLink} target="_blank" rel="noopener noreferrer" className="text-[10px] font-mono text-accent-400 hover:text-accent-300 transition-colors underline underline-offset-2">GitHub ↗</a>
+                                                    )}
+                                                    {project.liveLink && (
+                                                        <a href={project.liveLink} target="_blank" rel="noopener noreferrer" className="text-[10px] font-mono text-accent-400 hover:text-accent-300 transition-colors underline underline-offset-2">Live Demo ↗</a>
+                                                    )}
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
                                 </section>
 
+                                {/* Solved Problems */}
+                                {selectedCandidate.student.solvedProblems.length > 0 && (
+                                    <section>
+                                        <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#aaa] mb-4 flex items-center gap-2">
+                                            <Code2 size={14} className="text-accent-500" />
+                                            Solved Problems ({selectedCandidate.student.solvedProblems.length})
+                                        </h3>
+                                        <div className="space-y-2">
+                                            {selectedCandidate.student.solvedProblems.map((prob, idx) => (
+                                                <div key={idx} className="flex items-center justify-between bg-[#0A0A0A] border border-[#222] rounded-sm p-3 hover:border-[#333] transition-colors">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`w-2 h-2 rounded-full ${
+                                                            prob.difficulty === 'EASY' ? 'bg-green-400' :
+                                                            prob.difficulty === 'MEDIUM' ? 'bg-yellow-400' : 'bg-red-400'
+                                                        }`} />
+                                                        <span className="text-xs font-sans font-semibold text-white">{prob.title}</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-3">
+                                                        <span className="text-[9px] font-mono text-[#888] uppercase tracking-widest">{prob.topic}</span>
+                                                        <span className={`text-[9px] font-mono px-2 py-0.5 border rounded-sm uppercase tracking-widest ${
+                                                            prob.difficulty === 'EASY' ? 'text-green-400 border-green-500/20' :
+                                                            prob.difficulty === 'MEDIUM' ? 'text-yellow-400 border-yellow-500/20' : 'text-red-400 border-red-500/20'
+                                                        }`}>
+                                                            {prob.difficulty}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </section>
+                                )}
                             </div>
 
                             {/* Modal Footer */}
                             <div className="shrink-0 p-5 bg-[#0A0A0A] border-t border-[#222] flex justify-end gap-3">
                                 <button
-                                    onClick={() => setSelectedCandidate(null)}
+                                    onClick={() => setSelectedInterviewIdx(null)}
                                     className="px-5 py-2.5 rounded-sm border border-[#333] text-xs font-mono uppercase tracking-widest text-[#888] hover:text-white hover:bg-[#111] transition-colors"
                                 >
                                     Close
                                 </button>
                                 <Link
-                                    to={`/recruiter/interview?participant=${selectedCandidate.id}&time=${selectedCandidate.date}T${selectedCandidate.time}:00`}
+                                    to={`/recruiter/interview/${selectedCandidate.id}`}
                                     className="px-6 py-2.5 rounded-sm bg-accent-500/10 border border-accent-500/30 text-accent-400 font-bold text-xs uppercase tracking-widest font-mono hover:bg-accent-500/20 transition-colors flex items-center gap-2"
                                 >
                                     Join Interview <ChevronRight size={14} />
@@ -762,7 +619,7 @@ export default function RecruiterDashboard() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        onClick={() => setSelectedReport(null)}
+                        onClick={() => setSelectedRecordingIdx(null)}
                         className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 md:p-6"
                     >
                         <motion.div
@@ -775,10 +632,10 @@ export default function RecruiterDashboard() {
                             {/* Header */}
                             <div className="shrink-0 h-16 bg-gradient-to-r from-[#111] to-[#0A0A0A] border-b border-[#222] flex items-center justify-between px-6">
                                 <h2 className="text-sm font-bold font-sans uppercase tracking-widest text-white flex items-center gap-2">
-                                    <FileText size={16} className="text-accent-400" /> Interview Report: {selectedReport.student}
+                                    <FileText size={16} className="text-accent-400" /> Interview Report: {selectedReport.student.name}
                                 </h2>
                                 <button
-                                    onClick={() => setSelectedReport(null)}
+                                    onClick={() => setSelectedRecordingIdx(null)}
                                     className="p-1.5 bg-[#111] hover:bg-[#222] rounded-sm text-[#666] hover:text-white transition-colors border border-[#333]"
                                 >
                                     <X size={16} />
@@ -807,101 +664,92 @@ export default function RecruiterDashboard() {
                                     </div>
                                     <div className="bg-[#111] border border-[#222] p-4 rounded-sm flex flex-col gap-1">
                                         <span className="text-[10px] font-mono text-[#888] uppercase tracking-widest">Duration</span>
-                                        <span className="text-sm font-bold text-white font-sans">{selectedReport.duration}</span>
+                                        <span className="text-sm font-bold text-white font-sans">{selectedReport.duration || '—'}</span>
                                     </div>
                                     <div className="bg-[#111] border border-[#222] p-4 rounded-sm flex flex-col gap-1">
                                         <span className="text-[10px] font-mono text-[#888] uppercase tracking-widest">Date</span>
-                                        <span className="text-sm font-bold text-white font-sans">{selectedReport.date}</span>
+                                        <span className="text-sm font-bold text-white font-sans">{formatDate(selectedReport.scheduledAt)}</span>
                                     </div>
                                 </div>
 
                                 {/* Recruiter Notes */}
+                                {selectedReport.notes && (
+                                    <section>
+                                        <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#aaa] mb-3 flex items-center gap-2">
+                                            <MessageSquare size={14} className="text-accent-500" /> Recruiter Final Notes
+                                        </h3>
+                                        <div className="bg-[#0A0A0A] border border-[#222] rounded-sm p-4">
+                                            <p className="font-mono text-xs text-[#ccc] leading-relaxed">
+                                                {selectedReport.notes}
+                                            </p>
+                                        </div>
+                                    </section>
+                                )}
+
+                                {/* Student Info */}
                                 <section>
                                     <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#aaa] mb-3 flex items-center gap-2">
-                                        <MessageSquare size={14} className="text-accent-500" /> Recruiter Final Notes
+                                        <GraduationCap size={14} className="text-accent-500" /> Candidate Info
                                     </h3>
-                                    <div className="bg-[#0A0A0A] border border-[#222] rounded-sm p-4">
-                                        <p className="font-mono text-xs text-[#ccc] leading-relaxed">
-                                            {selectedReport.notes}
-                                        </p>
+                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                        <div className="bg-[#0A0A0A] border border-[#222] rounded-sm p-3">
+                                            <div className="text-[9px] font-mono text-[#666] uppercase tracking-widest mb-1">University</div>
+                                            <div className="text-xs font-sans font-semibold text-white">{selectedReport.student.university}</div>
+                                        </div>
+                                        <div className="bg-[#0A0A0A] border border-[#222] rounded-sm p-3">
+                                            <div className="text-[9px] font-mono text-[#666] uppercase tracking-widest mb-1">Branch</div>
+                                            <div className="text-xs font-sans font-semibold text-white">{selectedReport.student.branch}</div>
+                                        </div>
+                                        <div className="bg-[#0A0A0A] border border-[#222] rounded-sm p-3">
+                                            <div className="text-[9px] font-mono text-[#666] uppercase tracking-widest mb-1">CGPA</div>
+                                            <div className="text-xs font-sans font-semibold text-white">{selectedReport.student.cgpa}</div>
+                                        </div>
+                                        <div className="bg-[#0A0A0A] border border-[#222] rounded-sm p-3">
+                                            <div className="text-[9px] font-mono text-[#666] uppercase tracking-widest mb-1">Role</div>
+                                            <div className="text-xs font-sans font-semibold text-accent-400">{selectedReport.role}</div>
+                                        </div>
                                     </div>
                                 </section>
 
-                                {/* Questions Solved */}
-                                <section>
-                                    <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#aaa] mb-3 flex items-center gap-2">
-                                        <Code2 size={14} className="text-accent-500" /> Technical Assessment ({selectedReport.questions.length} Questions)
-                                    </h3>
-                                    <div className="space-y-4">
-                                        {selectedReport.questions.map((q, idx) => {
-                                            const passRate = Math.round((q.testCasesPassed / q.totalTestCases) * 100);
-                                            const isPerfect = q.testCasesPassed === q.totalTestCases;
-                                            return (
-                                                <div key={idx} className="bg-[#0A0A0A] border border-[#222] rounded-sm overflow-hidden flex flex-col">
-                                                    <div className="p-4 border-b border-[#222] flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-[#111]">
-                                                        <div className="font-bold font-sans text-sm text-white flex items-center gap-2">
-                                                            <div className={`w-2 h-2 rounded-full ${isPerfect ? 'bg-green-400' : 'bg-yellow-400'}`} />
-                                                            {q.title}
+                                {/* Solved Problems from Code Arena */}
+                                {selectedReport.student.solvedProblems.length > 0 && (
+                                    <section>
+                                        <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#aaa] mb-3 flex items-center gap-2">
+                                            <Code2 size={14} className="text-accent-500" /> Solved Problems ({selectedReport.student.solvedProblems.length})
+                                        </h3>
+                                        <div className="space-y-2">
+                                            {selectedReport.student.solvedProblems.map((q, idx) => {
+                                                return (
+                                                    <div key={idx} className="flex items-center justify-between bg-[#0A0A0A] border border-[#222] rounded-sm p-3 hover:border-[#333] transition-colors">
+                                                        <div className="flex items-center gap-3">
+                                                            <div className={`w-2 h-2 rounded-full ${
+                                                                q.difficulty === 'EASY' ? 'bg-green-400' :
+                                                                q.difficulty === 'MEDIUM' ? 'bg-yellow-400' : 'bg-red-400'
+                                                            }`} />
+                                                            <span className="text-xs font-sans font-semibold text-white">{q.title}</span>
                                                         </div>
-                                                        <div className="flex items-center gap-4">
-                                                            <div className="flex items-center gap-1.5 opacity-80">
-                                                                <span className="text-[10px] font-mono text-[#888] uppercase">Test Cases:</span>
-                                                                <span className={`text-xs font-mono font-bold ${isPerfect ? 'text-green-400' : 'text-yellow-400'}`}>
-                                                                    {q.testCasesPassed}/{q.totalTestCases}
-                                                                </span>
-                                                            </div>
-                                                            <div className="w-24 h-1.5 bg-[#222] rounded-full overflow-hidden shrink-0">
-                                                                <div 
-                                                                    className={`h-full ${isPerfect ? 'bg-green-500' : 'bg-yellow-500'}`} 
-                                                                    style={{ width: `${passRate}%` }} 
-                                                                />
-                                                            </div>
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="text-[9px] font-mono text-[#888] uppercase tracking-widest">{q.topic}</span>
+                                                            <span className={`text-[9px] font-mono px-2 py-0.5 border rounded-sm uppercase tracking-widest ${
+                                                                q.difficulty === 'EASY' ? 'text-green-400 border-green-500/20' :
+                                                                q.difficulty === 'MEDIUM' ? 'text-yellow-400 border-yellow-500/20' : 'text-red-400 border-red-500/20'
+                                                            }`}>
+                                                                {q.difficulty}
+                                                            </span>
                                                         </div>
                                                     </div>
-                                                    <div className="p-4 bg-[#050505]">
-                                                        <div className="text-[10px] font-mono text-[#666] mb-2 uppercase tracking-widest flex items-center gap-2">
-                                                            <Code2 size={12} className="text-[#888]" /> Final Submission
-                                                        </div>
-                                                        <pre className="border border-[#333] rounded-sm overflow-hidden" style={{ height: '180px' }}>
-                                                            <Editor
-                                                                value={q.codeSubmission}
-                                                                language="javascript"
-                                                                theme="vs-dark"
-                                                                options={{
-                                                                    readOnly: true,
-                                                                    minimap: { enabled: false },
-                                                                    fontSize: 11,
-                                                                    fontFamily: "'JetBrains Mono', 'Fira Code', Menlo, Monaco, 'Courier New', monospace",
-                                                                    lineNumbers: 'on',
-                                                                    scrollBeyondLastLine: false,
-                                                                    automaticLayout: true,
-                                                                    renderLineHighlight: 'none',
-                                                                    overviewRulerBorder: false,
-                                                                    hideCursorInOverviewRuler: true,
-                                                                    domReadOnly: true,
-                                                                    padding: { top: 8, bottom: 8 },
-                                                                    scrollbar: {
-                                                                        vertical: 'auto',
-                                                                        horizontal: 'auto',
-                                                                        verticalScrollbarSize: 4,
-                                                                        horizontalScrollbarSize: 4,
-                                                                    },
-                                                                }}
-                                                            />
-                                                        </pre>
-                                                    </div>
-                                                </div>
-                                            );
-                                        })}
-                                    </div>
-                                </section>
+                                                );
+                                            })}
+                                        </div>
+                                    </section>
+                                )}
 
                             </div>
                             
                             {/* Footer */}
                             <div className="shrink-0 p-5 bg-[#0A0A0A] border-t border-[#222] flex justify-end">
                                 <button
-                                    onClick={() => setSelectedReport(null)}
+                                    onClick={() => setSelectedRecordingIdx(null)}
                                     className="px-5 py-2.5 rounded-sm bg-[#111] border border-[#333] text-xs font-mono uppercase tracking-widest text-white hover:border-accent-500 transition-colors"
                                 >
                                     Dismiss Report

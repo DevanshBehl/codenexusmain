@@ -27,7 +27,7 @@ import {
 import confetti from 'canvas-confetti';
 import AskAI from '../../components/CodeArena/AskAI';
 import { codeArenaApi } from '../../lib/api';
-import { io } from 'socket.io-client';
+import { useSocket } from '../../lib/useSocket';
 
 const LANGUAGE_MAP: Record<string, string> = {
     cpp: 'cpp',
@@ -106,35 +106,43 @@ const CodeArenaProblem = () => {
         setCode(DEFAULT_CODE[language]);
     }, [language]);
 
+    const { socket } = useSocket();
+
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        const socket = io('http://localhost:5000/codearena', {
-            auth: { token }
-        });
-
-        socket.on('submission_result', (data) => {
+        if (!socket) return;
+        
+        const handleResult = (data: any) => {
             console.log('Submission result:', data);
-            setRunResult(data.result);
-            if (data.isSubmission) {
-                setSubmitState('success');
-                if (data.result.status === 'Accepted') {
-                    confetti({
-                        particleCount: 100,
-                        spread: 70,
-                        origin: { y: 0.6 }
-                    });
-                }
-            } else {
-                setRunState('success');
+            
+            // Format result payload to match expected shape
+            setRunResult({
+                status: data.status === 'accepted' || data.status === 'Accepted' ? 'Accepted' : data.status,
+                time: data.time_ms ? (data.time_ms / 1000).toFixed(3) : '0',
+                memory: data.memory_kb || 0,
+            });
+            
+            setSubmitState('success');
+            if (data.status === 'accepted' || data.status === 'Accepted') {
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
             }
-        });
+        };
 
-        socket.on('submission_status', (data) => {
+        const handleStatus = (data: any) => {
             console.log('Status:', data);
-        });
+        };
 
-        return () => { socket.disconnect(); };
-    }, []);
+        socket.on('submission_result', handleResult);
+        socket.on('submission_status', handleStatus);
+
+        return () => { 
+            socket.off('submission_result', handleResult);
+            socket.off('submission_status', handleStatus);
+        };
+    }, [socket]);
 
     const handleRun = async () => {
         if (!id) return;
@@ -142,7 +150,22 @@ const CodeArenaProblem = () => {
         setRunState('running');
         setRunResult(null);
         try {
-            await codeArenaApi.runCode(id, language, code);
+            const res = await codeArenaApi.runCode(id, language, code);
+            const data = res.data;
+            setRunResult({
+                status: data.verdict === 'accepted' ? 'Accepted' : data.verdict,
+                time: data.time_ms ? (data.time_ms / 1000).toFixed(3) : '0',
+                memory: data.memory_kb || 0,
+                testResults: data.results?.map((r: any, i: number) => ({
+                    input: problemData?.testCases?.[i]?.input || '',
+                    expectedOutput: problemData?.testCases?.[i]?.output || r.expected || '',
+                    actualOutput: r.stdout || '',
+                    passed: r.status === 'Accepted',
+                    error: r.stderr || r.compile_output || null,
+                })),
+                compile_output: data.error_message,
+            });
+            setRunState('success');
         } catch (err) {
             console.error(err);
             setRunState('idle');
@@ -155,7 +178,12 @@ const CodeArenaProblem = () => {
         setIsConsoleOpen(false);
         setRunResult(null);
         try {
-            await codeArenaApi.submitCode(id, language, code);
+            const res = await codeArenaApi.submitCode(id, language, code);
+            console.log('Submission Created:', res.data);
+            const subId = res.data.submissionId;
+            if (socket && subId) {
+                socket.emit('join_submission', { submissionId: subId });
+            }
         } catch (err) {
             console.error(err);
             setSubmitState('idle');

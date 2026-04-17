@@ -191,6 +191,14 @@ export function useMediasoup(socket: Socket | null, interviewId: string) {
             await consumeProducer(producerId);
         };
 
+        const handleExistingProducers = async ({ producers }: { producers: any[] }) => {
+            console.log("[Mediasoup] Existing producers:", producers.length);
+            for (const p of producers) {
+                await consumeProducer(p.producerId);
+            }
+            if (producers.length > 0) setHasRemotePeer(true);
+        };
+
         const handlePeerJoined = () => {
              console.log("[Mediasoup] Peer joined");
              setHasRemotePeer(true);
@@ -212,12 +220,14 @@ export function useMediasoup(socket: Socket | null, interviewId: string) {
         };
 
         socket.on("new-producer", handleNewProducer);
+        socket.on("existing-producers", handleExistingProducers);
         socket.on("peer-joined", handlePeerJoined);
         socket.on("room-joined", handleRoomJoined);
         socket.on("peer-left", handlePeerLeft);
 
         return () => {
             socket.off("new-producer", handleNewProducer);
+            socket.off("existing-producers", handleExistingProducers);
             socket.off("peer-joined", handlePeerJoined);
             socket.off("room-joined", handleRoomJoined);
             socket.off("peer-left", handlePeerLeft);

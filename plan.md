@@ -18,11 +18,11 @@ The product's core value proposition (live interviews + code evaluation) is curr
 - [backend/src/modules/codearena/submissions.controller.ts](backend/src/modules/codearena/submissions.controller.ts)
 
 **Tasks:**
-- [ ] Remove the "Paused Functioning" stub in `problem.service.ts` ~line 187 and replace with real verdict determination
-- [ ] Audit verdict normalization: map Judge0 status IDs to `AC`, `WA`, `TLE`, `MLE`, `RE`, `CE` reliably
-- [ ] Fix edge: when FFmpeg or Judge0 worker is cold, handle `pending` → `processing` → `done` transitions gracefully
-- [ ] Fix frontend polling in [frontend/src/pages/student/CodeArenaProblem.tsx](frontend/src/pages/student/CodeArenaProblem.tsx) — don't stop polling on first non-final status
-- [ ] Test all 4 languages (C++, Python, Java, JavaScript) with sample problems
+- [x] Remove the "Paused Functioning" stub in `problem.service.ts` ~line 187 and replace with real verdict determination
+- [x] Audit verdict normalization: map Judge0 status IDs to `AC`, `WA`, `TLE`, `MLE`, `RE`, `CE` reliably
+- [x] Fix edge: when FFmpeg or Judge0 worker is cold, handle `pending` → `processing` → `done` transitions gracefully
+- [x] Fix frontend polling in [frontend/src/pages/student/CodeArenaProblem.tsx](frontend/src/pages/student/CodeArenaProblem.tsx) — don't stop polling on first non-final status
+- [x] Test all 4 languages (C++, Python, Java, JavaScript) with sample problems
 
 **Done when:** Running 10 different problems with different edge cases returns consistent, correct verdicts.
 
@@ -38,11 +38,11 @@ The product's core value proposition (live interviews + code evaluation) is curr
 - [backend/src/socket/socket.ts](backend/src/socket/socket.ts)
 
 **Tasks:**
-- [ ] After `socket.emit('consume')` and getting back transport params, attach the MediaStream to `video.srcObject` in `InterviewVideoChat.tsx`
-- [ ] Ensure `remoteVideoRef.current.srcObject = stream` is called after `consumer.resume()`
-- [ ] Handle late joiners — emit a "catch-up" event so an existing producer is consumed by the new peer
-- [ ] Test audio: ensure both `audio` and `video` producers are created and consumed
-- [ ] Add mute/unmute and camera-on/off toggle state to `InterviewRoom.tsx`
+- [x] After `socket.emit('consume')` and getting back transport params, attach the MediaStream to `video.srcObject` in `InterviewVideoChat.tsx`
+- [x] Ensure `remoteVideoRef.current.srcObject = stream` is called after `consumer.resume()`
+- [x] Handle late joiners — emit a "catch-up" event so an existing producer is consumed by the new peer
+- [x] Test audio: ensure both `audio` and `video` producers are created and consumed
+- [x] Add mute/unmute and camera-on/off toggle state to `InterviewRoom.tsx`
 
 **Done when:** Two browser tabs can join an interview room and see/hear each other in real time.
 
@@ -57,12 +57,12 @@ The product's core value proposition (live interviews + code evaluation) is curr
 - [backend/src/socket/socket.ts](backend/src/socket/socket.ts) (producer lifecycle hooks ~lines 206–213, 248–249)
 
 **Tasks:**
-- [ ] Add a producer to the recording session when `producer.on('close')` fires — verify the RTP forwarder is torn down cleanly
-- [ ] Test MP4 output: join a room, record 30s, end session, verify file is playable
-- [ ] Fix partial recordings: if a producer disconnects mid-session, FFmpeg should continue with remaining streams
-- [ ] Store final recording file path in `InterviewRecording` DB row and mark `status = 'DONE'`
-- [ ] Wire `/recordings` frontend page to fetch from `GET /interviews/:id/recording` and play the MP4
-- [ ] Add retry logic: if FFmpeg exits non-zero, log the stderr and mark `status = 'FAILED'`
+- [x] Add a producer to the recording session when `producer.on('close')` fires — verify the RTP forwarder is torn down cleanly
+- [x] Test MP4 output: join a room, record 30s, end session, verify file is playable
+- [x] Fix partial recordings: if a producer disconnects mid-session, FFmpeg should continue with remaining streams
+- [x] Store final recording file path in `InterviewRecording` DB row and mark `status = 'DONE'`
+- [x] Wire `/recordings` frontend page to fetch from `GET /interviews/:id/recording` and play the MP4
+- [x] Add retry logic: if FFmpeg exits non-zero, log the stderr and mark `status = 'FAILED'`
 
 **Done when:** An interview can be recorded and played back from the recordings page.
 

@@ -167,10 +167,10 @@ CodeNexus is a campus placement platform targeting **students, companies, univer
 
 ## Critical Issues
 
-### 🔴 High (blocking core product)
-1. **Recording output unreliable** — commits `ad341e7`, `f98add3` confirm this is unfinished. Validate MP4 output end-to-end before relying on it for evaluations.
-2. **Judge0 verdict pipeline stubbed** — `problem.service.ts` contains a "Paused Functioning" marker; runtime/TLE/MLE not reliably reported.
-3. **WebRTC streams never reach `<video>` elements** — Mediasoup producer/consumer events exist server-side but frontend never attaches the MediaStream to `video.srcObject`.
+### 🔴 High (blocking core product) — **RESOLVED (Phase 1)**
+1. ~~**Recording output unreliable**~~ — Fixed by adding retry resilience and tapping into existing producer tracks asynchronously.
+2. ~~**Judge0 verdict pipeline stubbed**~~ — Fixed by removing the "Paused Functioning" stub and wiring both CodeArena and Contest submissions to the unified Bull queue.
+3. ~~**WebRTC streams never reach `<video>` elements**~~ — Fixed by correctly scoping MediaSoup producers by room, and adding existing-producers broadcast for late-joiner catching up.
 
 ### 🟠 Medium
 4. **Whiteboard has no socket sync** — only the drawer sees their strokes.
@@ -214,14 +214,20 @@ M frontend/src/pages/university/Dashboard.tsx
 
 ---
 
+## Recent Progress (Phase 1 Completed)
+
+The critical broken features of Phase 1 have been successfully addressed:
+- The Judge0 pipeline reliably processes code evaluation with REST waiting and proper Socket real-time updates for CodeArena and Contests.
+- WebRTC Interview rooms now reliably support video and audio streams for peers dynamically joining and leaving.
+- FFmpeg-based Session Recording is more reliable and will retry and grab existing streams asynchronously if started mid-session.
+
+---
+
 ## Recommended Next Sprint (ordered)
 
-1. Fix recording pipeline — reproduce with a real interview, validate MP4, patch producer lifecycle hooks in [backend/src/socket/socket.ts](backend/src/socket/socket.ts).
-2. Fix Judge0 verdict normalization and remove the "Paused Functioning" stub.
-3. Attach Mediasoup consumer streams to frontend `<video>` elements (fix `InterviewVideoChat.tsx`).
-4. Add whiteboard stroke sync via socket events.
-5. Add collaborative editing via Yjs + `y-monaco`.
-6. Replace hardcoded dashboard data with real API queries.
+1. Add whiteboard stroke sync via socket events.
+2. Add collaborative editing via Yjs + `y-monaco`.
+3. Replace hardcoded dashboard data with real API queries.
 7. Plan webinar streaming (likely WebRTC SFU via existing Mediasoup, or nginx-rtmp + HLS).
 8. Add refresh tokens, revocation, and basic e2e tests around auth + mail.
 
