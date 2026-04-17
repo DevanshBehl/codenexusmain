@@ -98,9 +98,9 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
 
         // Phase 2: Fetch persisted chat history
         interviewApi.getMessages(id).then(res => {
-            const formatted = res.data.map(m => ({
+            const formatted = (res.data as any[]).map(m => ({
                 text: m.text,
-                sender: m.senderCnid === 'Unknown' ? 'System' : m.senderCnid, // Simplified sender representation
+                sender: m.senderName || 'Unknown',
                 time: new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
             }));
             setChatMessages(formatted);

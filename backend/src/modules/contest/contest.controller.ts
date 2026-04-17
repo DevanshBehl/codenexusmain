@@ -31,6 +31,35 @@ export const getContestById = async (req: Request, res: Response, next: NextFunc
     }
 }
 
+export const registerStudent = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.id;
+        const reg = await contestService.registerStudent(userId as string, req.params.id as string);
+        res.status(201).json(new ApiResponse(201, reg, "Registered for contest successfully"));
+    } catch (e) {
+        next(e);
+    }
+}
+
+export const getRegistrations = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const regs = await contestService.getRegistrations(req.params.id as string);
+        res.status(200).json(new ApiResponse(200, regs, "Registrations fetched successfully"));
+    } catch (e) {
+        next(e);
+    }
+}
+
+export const getContestLeaderboard = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userCnid = req.user?.cnid;
+        const leaderboard = await contestService.getContestLeaderboard(req.params.id as string, userCnid);
+        res.status(200).json(new ApiResponse(200, leaderboard, "Contest leaderboard fetched successfully"));
+    } catch (e) {
+        next(e);
+    }
+}
+
 export const updateContest = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = req.user?.id;

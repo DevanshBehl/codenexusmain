@@ -36,19 +36,27 @@ const CodeArenaSubmissions = () => {
 
     const [submissionsData, setSubmissionsData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const LIMIT = 20;
+
+    const fetchSubmissions = async (pageNum: number) => {
+        try {
+            setLoading(true);
+            const res = await codeArenaApi.getSubmissions(undefined, pageNum, LIMIT);
+            const data = res.data as any;
+            setSubmissionsData(data.submissions || []);
+            setTotalPages(data.pagination?.totalPages || 1);
+            setPage(pageNum);
+        } catch (error) {
+            console.error("Failed to fetch submissions", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchSubmissions = async () => {
-            try {
-                const res = await codeArenaApi.getSubmissions();
-                setSubmissionsData((res.data as any).submissions || []);
-            } catch (error) {
-                console.error("Failed to fetch submissions", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchSubmissions();
+        fetchSubmissions(1);
     }, []);
 
     const getStatusDetails = (status: string) => {
@@ -163,25 +171,18 @@ const CodeArenaSubmissions = () => {
                                         <tr><td colSpan={6} className="text-center py-8 text-[#888]">Loading submissions...</td></tr>
                                     ) : submissionsData.length === 0 ? (
                                         <tr><td colSpan={6} className="text-center py-8 text-[#888]">No submissions yet</td></tr>
-                                    ) : submissionsData.map((sub, idx) => {
+                                    ) : submissionsData.map((sub) => {
                                         const statusObj = getStatusDetails(sub.status);
-                                        // Attempt to extract top-level runtime/memory or average from test cases
-                                        let runtime = 'N/A';
-                                        let memory = 'N/A';
-                                        if (sub.testResults && Array.isArray(sub.testResults) && sub.testResults.length > 0) {
-                                            const totalTime = sub.testResults.reduce((acc: number, cur: any) => acc + (parseFloat(cur.time) || 0), 0);
-                                            const maxMem = sub.testResults.reduce((acc: number, cur: any) => Math.max(acc, (parseFloat(cur.memory) || 0)), 0);
-                                            if (totalTime > 0) runtime = `${totalTime.toFixed(3)} s`;
-                                            if (maxMem > 0) memory = `${maxMem} KB`;
-                                        }
+                                        const runtime = sub.time_taken_ms ? `${(sub.time_taken_ms / 1000).toFixed(3)} s` : 'N/A';
+                                        const memory = sub.memory_used_kb ? `${sub.memory_used_kb} KB` : 'N/A';
 
                                         return (
-                                            <tr key={idx} className="border-b border-[#222] hover:bg-[#111] transition-colors">
+                                            <tr key={sub.id} className="border-b border-[#222] hover:bg-[#111] transition-colors">
                                                 <td className="py-4 px-6 font-mono text-xs text-[#888]">
-                                                    {new Date(sub.createdAt).toLocaleString()}
+                                                    {new Date(sub.submitted_at).toLocaleString()}
                                                 </td>
                                                 <td className="py-4 px-6 font-sans font-bold text-sm text-white hover:text-accent-400 transition-colors cursor-pointer">
-                                                    <Link to={`/student/codearena/${sub.problem?.id}`}>{sub.problem?.title || 'Unknown'}</Link>
+                                                    <Link to={`/student/codearena/${sub.problem_id}`}>{sub.problem?.title || 'Unknown'}</Link>
                                                 </td>
                                                 <td className="py-4 px-6 font-mono text-xs">
                                                     <div className={`flex items-center gap-2 font-bold ${statusObj.color}`}>
@@ -205,6 +206,31 @@ const CodeArenaSubmissions = () => {
                                     })}
                                 </tbody>
                             </table>
+
+                            {/* Pagination */}
+                            {totalPages > 1 && (
+                                <div className="flex items-center justify-between px-6 py-4 border-t border-[#222] bg-[#111]">
+                                    <div className="text-xs font-mono text-[#666]">
+                                        Page {page} of {totalPages}
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => fetchSubmissions(page - 1)}
+                                            disabled={page <= 1}
+                                            className="px-3 py-1.5 text-xs font-mono bg-[#0A0A0A] border border-[#333] text-[#888] hover:text-white hover:border-accent-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-sm"
+                                        >
+                                            Previous
+                                        </button>
+                                        <button
+                                            onClick={() => fetchSubmissions(page + 1)}
+                                            disabled={page >= totalPages}
+                                            className="px-3 py-1.5 text-xs font-mono bg-[#0A0A0A] border border-[#333] text-[#888] hover:text-white hover:border-accent-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors rounded-sm"
+                                        >
+                                            Next
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
 
                     </div>

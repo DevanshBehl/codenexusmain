@@ -3,6 +3,7 @@ import { env } from '../../config/env.js';
 import { prisma } from '../../lib/prisma.js';
 import { submitToJudge0, pollJudge0, determineVerdict, LANGUAGE_MAP } from './judge0.js';
 import { getIo } from '../../socket/socket.js';
+import * as leaderboardService from './leaderboard.service.js';
 
 const queueOpts = {
   redis: {
@@ -47,6 +48,25 @@ export function initSubmissionWorker() {
             if (!submission || !problem) {
                 console.error(`Submission ${submissionId} not found`);
                 return;
+            }
+
+            // 1.5. Lock submissions after contest ends (contest submissions only)
+            if (isContestSubmission) {
+                const contest = await prisma.contest.findUnique({
+                    where: { id: submission.problem?.contestId },
+                    select: { status: true, date: true, durationMins: true }
+                });
+                if (contest) {
+                    const contestEnd = new Date(new Date(contest.date).getTime() + contest.durationMins * 60_000);
+                    if (contest.status === 'COMPLETED' || new Date() >= contestEnd) {
+                        await prisma.submission.update({
+                            where: { id: submissionId },
+                            data: { status: 'locked' }
+                        });
+                        console.log(`Submission ${submissionId} locked - contest ended`);
+                        return;
+                    }
+                }
             }
 
             // 2. Set to Processing
@@ -134,7 +154,7 @@ export function initSubmissionWorker() {
             // 7. Update User's Profile Summary
             // 7. Update User's Profile Summary (CodeArena only)
             if (!isContestSubmission && submission.student_cnid) {
-                const isSolved = verdict === 'accepted' || verdict === 'Accepted';
+                const isSolved = verdict === 'accepted';
                 const summary = await prisma.caSubmissionSummary.findUnique({
                     where: {
                         student_cnid_problem_id: {
@@ -173,7 +193,55 @@ export function initSubmissionWorker() {
                 }
             }
 
-            // 8. Emit final result via WebSockets
+            // 8. Update Global Leaderboard (CodeArena only)
+            if (!isContestSubmission && submission.student_cnid && verdict === 'accepted') {
+                const solvedCount = await prisma.caSubmissionSummary.count({
+                    where: { student_cnid: submission.student_cnid, is_solved: true }
+                });
+                await leaderboardService.updateGlobalLeaderboard(submission.student_cnid, solvedCount);
+            }
+
+            // 9. Update Contest Leaderboard (contest submissions only)
+            if (isContestSubmission && verdict === 'accepted') {
+                const problem = await prisma.problem.findUnique({
+                    where: { id: submission.problemId },
+                    include: { contest: true }
+                });
+                if (problem?.contest) {
+                    const contest = problem.contest;
+                    const student = await prisma.student.findUnique({
+                        where: { id: submission.studentId }
+                    });
+                    if (student?.user?.cnid) {
+                        const submissions = await prisma.submission.findMany({
+                            where: {
+                                studentId: submission.studentId,
+                                problem: { contestId: contest.id }
+                            }
+                        });
+                        const solvedCount = submissions.filter(s => s.status === 'AC').length;
+                        const wrongAttempts = submissions.filter(s => s.status !== 'AC' && s.status !== 'pending').length;
+                        const contestStart = new Date(contest.date);
+                        const latestAccept = submissions
+                            .filter(s => s.status === 'AC')
+                            .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
+                            .pop();
+                        const timeTakenMinutes = latestAccept
+                            ? (new Date(latestAccept.createdAt).getTime() - contestStart.getTime()) / 60000
+                            : 0;
+
+                        await leaderboardService.updateContestLeaderboard(
+                            contest.id,
+                            student.user.cnid,
+                            solvedCount,
+                            wrongAttempts,
+                            timeTakenMinutes
+                        );
+                    }
+                }
+            }
+
+            // 10. Emit final result via WebSockets
             const ioClient2 = getIo();
             if (ioClient2) {
                 ioClient2.to(`submission:${submissionId}`).emit('submission_result', {

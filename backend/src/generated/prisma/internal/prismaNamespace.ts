@@ -392,6 +392,7 @@ export const ModelName = {
   Student: 'Student',
   Project: 'Project',
   Contest: 'Contest',
+  ContestRegistration: 'ContestRegistration',
   Problem: 'Problem',
   TestCase: 'TestCase',
   Submission: 'Submission',
@@ -399,6 +400,7 @@ export const ModelName = {
   Interview: 'Interview',
   Recording: 'Recording',
   InterviewRecording: 'InterviewRecording',
+  InterviewMessage: 'InterviewMessage',
   Webinar: 'Webinar',
   WebinarTargetUniversity: 'WebinarTargetUniversity',
   Mail: 'Mail',
@@ -423,7 +425,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "university" | "company" | "companyUniversity" | "recruiter" | "student" | "project" | "contest" | "problem" | "testCase" | "submission" | "jobApplication" | "interview" | "recording" | "interviewRecording" | "webinar" | "webinarTargetUniversity" | "mail" | "mailPermissionViolation" | "caProblem" | "caTestCase" | "caSubmission" | "caRunResult" | "caSubmissionSummary"
+    modelProps: "user" | "university" | "company" | "companyUniversity" | "recruiter" | "student" | "project" | "contest" | "contestRegistration" | "problem" | "testCase" | "submission" | "jobApplication" | "interview" | "recording" | "interviewRecording" | "interviewMessage" | "webinar" | "webinarTargetUniversity" | "mail" | "mailPermissionViolation" | "caProblem" | "caTestCase" | "caSubmission" | "caRunResult" | "caSubmissionSummary"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1019,6 +1021,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ContestRegistration: {
+      payload: Prisma.$ContestRegistrationPayload<ExtArgs>
+      fields: Prisma.ContestRegistrationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ContestRegistrationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContestRegistrationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ContestRegistrationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContestRegistrationPayload>
+        }
+        findFirst: {
+          args: Prisma.ContestRegistrationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContestRegistrationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ContestRegistrationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContestRegistrationPayload>
+        }
+        findMany: {
+          args: Prisma.ContestRegistrationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContestRegistrationPayload>[]
+        }
+        create: {
+          args: Prisma.ContestRegistrationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContestRegistrationPayload>
+        }
+        createMany: {
+          args: Prisma.ContestRegistrationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ContestRegistrationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContestRegistrationPayload>[]
+        }
+        delete: {
+          args: Prisma.ContestRegistrationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContestRegistrationPayload>
+        }
+        update: {
+          args: Prisma.ContestRegistrationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContestRegistrationPayload>
+        }
+        deleteMany: {
+          args: Prisma.ContestRegistrationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ContestRegistrationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ContestRegistrationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContestRegistrationPayload>[]
+        }
+        upsert: {
+          args: Prisma.ContestRegistrationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ContestRegistrationPayload>
+        }
+        aggregate: {
+          args: Prisma.ContestRegistrationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateContestRegistration>
+        }
+        groupBy: {
+          args: Prisma.ContestRegistrationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ContestRegistrationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ContestRegistrationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ContestRegistrationCountAggregateOutputType> | number
+        }
+      }
+    }
     Problem: {
       payload: Prisma.$ProblemPayload<ExtArgs>
       fields: Prisma.ProblemFieldRefs
@@ -1534,6 +1610,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.InterviewRecordingCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.InterviewRecordingCountAggregateOutputType> | number
+        }
+      }
+    }
+    InterviewMessage: {
+      payload: Prisma.$InterviewMessagePayload<ExtArgs>
+      fields: Prisma.InterviewMessageFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.InterviewMessageFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InterviewMessagePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.InterviewMessageFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InterviewMessagePayload>
+        }
+        findFirst: {
+          args: Prisma.InterviewMessageFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InterviewMessagePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.InterviewMessageFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InterviewMessagePayload>
+        }
+        findMany: {
+          args: Prisma.InterviewMessageFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InterviewMessagePayload>[]
+        }
+        create: {
+          args: Prisma.InterviewMessageCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InterviewMessagePayload>
+        }
+        createMany: {
+          args: Prisma.InterviewMessageCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.InterviewMessageCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InterviewMessagePayload>[]
+        }
+        delete: {
+          args: Prisma.InterviewMessageDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InterviewMessagePayload>
+        }
+        update: {
+          args: Prisma.InterviewMessageUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InterviewMessagePayload>
+        }
+        deleteMany: {
+          args: Prisma.InterviewMessageDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.InterviewMessageUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.InterviewMessageUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InterviewMessagePayload>[]
+        }
+        upsert: {
+          args: Prisma.InterviewMessageUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$InterviewMessagePayload>
+        }
+        aggregate: {
+          args: Prisma.InterviewMessageAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateInterviewMessage>
+        }
+        groupBy: {
+          args: Prisma.InterviewMessageGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InterviewMessageGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.InterviewMessageCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.InterviewMessageCountAggregateOutputType> | number
         }
       }
     }
@@ -2357,6 +2507,16 @@ export const ContestScalarFieldEnum = {
 export type ContestScalarFieldEnum = (typeof ContestScalarFieldEnum)[keyof typeof ContestScalarFieldEnum]
 
 
+export const ContestRegistrationScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  contestId: 'contestId',
+  createdAt: 'createdAt'
+} as const
+
+export type ContestRegistrationScalarFieldEnum = (typeof ContestRegistrationScalarFieldEnum)[keyof typeof ContestRegistrationScalarFieldEnum]
+
+
 export const ProblemScalarFieldEnum = {
   id: 'id',
   contestId: 'contestId',
@@ -2448,6 +2608,17 @@ export const InterviewRecordingScalarFieldEnum = {
 } as const
 
 export type InterviewRecordingScalarFieldEnum = (typeof InterviewRecordingScalarFieldEnum)[keyof typeof InterviewRecordingScalarFieldEnum]
+
+
+export const InterviewMessageScalarFieldEnum = {
+  id: 'id',
+  interviewId: 'interviewId',
+  senderId: 'senderId',
+  content: 'content',
+  createdAt: 'createdAt'
+} as const
+
+export type InterviewMessageScalarFieldEnum = (typeof InterviewMessageScalarFieldEnum)[keyof typeof InterviewMessageScalarFieldEnum]
 
 
 export const WebinarScalarFieldEnum = {
@@ -2807,6 +2978,7 @@ export type GlobalOmitConfig = {
   student?: Prisma.StudentOmit
   project?: Prisma.ProjectOmit
   contest?: Prisma.ContestOmit
+  contestRegistration?: Prisma.ContestRegistrationOmit
   problem?: Prisma.ProblemOmit
   testCase?: Prisma.TestCaseOmit
   submission?: Prisma.SubmissionOmit
@@ -2814,6 +2986,7 @@ export type GlobalOmitConfig = {
   interview?: Prisma.InterviewOmit
   recording?: Prisma.RecordingOmit
   interviewRecording?: Prisma.InterviewRecordingOmit
+  interviewMessage?: Prisma.InterviewMessageOmit
   webinar?: Prisma.WebinarOmit
   webinarTargetUniversity?: Prisma.WebinarTargetUniversityOmit
   mail?: Prisma.MailOmit

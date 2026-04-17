@@ -339,14 +339,28 @@ export const getMessages = async (userId: string, role: string, interviewId: str
 
     const messages = await prisma.interviewMessage.findMany({
         where: { interviewId },
-        include: { sender: { select: { cnid: true } } },
+        include: {
+            sender: {
+                select: {
+                    cnid: true,
+                    studentProfile: { select: { name: true } },
+                    recruiterProfile: { select: { name: true } },
+                }
+            }
+        },
         orderBy: { createdAt: 'asc' }
     });
 
-    return messages.map(msg => ({
-        id: msg.id,
-        text: msg.content,
-        senderCnid: msg.sender?.cnid || 'Unknown',
-        timestamp: msg.createdAt
-    }));
+    return messages.map(msg => {
+        const senderName = msg.sender?.studentProfile?.name
+            || msg.sender?.recruiterProfile?.name
+            || msg.sender?.cnid
+            || 'Unknown';
+        return {
+            id: msg.id,
+            text: msg.content,
+            senderName,
+            timestamp: msg.createdAt
+        };
+    });
 };

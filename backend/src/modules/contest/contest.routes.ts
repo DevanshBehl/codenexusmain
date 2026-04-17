@@ -11,6 +11,21 @@ const router = Router();
 router.get("/", contestController.getContests as RequestHandler);
 router.get("/:id", contestController.getContestById as RequestHandler);
 
+// Protected routes - register for contest (STUDENT only)
+router.post("/:id/register",
+    authenticate as RequestHandler,
+    authorize(["STUDENT"]) as RequestHandler,
+    contestController.registerStudent as RequestHandler
+);
+
+router.get("/:id/registrations",
+    authenticate as RequestHandler,
+    authorize(["COMPANY_ADMIN"]) as RequestHandler,
+    contestController.getRegistrations as RequestHandler
+);
+
+router.get("/:id/leaderboard", contestController.getContestLeaderboard as RequestHandler);
+
 // Protected routes - create contest (COMPANY_ADMIN only)
 router.post("/",
     authenticate as RequestHandler,

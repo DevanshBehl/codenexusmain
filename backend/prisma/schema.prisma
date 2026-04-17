@@ -46,6 +46,9 @@ model User {
   caSubmissions         CaSubmission[]
   caRunResults          CaRunResult[]
   caSubmissionSummaries CaSubmissionSummary[]
+
+  // Interview chat
+  interviewMessages     InterviewMessage[]
 }
 
 // ==========================================
@@ -137,10 +140,11 @@ model Student {
   user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   university University @relation(fields: [universityId], references: [id], onDelete: Cascade)
 
-  projects     Project[]
-  submissions  Submission[]
-  interviews   Interview[]
-  applications JobApplication[]
+  projects      Project[]
+  submissions   Submission[]
+  interviews    Interview[]
+  applications  JobApplication[]
+  registrations ContestRegistration[]
 }
 
 model Project {
@@ -170,8 +174,21 @@ model Contest {
   languages        String[]
   status           String   @default("UPCOMING") // UPCOMING, ACTIVE, COMPLETED
 
-  company  Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  problems Problem[]
+  company       Company               @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  problems      Problem[]
+  registrations ContestRegistration[]
+}
+
+model ContestRegistration {
+  id        String   @id @default(uuid())
+  studentId String
+  contestId String
+  createdAt DateTime @default(now())
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  contest Contest @relation(fields: [contestId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, contestId])
 }
 
 model Problem {
@@ -241,6 +258,7 @@ model Interview {
   student             Student            @relation(fields: [studentId], references: [id], onDelete: Cascade)
   recording           Recording?
   interviewRecording  InterviewRecording?
+  messages            InterviewMessage[]
 }
 
 model Recording {

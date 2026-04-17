@@ -214,6 +214,9 @@ export const contestApi = {
     getAll: () => api.get<ContestListItem[]>('/contests', false),
     getById: (id: string) => api.get<any>(`/contests/${id}`, false),
     create: (data: CreateContestPayload) => api.post('/contests', data),
+    register: (contestId: string) => api.post(`/contests/${contestId}/register`, {}),
+    getRegistrations: (contestId: string) => api.get<any[]>(`/contests/${contestId}/registrations`),
+    getLeaderboard: (contestId: string) => api.get<any>(`/contests/${contestId}/leaderboard`),
 };
 
 // ─── Problem APIs ───
@@ -446,9 +449,13 @@ export const codeArenaApi = {
         api.post(`/codearena/submissions/submit`, { problemId, language, code }),
         
     getSubmission: (id: string) => api.get(`/codearena/submissions/${id}`),
-    getSubmissions: (problemId?: string) => {
-        const params = problemId ? `?problemId=${problemId}` : '';
-        return api.get(`/codearena/submissions${params}`);
+    getSubmissions: (problemId?: string, page?: number, limit?: number) => {
+        const params = new URLSearchParams();
+        if (problemId) params.append('problemId', problemId);
+        if (page) params.append('page', page.toString());
+        if (limit) params.append('limit', limit.toString());
+        const qs = params.toString() ? `?${params.toString()}` : '';
+        return api.get(`/codearena/submissions${qs}`);
     },
 
     getLeaderboard: () => api.get(`/codearena/leaderboard`),

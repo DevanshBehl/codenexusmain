@@ -250,6 +250,7 @@ export type ContestWhereInput = {
   status?: Prisma.StringFilter<"Contest"> | string
   company?: Prisma.XOR<Prisma.CompanyScalarRelationFilter, Prisma.CompanyWhereInput>
   problems?: Prisma.ProblemListRelationFilter
+  registrations?: Prisma.ContestRegistrationListRelationFilter
 }
 
 export type ContestOrderByWithRelationInput = {
@@ -264,6 +265,7 @@ export type ContestOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   company?: Prisma.CompanyOrderByWithRelationInput
   problems?: Prisma.ProblemOrderByRelationAggregateInput
+  registrations?: Prisma.ContestRegistrationOrderByRelationAggregateInput
 }
 
 export type ContestWhereUniqueInput = Prisma.AtLeast<{
@@ -281,6 +283,7 @@ export type ContestWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.StringFilter<"Contest"> | string
   company?: Prisma.XOR<Prisma.CompanyScalarRelationFilter, Prisma.CompanyWhereInput>
   problems?: Prisma.ProblemListRelationFilter
+  registrations?: Prisma.ContestRegistrationListRelationFilter
 }, "id">
 
 export type ContestOrderByWithAggregationInput = {
@@ -326,6 +329,7 @@ export type ContestCreateInput = {
   status?: string
   company: Prisma.CompanyCreateNestedOneWithoutContestsInput
   problems?: Prisma.ProblemCreateNestedManyWithoutContestInput
+  registrations?: Prisma.ContestRegistrationCreateNestedManyWithoutContestInput
 }
 
 export type ContestUncheckedCreateInput = {
@@ -339,6 +343,7 @@ export type ContestUncheckedCreateInput = {
   languages?: Prisma.ContestCreatelanguagesInput | string[]
   status?: string
   problems?: Prisma.ProblemUncheckedCreateNestedManyWithoutContestInput
+  registrations?: Prisma.ContestRegistrationUncheckedCreateNestedManyWithoutContestInput
 }
 
 export type ContestUpdateInput = {
@@ -352,6 +357,7 @@ export type ContestUpdateInput = {
   status?: Prisma.StringFieldUpdateOperationsInput | string
   company?: Prisma.CompanyUpdateOneRequiredWithoutContestsNestedInput
   problems?: Prisma.ProblemUpdateManyWithoutContestNestedInput
+  registrations?: Prisma.ContestRegistrationUpdateManyWithoutContestNestedInput
 }
 
 export type ContestUncheckedUpdateInput = {
@@ -365,6 +371,7 @@ export type ContestUncheckedUpdateInput = {
   languages?: Prisma.ContestUpdatelanguagesInput | string[]
   status?: Prisma.StringFieldUpdateOperationsInput | string
   problems?: Prisma.ProblemUncheckedUpdateManyWithoutContestNestedInput
+  registrations?: Prisma.ContestRegistrationUncheckedUpdateManyWithoutContestNestedInput
 }
 
 export type ContestCreateManyInput = {
@@ -464,6 +471,11 @@ export type ContestSumOrderByAggregateInput = {
   timeLimitMinutes?: Prisma.SortOrder
 }
 
+export type ContestScalarRelationFilter = {
+  is?: Prisma.ContestWhereInput
+  isNot?: Prisma.ContestWhereInput
+}
+
 export type ContestNullableScalarRelationFilter = {
   is?: Prisma.ContestWhereInput | null
   isNot?: Prisma.ContestWhereInput | null
@@ -520,6 +532,20 @@ export type ContestUpdatelanguagesInput = {
   push?: string | string[]
 }
 
+export type ContestCreateNestedOneWithoutRegistrationsInput = {
+  create?: Prisma.XOR<Prisma.ContestCreateWithoutRegistrationsInput, Prisma.ContestUncheckedCreateWithoutRegistrationsInput>
+  connectOrCreate?: Prisma.ContestCreateOrConnectWithoutRegistrationsInput
+  connect?: Prisma.ContestWhereUniqueInput
+}
+
+export type ContestUpdateOneRequiredWithoutRegistrationsNestedInput = {
+  create?: Prisma.XOR<Prisma.ContestCreateWithoutRegistrationsInput, Prisma.ContestUncheckedCreateWithoutRegistrationsInput>
+  connectOrCreate?: Prisma.ContestCreateOrConnectWithoutRegistrationsInput
+  upsert?: Prisma.ContestUpsertWithoutRegistrationsInput
+  connect?: Prisma.ContestWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ContestUpdateToOneWithWhereWithoutRegistrationsInput, Prisma.ContestUpdateWithoutRegistrationsInput>, Prisma.ContestUncheckedUpdateWithoutRegistrationsInput>
+}
+
 export type ContestCreateNestedOneWithoutProblemsInput = {
   create?: Prisma.XOR<Prisma.ContestCreateWithoutProblemsInput, Prisma.ContestUncheckedCreateWithoutProblemsInput>
   connectOrCreate?: Prisma.ContestCreateOrConnectWithoutProblemsInput
@@ -546,6 +572,7 @@ export type ContestCreateWithoutCompanyInput = {
   languages?: Prisma.ContestCreatelanguagesInput | string[]
   status?: string
   problems?: Prisma.ProblemCreateNestedManyWithoutContestInput
+  registrations?: Prisma.ContestRegistrationCreateNestedManyWithoutContestInput
 }
 
 export type ContestUncheckedCreateWithoutCompanyInput = {
@@ -558,6 +585,7 @@ export type ContestUncheckedCreateWithoutCompanyInput = {
   languages?: Prisma.ContestCreatelanguagesInput | string[]
   status?: string
   problems?: Prisma.ProblemUncheckedCreateNestedManyWithoutContestInput
+  registrations?: Prisma.ContestRegistrationUncheckedCreateNestedManyWithoutContestInput
 }
 
 export type ContestCreateOrConnectWithoutCompanyInput = {
@@ -601,6 +629,74 @@ export type ContestScalarWhereInput = {
   status?: Prisma.StringFilter<"Contest"> | string
 }
 
+export type ContestCreateWithoutRegistrationsInput = {
+  id?: string
+  title: string
+  description?: string | null
+  date: Date | string
+  durationMins: number
+  timeLimitMinutes?: number
+  languages?: Prisma.ContestCreatelanguagesInput | string[]
+  status?: string
+  company: Prisma.CompanyCreateNestedOneWithoutContestsInput
+  problems?: Prisma.ProblemCreateNestedManyWithoutContestInput
+}
+
+export type ContestUncheckedCreateWithoutRegistrationsInput = {
+  id?: string
+  companyId: string
+  title: string
+  description?: string | null
+  date: Date | string
+  durationMins: number
+  timeLimitMinutes?: number
+  languages?: Prisma.ContestCreatelanguagesInput | string[]
+  status?: string
+  problems?: Prisma.ProblemUncheckedCreateNestedManyWithoutContestInput
+}
+
+export type ContestCreateOrConnectWithoutRegistrationsInput = {
+  where: Prisma.ContestWhereUniqueInput
+  create: Prisma.XOR<Prisma.ContestCreateWithoutRegistrationsInput, Prisma.ContestUncheckedCreateWithoutRegistrationsInput>
+}
+
+export type ContestUpsertWithoutRegistrationsInput = {
+  update: Prisma.XOR<Prisma.ContestUpdateWithoutRegistrationsInput, Prisma.ContestUncheckedUpdateWithoutRegistrationsInput>
+  create: Prisma.XOR<Prisma.ContestCreateWithoutRegistrationsInput, Prisma.ContestUncheckedCreateWithoutRegistrationsInput>
+  where?: Prisma.ContestWhereInput
+}
+
+export type ContestUpdateToOneWithWhereWithoutRegistrationsInput = {
+  where?: Prisma.ContestWhereInput
+  data: Prisma.XOR<Prisma.ContestUpdateWithoutRegistrationsInput, Prisma.ContestUncheckedUpdateWithoutRegistrationsInput>
+}
+
+export type ContestUpdateWithoutRegistrationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  durationMins?: Prisma.IntFieldUpdateOperationsInput | number
+  timeLimitMinutes?: Prisma.IntFieldUpdateOperationsInput | number
+  languages?: Prisma.ContestUpdatelanguagesInput | string[]
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  company?: Prisma.CompanyUpdateOneRequiredWithoutContestsNestedInput
+  problems?: Prisma.ProblemUpdateManyWithoutContestNestedInput
+}
+
+export type ContestUncheckedUpdateWithoutRegistrationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  companyId?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  date?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  durationMins?: Prisma.IntFieldUpdateOperationsInput | number
+  timeLimitMinutes?: Prisma.IntFieldUpdateOperationsInput | number
+  languages?: Prisma.ContestUpdatelanguagesInput | string[]
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  problems?: Prisma.ProblemUncheckedUpdateManyWithoutContestNestedInput
+}
+
 export type ContestCreateWithoutProblemsInput = {
   id?: string
   title: string
@@ -611,6 +707,7 @@ export type ContestCreateWithoutProblemsInput = {
   languages?: Prisma.ContestCreatelanguagesInput | string[]
   status?: string
   company: Prisma.CompanyCreateNestedOneWithoutContestsInput
+  registrations?: Prisma.ContestRegistrationCreateNestedManyWithoutContestInput
 }
 
 export type ContestUncheckedCreateWithoutProblemsInput = {
@@ -623,6 +720,7 @@ export type ContestUncheckedCreateWithoutProblemsInput = {
   timeLimitMinutes?: number
   languages?: Prisma.ContestCreatelanguagesInput | string[]
   status?: string
+  registrations?: Prisma.ContestRegistrationUncheckedCreateNestedManyWithoutContestInput
 }
 
 export type ContestCreateOrConnectWithoutProblemsInput = {
@@ -651,6 +749,7 @@ export type ContestUpdateWithoutProblemsInput = {
   languages?: Prisma.ContestUpdatelanguagesInput | string[]
   status?: Prisma.StringFieldUpdateOperationsInput | string
   company?: Prisma.CompanyUpdateOneRequiredWithoutContestsNestedInput
+  registrations?: Prisma.ContestRegistrationUpdateManyWithoutContestNestedInput
 }
 
 export type ContestUncheckedUpdateWithoutProblemsInput = {
@@ -663,6 +762,7 @@ export type ContestUncheckedUpdateWithoutProblemsInput = {
   timeLimitMinutes?: Prisma.IntFieldUpdateOperationsInput | number
   languages?: Prisma.ContestUpdatelanguagesInput | string[]
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  registrations?: Prisma.ContestRegistrationUncheckedUpdateManyWithoutContestNestedInput
 }
 
 export type ContestCreateManyCompanyInput = {
@@ -686,6 +786,7 @@ export type ContestUpdateWithoutCompanyInput = {
   languages?: Prisma.ContestUpdatelanguagesInput | string[]
   status?: Prisma.StringFieldUpdateOperationsInput | string
   problems?: Prisma.ProblemUpdateManyWithoutContestNestedInput
+  registrations?: Prisma.ContestRegistrationUpdateManyWithoutContestNestedInput
 }
 
 export type ContestUncheckedUpdateWithoutCompanyInput = {
@@ -698,6 +799,7 @@ export type ContestUncheckedUpdateWithoutCompanyInput = {
   languages?: Prisma.ContestUpdatelanguagesInput | string[]
   status?: Prisma.StringFieldUpdateOperationsInput | string
   problems?: Prisma.ProblemUncheckedUpdateManyWithoutContestNestedInput
+  registrations?: Prisma.ContestRegistrationUncheckedUpdateManyWithoutContestNestedInput
 }
 
 export type ContestUncheckedUpdateManyWithoutCompanyInput = {
@@ -718,10 +820,12 @@ export type ContestUncheckedUpdateManyWithoutCompanyInput = {
 
 export type ContestCountOutputType = {
   problems: number
+  registrations: number
 }
 
 export type ContestCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   problems?: boolean | ContestCountOutputTypeCountProblemsArgs
+  registrations?: boolean | ContestCountOutputTypeCountRegistrationsArgs
 }
 
 /**
@@ -741,6 +845,13 @@ export type ContestCountOutputTypeCountProblemsArgs<ExtArgs extends runtime.Type
   where?: Prisma.ProblemWhereInput
 }
 
+/**
+ * ContestCountOutputType without action
+ */
+export type ContestCountOutputTypeCountRegistrationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ContestRegistrationWhereInput
+}
+
 
 export type ContestSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -754,6 +865,7 @@ export type ContestSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   status?: boolean
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
   problems?: boolean | Prisma.Contest$problemsArgs<ExtArgs>
+  registrations?: boolean | Prisma.Contest$registrationsArgs<ExtArgs>
   _count?: boolean | Prisma.ContestCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["contest"]>
 
@@ -799,6 +911,7 @@ export type ContestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
 export type ContestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   company?: boolean | Prisma.CompanyDefaultArgs<ExtArgs>
   problems?: boolean | Prisma.Contest$problemsArgs<ExtArgs>
+  registrations?: boolean | Prisma.Contest$registrationsArgs<ExtArgs>
   _count?: boolean | Prisma.ContestCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ContestIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -813,6 +926,7 @@ export type $ContestPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   objects: {
     company: Prisma.$CompanyPayload<ExtArgs>
     problems: Prisma.$ProblemPayload<ExtArgs>[]
+    registrations: Prisma.$ContestRegistrationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1220,6 +1334,7 @@ export interface Prisma__ContestClient<T, Null = never, ExtArgs extends runtime.
   readonly [Symbol.toStringTag]: "PrismaPromise"
   company<T extends Prisma.CompanyDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CompanyDefaultArgs<ExtArgs>>): Prisma.Prisma__CompanyClient<runtime.Types.Result.GetResult<Prisma.$CompanyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   problems<T extends Prisma.Contest$problemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Contest$problemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProblemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  registrations<T extends Prisma.Contest$registrationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Contest$registrationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ContestRegistrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1680,6 +1795,30 @@ export type Contest$problemsArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.ProblemScalarFieldEnum | Prisma.ProblemScalarFieldEnum[]
+}
+
+/**
+ * Contest.registrations
+ */
+export type Contest$registrationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ContestRegistration
+   */
+  select?: Prisma.ContestRegistrationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ContestRegistration
+   */
+  omit?: Prisma.ContestRegistrationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ContestRegistrationInclude<ExtArgs> | null
+  where?: Prisma.ContestRegistrationWhereInput
+  orderBy?: Prisma.ContestRegistrationOrderByWithRelationInput | Prisma.ContestRegistrationOrderByWithRelationInput[]
+  cursor?: Prisma.ContestRegistrationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ContestRegistrationScalarFieldEnum | Prisma.ContestRegistrationScalarFieldEnum[]
 }
 
 /**

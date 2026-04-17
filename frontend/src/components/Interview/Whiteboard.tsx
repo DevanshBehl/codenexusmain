@@ -117,9 +117,15 @@ export default function Whiteboard({ socket, interviewId }: WhiteboardProps) {
         if (!socket) return;
 
         const handleWhiteboardSync = (data: { elements: DrawElement[] }) => {
+            // Cancel any pending local broadcast so we don't echo stale local state
+            if (syncTimeout.current) {
+                clearTimeout(syncTimeout.current);
+                syncTimeout.current = null;
+            }
             isRemoteUpdate.current = true;
             setElements(data.elements);
-            isRemoteUpdate.current = false;
+            // Reset flag after current microtask queue clears
+            setTimeout(() => { isRemoteUpdate.current = false; }, 0);
         };
 
         socket.on('whiteboard-sync', handleWhiteboardSync);

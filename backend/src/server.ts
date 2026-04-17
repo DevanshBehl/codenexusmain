@@ -5,6 +5,7 @@ import { prisma } from "./lib/prisma.js";
 import { createSocketServer } from "./socket/socket.js";
 import { createWorkers } from "./lib/mediasoup.js";
 import { initSubmissionWorker } from "./modules/codearena/submissionQueue.js";
+import { startContestStatusJob } from "./jobs/contestStatus.job.js";
 
 const startServer = async () => {
     try {
@@ -17,6 +18,9 @@ const startServer = async () => {
 
         // Initialize Background Workers
         initSubmissionWorker();
+
+        // Start Contest Status Auto-Flip Job
+        startContestStatusJob();
 
         // Attach Socket.IO
         createSocketServer(httpServer);

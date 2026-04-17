@@ -82,6 +82,11 @@ export type Project = Prisma.ProjectModel
  */
 export type Contest = Prisma.ContestModel
 /**
+ * Model ContestRegistration
+ * 
+ */
+export type ContestRegistration = Prisma.ContestRegistrationModel
+/**
  * Model Problem
  * 
  */
@@ -116,6 +121,11 @@ export type Recording = Prisma.RecordingModel
  * 
  */
 export type InterviewRecording = Prisma.InterviewRecordingModel
+/**
+ * Model InterviewMessage
+ * 
+ */
+export type InterviewMessage = Prisma.InterviewMessageModel
 /**
  * Model Webinar
  * 

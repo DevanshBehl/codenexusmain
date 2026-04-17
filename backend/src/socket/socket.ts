@@ -310,27 +310,31 @@ export function createSocketServer(httpServer: HttpServer): Server {
 
         // ─── Chat Messages ───
         socket.on("chat-message", async (data: { interviewId: string; text: string }) => {
+            if (!socket.userId || !data.interviewId || !data.text?.trim()) return;
             const roomId = `interview-${data.interviewId}`;
-            
-            // Phase 2: Persist chat message
-            const savedMsg = await prisma.interviewMessage.create({
-                data: {
-                    interviewId: data.interviewId,
-                    senderId: socket.userId!,
-                    content: data.text
-                }
-            });
 
-            const message: ChatMessage = {
-                id: savedMsg.id,
-                senderId: socket.userId!,
-                senderName: socket.userName!,
-                text: data.text,
-                timestamp: savedMsg.createdAt.toISOString(),
-            };
+            try {
+                const savedMsg = await prisma.interviewMessage.create({
+                    data: {
+                        interviewId: data.interviewId,
+                        senderId: socket.userId,
+                        content: data.text
+                    }
+                });
 
-            // Broadcast to others
-            io.to(roomId).emit("chat-message", message);
+                const message: ChatMessage = {
+                    id: savedMsg.id,
+                    senderId: socket.userId,
+                    senderName: socket.userName || 'Unknown',
+                    text: data.text,
+                    timestamp: savedMsg.createdAt.toISOString(),
+                };
+
+                // Broadcast to others in room (not back to sender — sender adds optimistically)
+                socket.to(roomId).emit("chat-message", message);
+            } catch (err) {
+                console.error("[Socket] Failed to save chat message", err);
+            }
         });
 
         // ─── Mode Sync (synchronized view between participants) ───

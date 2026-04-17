@@ -59,6 +59,7 @@ export const ModelName = {
   Student: 'Student',
   Project: 'Project',
   Contest: 'Contest',
+  ContestRegistration: 'ContestRegistration',
   Problem: 'Problem',
   TestCase: 'TestCase',
   Submission: 'Submission',
@@ -66,6 +67,7 @@ export const ModelName = {
   Interview: 'Interview',
   Recording: 'Recording',
   InterviewRecording: 'InterviewRecording',
+  InterviewMessage: 'InterviewMessage',
   Webinar: 'Webinar',
   WebinarTargetUniversity: 'WebinarTargetUniversity',
   Mail: 'Mail',
@@ -208,6 +210,16 @@ export const ContestScalarFieldEnum = {
 export type ContestScalarFieldEnum = (typeof ContestScalarFieldEnum)[keyof typeof ContestScalarFieldEnum]
 
 
+export const ContestRegistrationScalarFieldEnum = {
+  id: 'id',
+  studentId: 'studentId',
+  contestId: 'contestId',
+  createdAt: 'createdAt'
+} as const
+
+export type ContestRegistrationScalarFieldEnum = (typeof ContestRegistrationScalarFieldEnum)[keyof typeof ContestRegistrationScalarFieldEnum]
+
+
 export const ProblemScalarFieldEnum = {
   id: 'id',
   contestId: 'contestId',
@@ -299,6 +311,17 @@ export const InterviewRecordingScalarFieldEnum = {
 } as const
 
 export type InterviewRecordingScalarFieldEnum = (typeof InterviewRecordingScalarFieldEnum)[keyof typeof InterviewRecordingScalarFieldEnum]
+
+
+export const InterviewMessageScalarFieldEnum = {
+  id: 'id',
+  interviewId: 'interviewId',
+  senderId: 'senderId',
+  content: 'content',
+  createdAt: 'createdAt'
+} as const
+
+export type InterviewMessageScalarFieldEnum = (typeof InterviewMessageScalarFieldEnum)[keyof typeof InterviewMessageScalarFieldEnum]
 
 
 export const WebinarScalarFieldEnum = {

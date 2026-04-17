@@ -135,21 +135,38 @@ export async function getSubmission(req: Request, res: Response, next: NextFunct
 
 export async function getSubmissions(req: Request, res: Response, next: NextFunction) {
     try {
-        const { problemId } = req.query;
+        const { problemId, page = '1', limit = '20' } = req.query;
         const cnid = req.user?.cnid;
 
         if (!cnid) throw new ApiError(403, "Not authorized");
 
+        const pageNum = Math.max(1, parseInt(page as string) || 1);
+        const limitNum = Math.min(100, Math.max(1, parseInt(limit as string) || 20));
+        const skip = (pageNum - 1) * limitNum;
+
         const where: any = { student_cnid: cnid };
         if (problemId) where.problem_id = problemId;
 
-        const submissions = await prisma.caSubmission.findMany({
-            where,
-            orderBy: { submitted_at: 'desc' },
-            include: { problem: { select: { title: true } } }
-        });
+        const [submissions, total] = await Promise.all([
+            prisma.caSubmission.findMany({
+                where,
+                orderBy: { submitted_at: 'desc' },
+                skip,
+                take: limitNum,
+                include: { problem: { select: { title: true } } }
+            }),
+            prisma.caSubmission.count({ where })
+        ]);
 
-        res.status(200).json(new ApiResponse(200, submissions, "Submissions fetched successfully"));
+        res.status(200).json(new ApiResponse(200, {
+            submissions,
+            pagination: {
+                page: pageNum,
+                limit: limitNum,
+                total,
+                totalPages: Math.ceil(total / limitNum)
+            }
+        }, "Submissions fetched successfully"));
     } catch (e) {
         next(e);
     }
