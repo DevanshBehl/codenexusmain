@@ -453,3 +453,204 @@ export const codeArenaApi = {
     getLeaderboard: () => api.get(`/codearena/leaderboard`),
     getProfileStats: () => api.get(`/codearena/leaderboard/profile`),
 };
+
+// ==========================================
+// Dashboard API
+// ==========================================
+export interface StudentDashboardData {
+    profile: {
+        name: string;
+        branch: string;
+        cgpa: number;
+        university: string;
+        codeArenaScore: number;
+        status: string;
+    };
+    stats: {
+        problemsSolved: number;
+        totalSubmissions: number;
+        accuracy: number;
+        globalRank: number;
+        streak: number;
+        applications: number;
+    };
+    upcomingContests: {
+        id: string;
+        title: string;
+        company: string;
+        date: string;
+        durationMins: number;
+        problems: number;
+        status: string;
+    }[];
+    upcomingInterviews: {
+        id: string;
+        role: string;
+        type: string;
+        scheduledAt: string;
+        company: string;
+        recruiter: string;
+    }[];
+    upcomingWebinars: {
+        id: string;
+        title: string;
+        company: string;
+        scheduledAt: string;
+        durationMins: number;
+    }[];
+}
+
+export interface CompanyDashboardData {
+    profile: {
+        name: string;
+        industry: string | null;
+        description: string | null;
+    };
+    stats: {
+        partnerUniversities: number;
+        totalStudentsReach: number;
+        activeContests: number;
+        totalContests: number;
+        scheduledInterviews: number;
+        completedInterviews: number;
+        recruiters: number;
+    };
+    partnerUniversities: {
+        id: string;
+        name: string;
+        location: string;
+        tier: number;
+        studentCount: number;
+    }[];
+    candidates: {
+        id: string;
+        name: string;
+        branch: string;
+        cgpa: number;
+        university: string;
+        problemsSolved: number;
+        status: string;
+    }[];
+    recentContests: {
+        id: string;
+        title: string;
+        date: string;
+        durationMins: number;
+        status: string;
+        problems: number;
+    }[];
+    scheduledInterviews: {
+        id: string;
+        role: string;
+        type: string;
+        scheduledAt: string;
+        student: string;
+        studentBranch: string;
+        studentUniversity: string;
+        recruiter: string;
+    }[];
+}
+
+export interface UniversityDashboardData {
+    profile: { name: string; location: string; tier: number };
+    stats: {
+        totalStudents: number;
+        placedStudents: number;
+        availableStudents: number;
+        placementRate: number;
+        partnerCompanies: number;
+        upcomingDrives: number;
+    };
+    students: {
+        id: string;
+        name: string;
+        branch: string;
+        cgpa: number;
+        codeArenaScore: number;
+        status: string;
+        applications: number;
+        problemsSolved: number;
+    }[];
+    topStudents: {
+        id: string;
+        name: string;
+        branch: string;
+        cgpa: number;
+        codeArenaScore: number;
+    }[];
+    recentDrives: {
+        id: string;
+        title: string;
+        company: string;
+        date: string;
+        problems: number;
+        status: string;
+    }[];
+    upcomingWebinars: {
+        id: string;
+        title: string;
+        company: string;
+        scheduledAt: string;
+        durationMins: number;
+    }[];
+}
+
+export interface RecruiterDashboardData {
+    profile: { name: string; company: string };
+    stats: {
+        totalInterviews: number;
+        scheduledInterviews: number;
+        completedInterviews: number;
+        recordings: number;
+    };
+    scheduledInterviews: {
+        id: string;
+        role: string;
+        type: string;
+        scheduledAt: string;
+        student: {
+            id: string;
+            name: string;
+            branch: string;
+            cgpa: number;
+            specialization: string | null;
+            university: string;
+            projects: {
+                id: string;
+                title: string;
+                description: string;
+                techStack: string;
+                githubLink: string | null;
+                liveLink: string | null;
+            }[];
+            solvedProblems: { title: string; difficulty: string; topic: string }[];
+        };
+    }[];
+    recordings: {
+        id: string;
+        recordingId: string;
+        role: string;
+        type: string;
+        scheduledAt: string;
+        videoUrl: string | null;
+        duration: string | null;
+        rating: number;
+        verdict: string;
+        notes: string | null;
+        student: {
+            id: string;
+            name: string;
+            branch: string;
+            cgpa: number;
+            university: string;
+            solvedProblems: { title: string; difficulty: string; topic: string }[];
+        };
+    }[];
+}
+
+export const dashboardApi = {
+    student: () => api.get<StudentDashboardData>('/dashboard/student'),
+    company: () => api.get<CompanyDashboardData>('/dashboard/company'),
+    university: () => api.get<UniversityDashboardData>('/dashboard/university'),
+    recruiter: () => api.get<RecruiterDashboardData>('/dashboard/recruiter'),
+};

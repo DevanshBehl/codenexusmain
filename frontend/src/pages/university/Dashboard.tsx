@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { dashboardApi, type UniversityDashboardData } from '../../lib/api';
 import {
     Terminal,
     Building2,
@@ -29,8 +30,16 @@ import {
 
 const UniversityDashboard = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-    const [studentFilter, setStudentFilter] = useState<'ALL' | 'PLACED' | 'UNPLACED' | 'IN_PROCESS'>('ALL');
+    const [studentFilter, setStudentFilter] = useState<'ALL' | 'PLACED' | 'AVAILABLE'>('ALL');
     const [searchQuery, setSearchQuery] = useState('');
+    const [data, setData] = useState<UniversityDashboardData | null>(null);
+
+    useEffect(() => {
+        dashboardApi.university()
+            .then(res => setData(res.data))
+            .catch(() => { });
+    }, []);
+
     const sidebarItems = [
         { icon: Mail, label: 'MAIL', onClick: () => window.location.href = '/university/mail' },
         { icon: Presentation, label: 'WEBINARS', onClick: () => window.location.href = '/university/webinars' },
@@ -44,34 +53,9 @@ const UniversityDashboard = () => {
         { icon: FileText, label: 'PROFILE', onClick: () => window.location.href = '/university/profile' },
     ];
 
-    const students = [
-        { name: 'Aarav Sharma', branch: 'CSE', cgpa: 9.2, status: 'PLACED', company: 'Google' },
-        { name: 'Priya Patel', branch: 'ECE', cgpa: 8.8, status: 'PLACED', company: 'Microsoft' },
-        { name: 'Rohan Gupta', branch: 'CSE', cgpa: 8.5, status: 'IN_PROCESS', company: 'Amazon' },
-        { name: 'Sneha Reddy', branch: 'IT', cgpa: 9.0, status: 'PLACED', company: 'Apple' },
-        { name: 'Arjun Nair', branch: 'CSE', cgpa: 7.9, status: 'UNPLACED', company: '—' },
-        { name: 'Kavya Iyer', branch: 'ME', cgpa: 8.1, status: 'IN_PROCESS', company: 'Flipkart' },
-        { name: 'Vikram Singh', branch: 'CSE', cgpa: 9.4, status: 'PLACED', company: 'Meta' },
-        { name: 'Ananya Das', branch: 'ECE', cgpa: 7.6, status: 'UNPLACED', company: '—' },
-        { name: 'Rahul Verma', branch: 'IT', cgpa: 8.3, status: 'PLACED', company: 'Uber' },
-        { name: 'Meera Joshi', branch: 'CSE', cgpa: 8.7, status: 'IN_PROCESS', company: 'Stripe' },
-        { name: 'Aditya Kumar', branch: 'ME', cgpa: 7.4, status: 'UNPLACED', company: '—' },
-        { name: 'Ishita Bose', branch: 'CSE', cgpa: 9.1, status: 'PLACED', company: 'Netflix' },
-    ];
-
-    const recentDrives = [
-        { company: 'Google', date: 'Mar 18, 2026', roles: 'SDE I, SDE II', offers: 12, status: 'COMPLETED' },
-        { company: 'Microsoft', date: 'Mar 15, 2026', roles: 'SWE, PM', offers: 8, status: 'COMPLETED' },
-        { company: 'Amazon', date: 'Mar 22, 2026', roles: 'SDE I', offers: 0, status: 'UPCOMING' },
-        { company: 'Stripe', date: 'Mar 25, 2026', roles: 'Backend Eng.', offers: 0, status: 'UPCOMING' },
-    ];
-
-    const upcomingEvents = [
-        { title: 'Amazon Placement Drive', type: 'DRIVE', time: 'Mar 22, 10:00 AM', color: 'text-accent-400 border-accent-500/50' },
-        { title: 'Pre-Placement Talk — Stripe', type: 'PPT', time: 'Mar 24, 2:00 PM', color: 'text-yellow-400 border-yellow-500/50' },
-        { title: 'Resume Submission Deadline', type: 'DEADLINE', time: 'Mar 25, 11:59 PM', color: 'text-red-400 border-red-500/50' },
-        { title: 'Mock Interview Session', type: 'WORKSHOP', time: 'Mar 28, 5:00 PM', color: 'text-[#888] border-[#333]' },
-    ];
+    const students = data?.students || [];
+    const recentDrives = data?.recentDrives || [];
+    const upcomingWebinars = data?.upcomingWebinars || [];
 
     const filteredStudents = students.filter(s => {
         const matchesFilter = studentFilter === 'ALL' || s.status === studentFilter;
@@ -80,17 +64,24 @@ const UniversityDashboard = () => {
         return matchesFilter && matchesSearch;
     });
 
-    const placedCount = students.filter(s => s.status === 'PLACED').length;
-    const totalStudents = students.length;
+    const placedCount = data?.stats.placedStudents ?? 0;
+    const totalStudents = data?.stats.totalStudents ?? 0;
+    const placementRate = data?.stats.placementRate ?? 0;
+
+    const universityName = data?.profile.name || '—';
+    const universityInitials = universityName.split(' ').map(n => n[0]).slice(0, 2).join('').toUpperCase() || 'UN';
+
+    const formatDate = (iso: string) => {
+        const d = new Date(iso);
+        return d.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    };
 
     const getStatusStyle = (status: string) => {
         switch (status) {
             case 'PLACED':
                 return 'text-green-400 bg-green-500/10 border-green-500/20';
-            case 'IN_PROCESS':
-                return 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20';
-            case 'UNPLACED':
-                return 'text-[#888] bg-[#111] border-[#333]';
+            case 'AVAILABLE':
+                return 'text-accent-400 bg-accent-500/10 border-accent-500/20';
             default:
                 return 'text-[#888] bg-[#111] border-[#333]';
         }
@@ -102,6 +93,8 @@ const UniversityDashboard = () => {
                 return 'text-green-400 border-green-500/20 bg-green-500/10';
             case 'UPCOMING':
                 return 'text-accent-400 border-accent-500/20 bg-accent-500/10';
+            case 'ACTIVE':
+                return 'text-yellow-400 border-yellow-500/20 bg-yellow-500/10';
             default:
                 return 'text-[#888] border-[#333] bg-[#111]';
         }
@@ -181,7 +174,7 @@ const UniversityDashboard = () => {
                 <div className="p-4 border-t border-[#222]">
                     <div className="flex items-center group cursor-pointer hover:bg-[#111] p-2 rounded-sm border border-transparent hover:border-[#333] transition-colors">
                         <div className="w-8 h-8 rounded-sm bg-[#1a1a1a] border border-[#333] flex items-center justify-center text-white font-mono text-xs font-bold shrink-0">
-                            PC
+                            {universityInitials}
                         </div>
                         <AnimatePresence>
                             {isSidebarOpen && (
@@ -192,7 +185,7 @@ const UniversityDashboard = () => {
                                     className="ml-3 overflow-hidden flex-1 flex items-center justify-between"
                                 >
                                     <div>
-                                        <p className="text-xs font-mono text-white whitespace-nowrap uppercase tracking-wider">Placement Cell</p>
+                                        <p className="text-xs font-mono text-white whitespace-nowrap uppercase tracking-wider">{universityName}</p>
                                         <p className="text-[10px] font-mono text-accent-500 whitespace-nowrap">UNIVERSITY</p>
                                     </div>
                                     <LogOut size={14} className="text-[#555] group-hover:text-red-400 transition-colors" />
@@ -218,10 +211,10 @@ const UniversityDashboard = () => {
                                 PLACEMENT PORTAL ONLINE
                             </div>
                             <h1 className="text-3xl md:text-5xl font-bold text-white tracking-tight uppercase">
-                                <span className="text-accent-400 font-serif italic">University</span> Dashboard
+                                <span className="text-accent-400 font-serif italic">{universityName}</span> Dashboard
                             </h1>
                             <p className="text-[#888] font-mono text-xs mt-2">
-                                /home/university/placement_cell/dashboard
+                                {data?.profile.location ? `${data.profile.location} · Tier ${data.profile.tier}` : '/home/university/placement_cell/dashboard'}
                             </p>
                         </div>
 
@@ -241,12 +234,12 @@ const UniversityDashboard = () => {
                         <div className="bg-[#0A0A0A] border border-[#222] p-6 rounded-sm group hover:border-[#333] transition-colors relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-1 h-full bg-[#111] group-hover:bg-accent-500 transition-colors"></div>
                             <h3 className="text-[10px] uppercase font-mono tracking-widest text-[#888] mb-2 flex justify-between items-center">
-                                Companies Listed
+                                Partner Companies
                                 <span className="text-accent-400 font-bold">2026</span>
                             </h3>
-                            <div className="text-4xl font-bold font-sans tracking-tight">48</div>
+                            <div className="text-4xl font-bold font-sans tracking-tight">{data?.stats.partnerCompanies ?? 0}</div>
                             <div className="text-[10px] font-mono text-green-400 mt-3 flex items-center gap-1">
-                                <TrendingUp size={10} /> ↑ 12 MORE <span className="text-[#555]">/ VS LAST YEAR</span>
+                                <TrendingUp size={10} /> {data?.stats.upcomingDrives ?? 0} UPCOMING DRIVES
                             </div>
                         </div>
 
@@ -261,20 +254,20 @@ const UniversityDashboard = () => {
                                 {placedCount} <span className="text-sm text-[#555] font-mono font-normal pb-1">of {totalStudents} eligible</span>
                             </div>
                             <div className="w-full bg-[#111] border border-[#333] h-1.5 mt-3 rounded-sm overflow-hidden">
-                                <div className="bg-accent-500 h-1.5 rounded-sm transition-all duration-500" style={{ width: `${(placedCount / totalStudents) * 100}%` }} />
+                                <div className="bg-accent-500 h-1.5 rounded-sm transition-all duration-500" style={{ width: `${totalStudents > 0 ? (placedCount / totalStudents) * 100 : 0}%` }} />
                             </div>
                         </div>
 
-                        {/* Avg. Package */}
+                        {/* Placement Rate */}
                         <div className="bg-[#0A0A0A] border border-[#222] p-6 rounded-sm group hover:border-[#333] transition-colors relative overflow-hidden">
                             <div className="absolute top-0 left-0 w-1 h-full bg-[#111] group-hover:bg-accent-500 transition-colors"></div>
                             <h3 className="text-[10px] uppercase font-mono tracking-widest text-[#888] mb-2 flex justify-between items-center">
-                                Avg. Package
-                                <span className="text-accent-400 font-bold">₹12.4 LPA</span>
+                                Placement Rate
+                                <span className="text-accent-400 font-bold">{placementRate}%</span>
                             </h3>
-                            <div className="text-4xl font-bold font-sans tracking-tight">₹12.4<span className="text-lg text-[#555] ml-1">LPA</span></div>
+                            <div className="text-4xl font-bold font-sans tracking-tight">{placementRate}<span className="text-lg text-[#555] ml-1">%</span></div>
                             <div className="text-[10px] font-mono text-green-400 mt-3 flex items-center gap-1">
-                                <TrendingUp size={10} /> ↑ 18% <span className="text-[#555]">/ VS LAST YEAR (₹10.5 LPA)</span>
+                                <TrendingUp size={10} /> {data?.stats.availableStudents ?? 0} <span className="text-[#555]">STUDENTS AVAILABLE</span>
                             </div>
                         </div>
                     </div>
@@ -295,20 +288,21 @@ const UniversityDashboard = () => {
                                 </div>
 
                                 <div className="space-y-3">
-                                    {recentDrives.map((drive, i) => (
-                                        <div key={i} className="flex flex-col md:flex-row md:items-center justify-between p-4 border border-[#222] bg-[#050505] hover:border-[#333] transition-colors group cursor-pointer rounded-sm">
+                                    {recentDrives.length === 0 && (
+                                        <div className="text-center py-12 text-[#555] font-mono text-xs uppercase tracking-widest">
+                                            No placement drives yet
+                                        </div>
+                                    )}
+                                    {recentDrives.map((drive) => (
+                                        <div key={drive.id} className="flex flex-col md:flex-row md:items-center justify-between p-4 border border-[#222] bg-[#050505] hover:border-[#333] transition-colors group cursor-pointer rounded-sm">
                                             <div className="flex-1">
-                                                <h4 className="font-sans font-bold text-sm text-white group-hover:text-accent-400 transition-colors mb-1">{drive.company}</h4>
+                                                <h4 className="font-sans font-bold text-sm text-white group-hover:text-accent-400 transition-colors mb-1">{drive.title || drive.company}</h4>
                                                 <div className="flex items-center gap-4 text-[10px] font-mono text-[#666] uppercase tracking-widest">
-                                                    <span>{drive.date}</span>
+                                                    <span>{drive.company}</span>
                                                     <span>•</span>
-                                                    <span>{drive.roles}</span>
-                                                    {drive.offers > 0 && (
-                                                        <>
-                                                            <span>•</span>
-                                                            <span className="text-green-400">{drive.offers} OFFERS</span>
-                                                        </>
-                                                    )}
+                                                    <span>{formatDate(drive.date)}</span>
+                                                    <span>•</span>
+                                                    <span>{drive.problems} PROBLEMS</span>
                                                 </div>
                                             </div>
                                             <div className="mt-3 md:mt-0">
@@ -345,7 +339,7 @@ const UniversityDashboard = () => {
                                         {/* Filter */}
                                         <div className="flex items-center gap-1">
                                             <Filter size={10} className="text-[#555]" />
-                                            {(['ALL', 'PLACED', 'UNPLACED', 'IN_PROCESS'] as const).map((f) => (
+                                            {(['ALL', 'PLACED', 'AVAILABLE'] as const).map((f) => (
                                                 <button
                                                     key={f}
                                                     onClick={() => setStudentFilter(f)}
@@ -355,7 +349,7 @@ const UniversityDashboard = () => {
                                                             : 'border-[#333] text-[#666] hover:text-white hover:border-[#555]'
                                                     }`}
                                                 >
-                                                    {f.replace('_', ' ')}
+                                                    {f}
                                                 </button>
                                             ))}
                                         </div>
@@ -368,14 +362,14 @@ const UniversityDashboard = () => {
                                     <div className="col-span-2">Branch</div>
                                     <div className="col-span-2">CGPA</div>
                                     <div className="col-span-2">Status</div>
-                                    <div className="col-span-2">Company</div>
+                                    <div className="col-span-2">Arena Score</div>
                                 </div>
 
                                 {/* Student Rows */}
                                 <div className="space-y-1 max-h-[360px] overflow-y-auto custom-scrollbar">
                                     {filteredStudents.map((student, i) => (
                                         <motion.div
-                                            key={i}
+                                            key={student.id}
                                             initial={{ opacity: 0, y: 8 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             transition={{ delay: i * 0.03 }}
@@ -391,10 +385,10 @@ const UniversityDashboard = () => {
                                             <div className="col-span-2 text-xs font-mono font-bold text-white">{student.cgpa}</div>
                                             <div className="col-span-2">
                                                 <span className={`text-[9px] font-mono uppercase tracking-widest px-2 py-0.5 border rounded-sm ${getStatusStyle(student.status)}`}>
-                                                    {student.status.replace('_', ' ')}
+                                                    {student.status}
                                                 </span>
                                             </div>
-                                            <div className="col-span-2 text-[10px] font-mono text-[#888]">{student.company}</div>
+                                            <div className="col-span-2 text-[10px] font-mono text-accent-400 font-bold">{student.codeArenaScore}</div>
                                         </motion.div>
                                     ))}
                                 </div>
@@ -410,31 +404,36 @@ const UniversityDashboard = () => {
                         {/* Right Column */}
                         <div className="space-y-6 flex flex-col">
 
-                            {/* Upcoming Events */}
+                            {/* Upcoming Webinars */}
                             <div className="bg-[#0A0A0A] border border-[#222] p-6 rounded-sm flex-1">
                                 <div className="flex justify-between items-center mb-6 pb-4 border-b border-[#222]">
                                     <h3 className="text-sm font-bold font-sans uppercase tracking-widest text-white flex items-center gap-2">
                                         <Calendar size={16} className="text-[#888]" />
-                                        Events
+                                        Upcoming Webinars
                                     </h3>
                                 </div>
 
                                 <div className="space-y-4">
-                                    {upcomingEvents.map((event, i) => (
-                                        <div key={i} className="flex gap-4 group cursor-pointer opacity-90 hover:opacity-100 transition-opacity">
+                                    {upcomingWebinars.length === 0 && (
+                                        <div className="text-center py-8 text-[#555] font-mono text-xs uppercase tracking-widest">
+                                            No upcoming webinars
+                                        </div>
+                                    )}
+                                    {upcomingWebinars.map((webinar, i) => (
+                                        <div key={webinar.id} className="flex gap-4 group cursor-pointer opacity-90 hover:opacity-100 transition-opacity">
                                             <div className="flex flex-col items-center">
-                                                <div className={`w-2 h-2 rounded-full border border-current mt-1.5 ${event.color} bg-[#0A0A0A]`} />
-                                                {i !== upcomingEvents.length - 1 && (
+                                                <div className="w-2 h-2 rounded-full border border-current mt-1.5 text-accent-400 border-accent-500/50 bg-[#0A0A0A]" />
+                                                {i !== upcomingWebinars.length - 1 && (
                                                     <div className="w-px h-full bg-[#222] mt-2 group-hover:bg-[#333] transition-colors" />
                                                 )}
                                             </div>
                                             <div className="flex-1 pb-4">
-                                                <span className={`text-[9px] font-mono uppercase tracking-widest border border-current px-1.5 py-0.5 rounded-[2px] ${event.color}`}>
-                                                    {event.type}
+                                                <span className="text-[9px] font-mono uppercase tracking-widest border border-current px-1.5 py-0.5 rounded-[2px] text-accent-400 border-accent-500/50">
+                                                    PPT
                                                 </span>
-                                                <h4 className="font-sans font-bold text-white mt-2 group-hover:text-accent-400 transition-colors text-sm">{event.title}</h4>
+                                                <h4 className="font-sans font-bold text-white mt-2 group-hover:text-accent-400 transition-colors text-sm">{webinar.title}</h4>
                                                 <p className="text-[10px] font-mono text-[#666] mt-1 tracking-widest">
-                                                    {event.time}
+                                                    {webinar.company} · {formatDate(webinar.scheduledAt)} · {webinar.durationMins} min
                                                 </p>
                                             </div>
                                         </div>
