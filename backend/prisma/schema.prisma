@@ -272,6 +272,19 @@ model InterviewRecording {
   @@index([interview_id])
 }
 
+model InterviewMessage {
+  id          String   @id @default(uuid())
+  interviewId String
+  senderId    String
+  content     String
+  createdAt   DateTime @default(now())
+
+  interview Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+  sender    User      @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([interviewId, createdAt])
+}
+
 // ==========================================
 // 5. WEBINARS / PRE-PLACEMENT TALKS (PPT)
 // ==========================================

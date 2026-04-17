@@ -84,7 +84,7 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
     const remoteName = interviewData ? (isRecruiter ? interviewData.student.name : "Recruiter") : "Waiting...";
     const selfName = isRecruiter ? 'Recruiter (You)' : 'Student (You)';
 
-    /* ────────── Fetch Interview Metadata ────────── */
+    /* ────────── Fetch Interview Metadata & Chat History ────────── */
     useEffect(() => {
         if (!id) return;
         interviewApi.getById(id).then(res => {
@@ -95,6 +95,17 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
             window.alert("Failed to load interview");
             navigate(-1);
         });
+
+        // Phase 2: Fetch persisted chat history
+        interviewApi.getMessages(id).then(res => {
+            const formatted = res.data.map(m => ({
+                text: m.text,
+                sender: m.senderCnid === 'Unknown' ? 'System' : m.senderCnid, // Simplified sender representation
+                time: new Date(m.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            }));
+            setChatMessages(formatted);
+        }).catch(err => console.error("Failed to load chat history", err));
+
     }, [id, navigate]);
 
     /* ────────── Timing Validation for Lobby ────────── */

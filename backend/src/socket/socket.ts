@@ -6,6 +6,10 @@ import { prisma } from "../lib/prisma.js";
 import { createRoomRouter, createWebRtcTransport, transports, producers, consumers, routers } from "../lib/mediasoup.js";
 import { startRecording, addProducerToRecording, stopRecording, removeProducerFromRecording, activeSessions } from "../lib/recording.manager.js";
 
+// Memory caches for Phase 2 Late-Joiner Hydration
+const roomWhiteboards = new Map<string, any[]>();
+const roomYjsDocs = new Map<string, Buffer[]>();
+
 let ioInstance: Server | null = null;
 
 interface AuthenticatedSocket extends Socket {
@@ -134,6 +138,20 @@ export function createSocketServer(httpServer: HttpServer): Server {
                         recruiterName: interview.recruiter.name,
                     },
                 });
+
+                // Phase 2: Hydrate late joiners with existing presentation states
+                if (roomWhiteboards.has(interviewId)) {
+                    socket.emit("whiteboard-sync", {
+                        elements: roomWhiteboards.get(interviewId),
+                        userId: "system"
+                    });
+                }
+                
+                if (roomYjsDocs.has(interviewId)) {
+                    socket.emit("yjs-state", {
+                        updates: roomYjsDocs.get(interviewId)
+                    });
+                }
 
                 // Send existing producers so late-joiner can consume them
                 const existingProducers = Array.from(producers.values())
@@ -291,15 +309,27 @@ export function createSocketServer(httpServer: HttpServer): Server {
         });
 
         // ─── Chat Messages ───
-        socket.on("chat-message", (data: { interviewId: string; text: string }) => {
+        socket.on("chat-message", async (data: { interviewId: string; text: string }) => {
             const roomId = `interview-${data.interviewId}`;
+            
+            // Phase 2: Persist chat message
+            const savedMsg = await prisma.interviewMessage.create({
+                data: {
+                    interviewId: data.interviewId,
+                    senderId: socket.userId!,
+                    content: data.text
+                }
+            });
+
             const message: ChatMessage = {
-                id: `msg-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+                id: savedMsg.id,
                 senderId: socket.userId!,
                 senderName: socket.userName!,
                 text: data.text,
-                timestamp: new Date().toISOString(),
+                timestamp: savedMsg.createdAt.toISOString(),
             };
+
+            // Broadcast to others
             io.to(roomId).emit("chat-message", message);
         });
 
@@ -332,9 +362,29 @@ export function createSocketServer(httpServer: HttpServer): Server {
             });
         });
 
+        // ─── Code Sync (Yjs CRDT pattern) ───
+        socket.on("yjs-update", (data: { interviewId: string; update: Buffer }) => {
+            const roomId = `interview-${data.interviewId}`;
+            
+            // Cache update
+            const updates = roomYjsDocs.get(data.interviewId) || [];
+            updates.push(data.update);
+            roomYjsDocs.set(data.interviewId, updates);
+
+            // Broadcast to others
+            socket.to(roomId).emit("yjs-update", {
+                update: data.update,
+                userId: socket.userId
+            });
+        });
+
         // ─── Whiteboard Sync ───
         socket.on("whiteboard-sync", (data: { interviewId: string; elements: any[] }) => {
             const roomId = `interview-${data.interviewId}`;
+            
+            // Cache latest full state
+            roomWhiteboards.set(data.interviewId, data.elements);
+
             socket.to(roomId).emit("whiteboard-sync", {
                 elements: data.elements,
                 userId: socket.userId,

@@ -316,3 +316,37 @@ export const downloadServerRecording = async (userId: string, userRole: string, 
         fileSize: recording.file_size_bytes ? Number(recording.file_size_bytes) : undefined,
     };
 };
+
+export const getMessages = async (userId: string, role: string, interviewId: string) => {
+    // Check access
+    const interview = await prisma.interview.findUnique({
+        where: { id: interviewId },
+        include: {
+            student: true,
+            recruiter: true
+        }
+    });
+
+    if (!interview) throw new ApiError(404, "Interview not found");
+
+    if (role === 'STUDENT' && interview.student.userId !== userId) {
+        throw new ApiError(403, "You can only view chat for your own interviews");
+    }
+
+    if (role === 'RECRUITER' && interview.recruiter.userId !== userId) {
+        throw new ApiError(403, "You can only view chat for your own interviews");
+    }
+
+    const messages = await prisma.interviewMessage.findMany({
+        where: { interviewId },
+        include: { sender: { select: { cnid: true } } },
+        orderBy: { createdAt: 'asc' }
+    });
+
+    return messages.map(msg => ({
+        id: msg.id,
+        text: msg.content,
+        senderCnid: msg.sender?.cnid || 'Unknown',
+        timestamp: msg.createdAt
+    }));
+};

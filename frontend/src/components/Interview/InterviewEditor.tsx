@@ -2,6 +2,8 @@ import { useState, useRef, useEffect, useCallback } from 'react';
 import { Terminal, Play, Send, Settings, Lock } from 'lucide-react';
 import Editor, { type OnMount } from '@monaco-editor/react';
 import { Socket } from 'socket.io-client';
+import * as Y from 'yjs';
+import { MonacoBinding } from 'y-monaco';
 
 /* ── Language mapping for Monaco ── */
 const LANGUAGE_MAP: Record<string, string> = {
@@ -78,68 +80,62 @@ export default function InterviewEditor({ socket, interviewId, role }: Interview
     const handleEditorDidMount: OnMount = (editor) => {
         editorRef.current = editor;
         if (isStudent) editor.focus();
+        
+        // Phase 2: Yjs Initialization
+        if (socket) {
+            const doc = new Y.Doc();
+            const type = doc.getText('monaco');
+            const model = editor.getModel();
+            
+            // @ts-ignore
+            const binding = new MonacoBinding(type, model, new Set([editor]), null);
+
+            doc.on('update', (update: Uint8Array, origin: any) => {
+                if (origin !== socket) {
+                    socket.emit('yjs-update', { interviewId, update: Array.from(update) });
+                }
+            });
+
+            socket.on('yjs-update', (data: { update: number[] }) => {
+                Y.applyUpdate(doc, new Uint8Array(data.update), socket);
+            });
+
+            socket.on('yjs-state', (data: { updates: number[][] }) => {
+                if (data.updates) {
+                    data.updates.forEach(u => Y.applyUpdate(doc, new Uint8Array(u), socket));
+                }
+            });
+            
+            // Clean up old text-based code-sync
+            socket.on('code-sync', (data: { language: string }) => {
+                if (data.language && data.language !== language) {
+                    setLanguage(data.language);
+                }
+            });
+        }
     };
 
     const handleLanguageChange = (newLang: string) => {
         setLanguage(newLang);
-        if (editorRef.current) {
-            isRemoteUpdate.current = true;
-            editorRef.current.setValue(DEFAULT_CODE[newLang] ?? '');
-            isRemoteUpdate.current = false;
-        }
-        // Broadcast language change with code
         if (socket && isStudent) {
             socket.emit('code-sync', {
                 interviewId,
-                code: DEFAULT_CODE[newLang] ?? '',
+                code: '',
                 language: newLang,
             });
         }
     };
 
-    // Emit code changes to the other participant (debounced)
-    const handleCodeChange = useCallback((value: string | undefined) => {
-        if (isRemoteUpdate.current || !isStudent || !socket) return;
-
-        if (syncTimeout.current) clearTimeout(syncTimeout.current);
-        syncTimeout.current = setTimeout(() => {
-            socket.emit('code-sync', {
-                interviewId,
-                code: value ?? '',
-                language,
-            });
-        }, 150); // Debounce 150ms to avoid spamming
-    }, [socket, interviewId, language, isStudent]);
-
-    // Receive code changes from the other participant
+    // Receive general socket cleanups mapped from didMount
     useEffect(() => {
-        if (!socket) return;
-
-        const handleCodeSync = (data: { code: string; language: string }) => {
-            // Update language selector if changed
-            if (data.language && data.language !== language) {
-                setLanguage(data.language);
-            }
-            // Update editor content
-            if (editorRef.current) {
-                isRemoteUpdate.current = true;
-                const editor = editorRef.current;
-                const model = editor.getModel();
-                if (model) {
-                    // Preserve cursor position for the viewer
-                    const position = editor.getPosition();
-                    editor.setValue(data.code);
-                    if (position) editor.setPosition(position);
-                }
-                isRemoteUpdate.current = false;
-            }
-        };
-
-        socket.on('code-sync', handleCodeSync);
         return () => {
-            socket.off('code-sync', handleCodeSync);
+            if (socket) {
+                socket.off('yjs-update');
+                socket.off('yjs-state');
+                socket.off('code-sync');
+            }
         };
-    }, [socket, language]);
+    }, [socket]);
 
     return (
         <section className="h-full min-h-0 border border-accent-500/30 bg-[#050505] rounded-sm overflow-hidden flex flex-col relative group hover:border-accent-500/60 transition-colors shadow-[0_0_20px_oklch(0.777_0.152_181.912_/_0.05)]">
@@ -194,7 +190,6 @@ export default function InterviewEditor({ socket, interviewId, role }: Interview
                     defaultValue={DEFAULT_CODE[language]}
                     theme="vs-dark"
                     onMount={handleEditorDidMount}
-                    onChange={handleCodeChange}
                     options={{
                         fontSize: 14,
                         fontFamily: "'JetBrains Mono', 'Fira Code', 'Cascadia Code', Menlo, Monaco, 'Courier New', monospace",

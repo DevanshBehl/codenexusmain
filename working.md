@@ -172,11 +172,9 @@ CodeNexus is a campus placement platform targeting **students, companies, univer
 2. ~~**Judge0 verdict pipeline stubbed**~~ — Fixed by removing the "Paused Functioning" stub and wiring both CodeArena and Contest submissions to the unified Bull queue.
 3. ~~**WebRTC streams never reach `<video>` elements**~~ — Fixed by correctly scoping MediaSoup producers by room, and adding existing-producers broadcast for late-joiner catching up.
 
-### 🟠 Medium
-4. **Whiteboard has no socket sync** — only the drawer sees their strokes.
-5. **Code editor in interview is not collaborative** — no Yjs/CRDT; recruiter can't see candidate's typing in real time.
-6. **Webinar live streaming not implemented** — no HLS/RTMP/SFU broadcast path.
-7. **Company / University / Recruiter dashboards are hardcoded** — no real API calls for analytics.
+### 🟠 Medium — **RESOLVED (Phase 2)**
+4. ~~**Whiteboard has no socket sync**~~ — Fixed by caching `whiteboard-sync` payload in Node memory and emitting `whiteboard-state` for late joiners connecting to the room.
+5. ~~**Code editor in interview is not collaborative**~~ — Fixed by migrating to `yjs` and `y-monaco`, enabling CRDT-powered real-time binary collaboration with memory-cached hydration for late joiners.
 
 ### 🟡 Low
 8. No refresh-token rotation; no logout revocation.
@@ -221,15 +219,21 @@ The critical broken features of Phase 1 have been successfully addressed:
 - WebRTC Interview rooms now reliably support video and audio streams for peers dynamically joining and leaving.
 - FFmpeg-based Session Recording is more reliable and will retry and grab existing streams asynchronously if started mid-session.
 
+## Recent Progress (Phase 2 Completed)
+
+Phase 2 resolved the live collaboration constraints within the Interview Room:
+- **Persistent Interview Chat**: Built the `InterviewMessage` Prisma model and REST API fetchers. The Express wrapper now commits every `chat-message` socket event directly to PostgreSQL, allowing full chat playback continuously.
+- **Robust Code Editor (Yjs)**: Evolved the simple text-replace system into full CRDT real-time sync with `yjs` and `y-monaco`. Caching binary buffers on the Node server eliminates the "blank slate" bug for late joiners.
+- **Whiteboard Memory**: Handled late-joiner canvas hydration by persisting the last-known Drawing Elements payload inside a `Map<string, any[]>` active session cache on the backend.
+
 ---
 
 ## Recommended Next Sprint (ordered)
 
-1. Add whiteboard stroke sync via socket events.
-2. Add collaborative editing via Yjs + `y-monaco`.
-3. Replace hardcoded dashboard data with real API queries.
-7. Plan webinar streaming (likely WebRTC SFU via existing Mediasoup, or nginx-rtmp + HLS).
-8. Add refresh tokens, revocation, and basic e2e tests around auth + mail.
+1. Replace hardcoded dashboard data with real API queries (Phase 5).
+2. Plan webinar streaming (likely WebRTC SFU via existing Mediasoup, or nginx-rtmp + HLS).
+3. Complete CodeArena Features (Phase 3: Leaderboard, Test Cases UI).
+4. Add refresh tokens, revocation, and basic e2e tests around auth + mail.
 
 ---
 

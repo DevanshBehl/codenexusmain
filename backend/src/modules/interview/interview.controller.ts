@@ -131,3 +131,14 @@ export const downloadServerRecording = async (req: Request, res: Response, next:
         next(e);
     }
 }
+
+export const getMessages = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.id;
+        const role = req.user?.role;
+        const messages = await interviewService.getMessages(userId as string, role as string, req.params.id as string);
+        res.status(200).json(new ApiResponse(200, messages, "Messages fetched successfully"));
+    } catch (e) {
+        next(e);
+    }
+}

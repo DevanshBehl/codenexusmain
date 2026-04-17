@@ -65,4 +65,10 @@ router.get("/:id/recording/download",
     interviewController.downloadServerRecording as RequestHandler
 );
 
+// Get chat messages (Participants only)
+router.get("/:id/messages",
+    authorize(["RECRUITER", "STUDENT"]) as RequestHandler,
+    interviewController.getMessages as RequestHandler
+);
+
 export default router;

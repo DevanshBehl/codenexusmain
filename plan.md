@@ -81,12 +81,12 @@ With A/V working, add the remaining real-time collaboration features that make i
 - [backend/src/socket/socket.ts](backend/src/socket/socket.ts)
 
 **Tasks:**
-- [ ] Add socket event `whiteboard:stroke` — payload: `{ x, y, prevX, prevY, color, lineWidth, tool }`
-- [ ] On draw, emit `whiteboard:stroke` to the room (not back to sender)
-- [ ] On `whiteboard:stroke` received, replay the stroke on the remote canvas
-- [ ] Add `whiteboard:clear` event
-- [ ] On new join, emit `whiteboard:state` with the full stroke history so late joiners catch up
-- [ ] Add a tool palette: pen, eraser, color picker, line width
+- [x] Add socket event `whiteboard:stroke` — payload: `{ x, y, prevX, prevY, color, lineWidth, tool }`
+- [x] On draw, emit `whiteboard:stroke` to the room (not back to sender)
+- [x] On `whiteboard:stroke` received, replay the stroke on the remote canvas
+- [x] Add `whiteboard:clear` event
+- [x] On new join, emit `whiteboard:state` with the full stroke history so late joiners catch up
+- [x] Add a tool palette: pen, eraser, color picker, line width
 
 **Done when:** Recruiter and candidate both see strokes as they are drawn.
 
@@ -101,12 +101,12 @@ With A/V working, add the remaining real-time collaboration features that make i
 - [backend/src/socket/socket.ts](backend/src/socket/socket.ts)
 
 **Tasks:**
-- [ ] Install `yjs` and `y-monaco` in frontend
-- [ ] Create a Yjs `Doc` per interview room, backed by a Socket.IO provider (`y-socket.io` or custom)
-- [ ] Add backend relay: `socket.on('yjs:update', data => socket.to(room).emit('yjs:update', data))`
-- [ ] Bind the Y.Text type to the Monaco editor model
-- [ ] Show remote cursors with participant name labels (use `@nexode-ai/monaco-remote-cursor` or build custom)
-- [ ] Sync language selection across participants
+- [x] Install `yjs` and `y-monaco` in frontend
+- [x] Create a Yjs `Doc` per interview room, backed by a Socket.IO provider (`y-socket.io` or custom)
+- [x] Add backend relay: `socket.on('yjs:update', data => socket.to(room).emit('yjs:update', data))`
+- [x] Bind the Y.Text type to the Monaco editor model
+- [x] Show remote cursors with participant name labels (use `@nexode-ai/monaco-remote-cursor` or build custom)
+- [x] Sync language selection across participants
 
 **Done when:** Both users type in the editor and see each other's cursors and changes instantly.
 
@@ -122,11 +122,11 @@ With A/V working, add the remaining real-time collaboration features that make i
 - [frontend/src/components/Interview/InterviewRoom.tsx](frontend/src/components/Interview/InterviewRoom.tsx)
 
 **Tasks:**
-- [ ] Add `InterviewMessage` model to Prisma schema (`id, interviewId, senderId, content, createdAt`)
-- [ ] Add `POST /interviews/:id/messages` and `GET /interviews/:id/messages` endpoints
-- [ ] Add socket event `chat:message` → save to DB + broadcast to room
-- [ ] Load chat history on room join (`GET /interviews/:id/messages`)
-- [ ] Wire the existing chat UI in `InterviewRoom.tsx` to emit and receive messages
+- [x] Add `InterviewMessage` model to Prisma schema (`id, interviewId, senderId, content, createdAt`)
+- [x] Add `POST /interviews/:id/messages` and `GET /interviews/:id/messages` endpoints
+- [x] Add socket event `chat:message` → save to DB + broadcast to room
+- [x] Load chat history on room join (`GET /interviews/:id/messages`)
+- [x] Wire the existing chat UI in `InterviewRoom.tsx` to emit and receive messages
 
 **Done when:** Messages sent during an interview are visible to both parties and persist after refresh.
 

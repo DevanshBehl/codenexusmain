@@ -402,6 +402,7 @@ export const interviewApi = {
     update: (id: string, data: any) => api.patch<InterviewItem>(`/interviews/${id}`, data),
     delete: (id: string) => api.del(`/interviews/${id}`),
     join: (id: string) => api.get<{ success: boolean }>(`/interviews/${id}/join`),
+    getMessages: (id: string) => api.get<any[]>(`/interviews/${id}/messages`),
     saveRecording: (id: string, data: any) => api.post(`/interviews/${id}/recording`, data),
     getStudents: () => api.get<any[]>('/interviews/students'),
     getCompanyRecruiters: () => api.get<any[]>('/interviews/company-recruiters'),

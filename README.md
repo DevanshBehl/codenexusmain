@@ -30,9 +30,9 @@
 
 ## 🚀 Overview
 
-**CodeNexus** connects four stakeholders — **Students**, **Universities**, **Companies**, and **Recruiters** — through dedicated role-based dashboards, an internal mailing system, live webinar rooms, a competitive coding arena with sandboxed code execution, and a real-time interview IDE with WebRTC video.
+**CodeNexus** connects four stakeholders — **Students**, **Universities**, **Companies**, and **Recruiters** — through dedicated role-based dashboards, an internal mailing system, live webinar rooms, a competitive coding arena with sandboxed code execution (Judge0 integration), and a real-time interview IDE with WebRTC multi-peer video and robust FFmpeg session recording.
 
-Every interaction — from scheduling a pre-placement talk to conducting a live technical interview — happens entirely within CodeNexus.
+Every interaction — from scheduling a pre-placement talk to conducting a live, recordable technical interview — happens entirely within CodeNexus.
 
 ---
 
@@ -52,31 +52,42 @@ graph TB
         FE["⚛️ React Frontend<br/>Vite + TailwindCSS v4"]
     end
 
-    subgraph "Server"
-        API["🟢 Express API<br/>REST + Socket.IO"]
-        QUEUE["📋 BullMQ<br/>Job Queue"]
-        RUNNER["🐳 Docker Runner<br/>Sandboxed Execution"]
+    subgraph "Real-Time / Media Engine"
+        SFU["📹 Mediasoup SFU<br/>WebRTC Routing"]
+        REC["⏺️ FFmpeg Pipelines<br/>Session Recording"]
     end
 
-    subgraph "Data"
+    subgraph "Backend Core"
+        API["🟢 Express API + Socket.IO<br/>REST & WSS Handlers"]
+        QUEUE["📋 BullMQ<br/>Async Job Queue"]
+        JUDGE["⚖️ Judge0 CE<br/>Sandboxed Execution"]
+    end
+
+    subgraph "Data Persistence"
         PG["🐘 PostgreSQL<br/>Primary Database"]
-        RD["⚡ Redis<br/>Cache + Leaderboard + Pub/Sub"]
-        S3["📦 S3 / MinIO<br/>File Storage"]
+        RD["⚡ Redis<br/>Cache & Leaderboard"]
+        S3["📦 Local / S3<br/>File & MP4 Storage"]
     end
 
     FE -->|REST + WebSocket| API
+    FE <-->|WebRTC RTP/RTCP| SFU
+    API <-->|Control Router/Producer| SFU
+    SFU -->|Tap Media Streams| REC
+    REC -->|Save MP4| S3
     API --> PG
     API --> RD
     API --> S3
-    API -->|enqueue| QUEUE
-    QUEUE -->|process| RUNNER
+    API -->|Enqueue contest/code submissions| QUEUE
+    QUEUE -->|Process & Poll| JUDGE
 
     style FE fill:#0a0a0a,stroke:#06b6d4,color:#06b6d4
     style API fill:#0a0a0a,stroke:#339933,color:#339933
+    style SFU fill:#0a0a0a,stroke:#8b5cf6,color:#8b5cf6
+    style REC fill:#0a0a0a,stroke:#ef4444,color:#ef4444
     style PG fill:#0a0a0a,stroke:#4169E1,color:#4169E1
     style RD fill:#0a0a0a,stroke:#DC382D,color:#DC382D
     style QUEUE fill:#0a0a0a,stroke:#f59e0b,color:#f59e0b
-    style RUNNER fill:#0a0a0a,stroke:#2496ED,color:#2496ED
+    style JUDGE fill:#0a0a0a,stroke:#2496ED,color:#2496ED
     style S3 fill:#0a0a0a,stroke:#888,color:#888
 ```
 
