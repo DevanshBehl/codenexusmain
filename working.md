@@ -319,6 +319,49 @@ Phase 3 completed the Code Arena feature set, making it fully functional with li
 
 ---
 
+## Recent Progress (Phase 4 — In Progress)
+
+Phase 4 is replacing hardcoded mock data on admin dashboards with real backend API calls, plus completing the end-to-end evaluation workflow.
+
+### 4.1 — Evaluation Module (Backend)
+- **Discovery:** Dashboard module already existed at `backend/src/modules/dashboard/` with fully implemented service, controller, and routes — no work needed there. Already mounted at `/api/v1/dashboard`.
+- **New module:** `backend/src/modules/evaluation/` — no evaluation module existed, had to be created from scratch
+- **New Prisma model:** `Evaluation` added to schema with Interview and Company relations
+- **New files:**
+  - `evaluation.schema.ts` — Zod validation for verdict + notes + structured scores (technical, communication, culture)
+  - `evaluation.service.ts` — `getCompanyEvaluations`, `getEvaluationDetail`, `submitEvaluation`
+  - `evaluation.controller.ts` — 3 handlers
+  - `evaluation.routes.ts` — 3 routes mounted at `/api/v1/evaluations`
+- **Key behavior:** `submitEvaluation` also updates `JobApplication.status` to SELECTED/REJECTED when verdict is finalized
+
+### 4.2 — Evaluation API (Frontend)
+- **Updated:** `frontend/src/lib/api.ts`
+  - Added `EvaluationCandidate` interface with full structured scores and questions array
+  - Added `SubmitEvaluationPayload` interface with verdict, notes, rating, and score breakdowns
+  - Added `evaluationApi` with `getCompanyEvaluations(status?)`, `getEvaluationDetail(interviewId)`, `submitEvaluation(interviewId, data)`
+
+### 4.3 — Company Evaluation Page Wiring
+- **Updated:** `frontend/src/pages/company/Evaluation.tsx`
+  - Replaced `mockCandidates` with real `pendingCandidates`/`evaluatedCandidates` state
+  - Added `useEffect` to fetch both lists on mount via `evaluationApi.getCompanyEvaluations('PENDING')` and `getCompanyEvaluations('EVALUATED')`
+  - Added `handleEvaluation` async submit handler calling `evaluationApi.submitEvaluation`
+  - Added `detailLoading` state — when a candidate is clicked, fetches full evaluation detail via `getEvaluationDetail` to populate the `questions` array (code submissions from contest problems)
+  - Added loading indicator in Technical Assessment section while detail is fetching
+  - Added HOLD button alongside SELECTED/REJECTED in modal footer
+  - Updated `handleEvaluation` to accept `'SELECTED' | 'REJECTED' | 'HOLD'`
+  - Added `Pause` icon import for HOLD button
+
+### 4.4 — Interface Verification
+- Verified `UniversityDashboardData` and `RecruiterDashboardData` interfaces in `api.ts` — properties appear correctly defined
+- `RecruiterDashboardData.stats` correctly includes `solvedProblems` within nested `student` object (not at top-level stats)
+- No changes needed to these interfaces
+
+### Remaining for Phase 4
+- University Evaluation page (`frontend/src/pages/university/Evaluation.tsx`) still uses `mockCandidates` — no `getUniversityEvaluations` backend endpoint exists; universities view company-submitted evaluations of their students, which would require a new backend endpoint (separate feature work beyond "replacing mock data")
+- University/Recruiter dashboards use mock data — `dashboardApi.university()` and `dashboardApi.recruiter()` are wired but data shapes verified correct; main dashboards themselves still need full wiring to real API calls
+
+---
+
 ## Recommended Next Sprint (ordered)
 
 1. Replace hardcoded dashboard data with real API queries (Phase 4).

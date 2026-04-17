@@ -23,7 +23,8 @@ import {
     XCircle,
     Check,
     Mail,
-    Presentation
+    Presentation,
+    Pause
 } from 'lucide-react';
 import { evaluationApi, type EvaluationCandidate } from '../../lib/api';
 
@@ -38,8 +39,12 @@ export default function CompanyEvaluation() {
     const [evaluatedCandidates, setEvaluatedCandidates] = useState<EvaluationCandidate[]>([]);
     const [selectedCandidate, setSelectedCandidate] = useState<EvaluationCandidate | null>(null);
     const [evaluatorNote, setEvaluatorNote] = useState('');
+    const [technicalScore, setTechnicalScore] = useState<number | undefined>();
+    const [communicationScore, setCommunicationScore] = useState<number | undefined>();
+    const [cultureScore, setCultureScore] = useState<number | undefined>();
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
+    const [detailLoading, setDetailLoading] = useState(false);
 
     const sidebarItems = [
         { icon: Mail, label: 'MAIL', onClick: () => window.location.href = '/company/mail' },
@@ -82,22 +87,31 @@ export default function CompanyEvaluation() {
         }
     };
 
-    const handleEvaluation = async (verdict: 'SELECTED' | 'REJECTED') => {
+    const handleEvaluation = async (verdict: 'SELECTED' | 'REJECTED' | 'HOLD') => {
         if (!selectedCandidate) return;
         setSubmitting(true);
         try {
             await evaluationApi.submitEvaluation(selectedCandidate.id, {
                 verdict,
-                notes: evaluatorNote
+                notes: evaluatorNote,
+                technicalScore,
+                communicationScore,
+                cultureScore
             });
             setEvaluatedCandidates(prev => [{
                 ...selectedCandidate,
                 status: verdict,
-                evaluatorNote
+                evaluatorNote,
+                technicalScore,
+                communicationScore,
+                cultureScore
             }, ...prev]);
             setPendingCandidates(prev => prev.filter(c => c.id !== selectedCandidate.id));
             setSelectedCandidate(null);
             setEvaluatorNote('');
+            setTechnicalScore(undefined);
+            setCommunicationScore(undefined);
+            setCultureScore(undefined);
         } catch (error) {
             console.error("Failed to submit evaluation", error);
         } finally {
@@ -315,9 +329,19 @@ export default function CompanyEvaluation() {
                                         </div>
                                         <div className="flex items-center gap-4 mt-3 md:mt-0">
                                             <button 
-                                                onClick={() => {
-                                                    setSelectedCandidate(candidate);
-                                                    setEvaluatorNote(candidate.evaluatorNote || '');
+                                                onClick={async () => {
+                                                    setDetailLoading(true);
+                                                    try {
+                                                        const detailRes = await evaluationApi.getEvaluationDetail(candidate.id);
+                                                        setSelectedCandidate(detailRes.data);
+                                                        setEvaluatorNote(detailRes.data.evaluatorNote || '');
+                                                    } catch (error) {
+                                                        console.error("Failed to fetch evaluation detail", error);
+                                                        setSelectedCandidate(candidate);
+                                                        setEvaluatorNote(candidate.evaluatorNote || '');
+                                                    } finally {
+                                                        setDetailLoading(false);
+                                                    }
                                                 }}
                                                 className={`px-4 py-2 bg-[#111] border rounded-sm transition-colors flex items-center gap-2 group/btn ${
                                                     candidate.status === 'PENDING' ? 'border-accent-500/50 hover:bg-accent-500/10 hover:border-accent-500' : 'border-[#333] hover:border-[#555]'
@@ -430,10 +454,19 @@ export default function CompanyEvaluation() {
                                     <div className="lg:col-span-2 space-y-6 flex flex-col h-full">
                                         <div className="bg-[#0A0A0A] border border-[#222] rounded-sm p-4 flex-1">
                                             <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#aaa] mb-4 flex items-center gap-2">
-                                                <Code2 size={12} className="text-accent-500" /> Technical Assessment ({selectedCandidate.questions.length})
+                                                <Code2 size={12} className="text-accent-500" /> Technical Assessment ({detailLoading ? '...' : selectedCandidate.questions.length})
                                             </h3>
                                             <div className="space-y-4">
-                                                {selectedCandidate.questions.map((q, idx) => {
+                                                {detailLoading ? (
+                                                    <div className="text-center py-12 text-[#555] font-mono text-xs uppercase tracking-widest">
+                                                        Loading assessment data...
+                                                    </div>
+                                                ) : selectedCandidate.questions.length === 0 ? (
+                                                    <div className="text-center py-12 text-[#555] font-mono text-xs uppercase tracking-widest">
+                                                        No technical submissions found
+                                                    </div>
+                                                ) : (
+                                                selectedCandidate.questions.map((q, idx) => {
                                                     const passRate = Math.round((q.testCasesPassed / q.totalTestCases) * 100);
                                                     const isPerfect = q.testCasesPassed === q.totalTestCases;
                                                     return (
@@ -489,7 +522,70 @@ export default function CompanyEvaluation() {
                                                             </div>
                                                         </div>
                                                     );
-                                                })}
+                                                })
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-3 gap-3">
+                                            <div className="bg-[#111] border border-[#333] p-4 rounded-sm flex flex-col">
+                                                <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#aaa] mb-3">Technical Score</h3>
+                                                <div className="flex gap-1">
+                                                    {[1, 2, 3, 4, 5].map(score => (
+                                                        <button
+                                                            key={score}
+                                                            onClick={() => setTechnicalScore(score)}
+                                                            disabled={selectedCandidate.status !== 'PENDING'}
+                                                            className={`flex-1 py-2 rounded-sm text-xs font-bold transition-all ${
+                                                                technicalScore === score
+                                                                    ? 'bg-blue-500/30 border border-blue-500 text-blue-400'
+                                                                    : 'bg-[#050505] border border-[#333] text-[#666] hover:border-blue-500/50'
+                                                            } ${selectedCandidate.status !== 'PENDING' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                        >
+                                                            {score}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-[#111] border border-[#333] p-4 rounded-sm flex flex-col">
+                                                <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#aaa] mb-3">Communication Score</h3>
+                                                <div className="flex gap-1">
+                                                    {[1, 2, 3, 4, 5].map(score => (
+                                                        <button
+                                                            key={score}
+                                                            onClick={() => setCommunicationScore(score)}
+                                                            disabled={selectedCandidate.status !== 'PENDING'}
+                                                            className={`flex-1 py-2 rounded-sm text-xs font-bold transition-all ${
+                                                                communicationScore === score
+                                                                    ? 'bg-purple-500/30 border border-purple-500 text-purple-400'
+                                                                    : 'bg-[#050505] border border-[#333] text-[#666] hover:border-purple-500/50'
+                                                            } ${selectedCandidate.status !== 'PENDING' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                        >
+                                                            {score}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+
+                                            <div className="bg-[#111] border border-[#333] p-4 rounded-sm flex flex-col">
+                                                <h3 className="text-[10px] font-mono uppercase tracking-widest text-[#aaa] mb-3">Culture Fit Score</h3>
+                                                <div className="flex gap-1">
+                                                    {[1, 2, 3, 4, 5].map(score => (
+                                                        <button
+                                                            key={score}
+                                                            onClick={() => setCultureScore(score)}
+                                                            disabled={selectedCandidate.status !== 'PENDING'}
+                                                            className={`flex-1 py-2 rounded-sm text-xs font-bold transition-all ${
+                                                                cultureScore === score
+                                                                    ? 'bg-green-500/30 border border-green-500 text-green-400'
+                                                                    : 'bg-[#050505] border border-[#333] text-[#666] hover:border-green-500/50'
+                                                            } ${selectedCandidate.status !== 'PENDING' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                        >
+                                                            {score}
+                                                        </button>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </div>
 
@@ -525,6 +621,13 @@ export default function CompanyEvaluation() {
                                                 className="px-6 py-2.5 rounded-sm bg-[#111] border border-[#333] hover:border-red-500/50 hover:bg-red-500/10 hover:text-red-400 text-xs font-mono uppercase tracking-widest text-[#888] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 group"
                                             >
                                                 <XCircle size={14} className="group-hover:text-red-400" /> Reject
+                                            </button>
+                                            <button
+                                                onClick={() => handleEvaluation('HOLD')}
+                                                disabled={evaluatorNote.trim().length === 0}
+                                                className="px-6 py-2.5 rounded-sm bg-[#111] border border-[#333] hover:border-yellow-500/50 hover:bg-yellow-500/10 hover:text-yellow-400 text-xs font-mono uppercase tracking-widest text-[#888] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2 group"
+                                            >
+                                                <Pause size={14} className="group-hover:text-yellow-400" /> Hold
                                             </button>
                                             <button
                                                 onClick={() => handleEvaluation('SELECTED')}
