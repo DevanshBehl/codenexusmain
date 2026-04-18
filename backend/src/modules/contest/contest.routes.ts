@@ -41,7 +41,7 @@ router.post("/",
     authenticate as RequestHandler,
     authorize(["COMPANY_ADMIN"]) as RequestHandler,
     validate(createContestSchema) as RequestHandler,
-    contestController.createcontest as RequestHandler
+    contestController.createContest as RequestHandler
 );
 
 router.put("/:id",

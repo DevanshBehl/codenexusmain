@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
     Terminal, FileText, Mail, Presentation, LogOut, ChevronLeft, ChevronRight,
-    Code2, Briefcase, PenTool, Box, User, Edit2, X, Save
+    Code2, Briefcase, PenTool, Box, User, Edit2, X, Save, Trophy, Play
 } from 'lucide-react';
 
 interface ProfileData {
@@ -113,8 +113,10 @@ export default function StudentProfile() {
         { icon: Code2, label: 'CODE ARENA', onClick: () => window.location.href = '/student/codearena' },
         { icon: PenTool, label: 'DESIGN ARENA', onClick: () => window.location.href = '/student/designarena' },
         { icon: Briefcase, label: 'INTERVIEWS', onClick: () => window.location.href = '/student/interview' },
+        { icon: Trophy, label: 'CONTEST', onClick: () => window.location.href = '/student/contest' },
         { icon: FileText, label: 'PROFILE', onClick: () => window.location.href = '/student/profile' },
         { icon: Box, label: 'PROJECTS', onClick: () => window.location.href = '/student/projects' },
+        { icon: Play, label: 'RECORDING', onClick: () => window.location.href = '/student/recording' },
     ];
 
     const handleSave = async () => {

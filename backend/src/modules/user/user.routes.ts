@@ -5,7 +5,7 @@ import { authenticate } from "../../middleware/authenticate.js";
 import { authorize } from "../../middleware/authorize.js";
 
 import {
-    createStundetProfileSchema,
+    createStudentProfileSchema,
     updateStudentProfileSchema,
     createCompanyProfileSchema,
     createUniversityProfileSchema

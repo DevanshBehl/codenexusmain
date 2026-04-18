@@ -199,6 +199,11 @@ CodeNexus is a campus placement platform targeting **students, companies, univer
 11. ~~**No tests (unit or integration)**~~ — Vitest wired for both frontend and backend; 3 test files covering auth service, permission matrix, and login page. (Coverage still thin.)
 12. ~~**Docker Compose does not include app services**~~ — Backend + frontend Dockerfiles added; app services now in docker-compose.
 
+### 🟢 Code Quality Fixes — **RESOLVED (Post Phase 6 Audit)**
+14. ~~**Typo in `user.schema.ts`**: `createStundetProfileSchema` → `createStudentProfileSchema`~~ — Renamed in schema, updated import in `user.routes.ts` and type inference line.
+15. ~~**Casing bug in `contest.controller.ts`**: `createcontest` → `createContest`~~ — Renamed export and updated reference in `contest.routes.ts`.
+16. ~~**Student sidebar missing Contest + Recording links**~~ — Added `Trophy / CONTEST (/student/contest)` and `Play / RECORDING (/student/recording)` to all 11 student page sidebars (Dashboard, CodeArena, CodeArenaProblem, CodeArenaLeaderboard, CodeArenaSubmissions, DesignArena, DesignArenaProblem, StudentInterview, StudentProjects, StudentProfile, Recordings). Also added missing PROFILE link to Recordings student sidebar.
+
 ### 🟡 Low — Remaining
 9. No transactional email (password reset, verification).
 13. Test coverage thin — only 3 test files; evaluation, mail, contest, webinar flows untested.

@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
     Terminal, Building2, Users, FileText, CheckCircle2, CheckSquare, Mail, Presentation,
     Calendar, Video, PlayCircle, Building, Lock, Play, Clock,
-    Code2, MessageSquare, Briefcase, PenTool, Box
+    Code2, MessageSquare, Briefcase, PenTool, Box, Trophy
 } from 'lucide-react';
 import InterviewRoom from '../../components/Interview/InterviewRoom';
 
@@ -46,8 +46,10 @@ export default function StudentInterview() {
         { icon: Code2, label: 'CODE ARENA', onClick: () => navigate('/student/codearena') },
         { icon: PenTool, label: 'DESIGN ARENA', onClick: () => navigate('/student/designarena') },
         { icon: Briefcase, label: 'INTERVIEWS', active: true, onClick: () => navigate('/student/interview') },
+        { icon: Trophy, label: 'CONTEST', onClick: () => navigate('/student/contest') },
         { icon: FileText, label: 'PROFILE', onClick: () => window.location.href = '/student/profile' },
         { icon: Box, label: 'PROJECTS', onClick: () => navigate('/student/projects') },
+        { icon: Play, label: 'RECORDING', onClick: () => navigate('/student/recording') },
     ];
 
     const canJoinInterview = (dateStr: string, timeStr: string) => {

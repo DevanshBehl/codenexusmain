@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createStundetProfileSchema = z.object({
+export const createStudentProfileSchema = z.object({
     body: z.object({
         universityId: z.string().uuid("Invalid University ID"),
         name: z.string().min(1, "Name is required"),
@@ -63,7 +63,7 @@ export const createUniversityProfileSchema = z.object({
     }),
 });
 
-export type CreateStudentInput = z.infer<typeof createStundetProfileSchema>['body'];
+export type CreateStudentInput = z.infer<typeof createStudentProfileSchema>['body'];
 export type UpdateStudentInput = z.infer<typeof updateStudentProfileSchema>['body'];
 export type CreateCompanyInput = z.infer<typeof createCompanyProfileSchema>['body'];
 export type CreateUniversityInput = z.infer<typeof createUniversityProfileSchema>['body'];

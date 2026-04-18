@@ -4,7 +4,7 @@ import * as percentileService from "./percentile.service.js";
 import { ApiResponse } from "../../utils/api-response.js";
 import { ApiError } from "../../utils/api-error.js";
 
-export const createcontest = async (req: Request, res: Response, next: NextFunction) => {
+export const createContest = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = req.user?.id;
         const contestData = req.body;

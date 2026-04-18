@@ -16,7 +16,9 @@ import {
     CheckCircle2,
     Mail,
     Presentation,
-    PenTool
+    PenTool,
+    Trophy,
+    Play
 } from 'lucide-react';
 
 const StudentDashboard = () => {
@@ -90,8 +92,10 @@ const StudentDashboard = () => {
         { icon: Code2, label: 'CODE ARENA', path: '/student/codearena' },
         { icon: PenTool, label: 'DESIGN ARENA', path: '/student/designarena' },
         { icon: Briefcase, label: 'INTERVIEWS', path: '/student/interview' },
+        { icon: Trophy, label: 'CONTEST', path: '/student/contest' },
         { icon: FileText, label: 'PROFILE', path: '/student/profile' },
         { icon: Box, label: 'PROJECTS', path: '/student/projects' },
+        { icon: Play, label: 'RECORDING', path: '/student/recording' },
     ];
 
     return (

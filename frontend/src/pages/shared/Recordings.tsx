@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import {
     Terminal, Building2, Users, Mail, Presentation,
     Calendar, Video, Code2, Play, CheckCircle2, Briefcase,
-    PenTool, Box, Star, ChevronLeft, ChevronRight, Swords, Loader2
+    PenTool, Box, Star, ChevronLeft, ChevronRight, Swords, Loader2, Trophy, FileText
 } from 'lucide-react';
 import VideoPlayer, { type Timestamp } from '../../components/VideoPlayer';
 import { interviewApi } from '../../lib/api';
@@ -99,8 +99,10 @@ export default function Recordings({ userRole }: RecordingsProps) {
         { icon: Code2, label: 'CODE ARENA', onClick: () => navigate('/student/codearena') },
         { icon: PenTool, label: 'DESIGN ARENA', onClick: () => navigate('/student/designarena') },
         { icon: Briefcase, label: 'INTERVIEWS', onClick: () => navigate('/student/interview') },
-        { icon: Play, label: 'RECORDINGS', active: true, onClick: () => navigate('/student/recording') },
+        { icon: Trophy, label: 'CONTEST', onClick: () => navigate('/student/contest') },
+        { icon: FileText, label: 'PROFILE', onClick: () => navigate('/student/profile') },
         { icon: Box, label: 'PROJECTS', onClick: () => navigate('/student/projects') },
+        { icon: Play, label: 'RECORDINGS', active: true, onClick: () => navigate('/student/recording') },
     ];
 
     const universitySidebarItems = [

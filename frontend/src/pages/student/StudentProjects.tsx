@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
 import {
     Terminal, Users, FileText, CheckCircle2, MessageSquare, Briefcase, PenTool,
-    Code2, Presentation, PlayCircle, Box, Plus, Github, ExternalLink, X, PlusCircle, Mail
+    Code2, Presentation, PlayCircle, Box, Plus, Github, ExternalLink, X, PlusCircle, Mail,
+    Trophy, Play
 } from 'lucide-react';
 
 interface Project {
@@ -64,8 +65,10 @@ export default function StudentProjects() {
         { icon: Code2, label: 'CODE ARENA', onClick: () => navigate('/student/codearena') },
         { icon: PenTool, label: 'DESIGN ARENA', onClick: () => navigate('/student/designarena') },
         { icon: Briefcase, label: 'INTERVIEWS', onClick: () => navigate('/student/interview') },
+        { icon: Trophy, label: 'CONTEST', onClick: () => navigate('/student/contest') },
         { icon: FileText, label: 'PROFILE', onClick: () => window.location.href = '/student/profile' },
         { icon: Box, label: 'PROJECTS', active: true, onClick: () => navigate('/student/projects') },
+        { icon: Play, label: 'RECORDING', onClick: () => navigate('/student/recording') },
     ];
 
     const getWordCount = (text: string) => text.trim().split(/\s+/).filter(word => word.length > 0).length;
