@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
     Video, VideoOff, Mic, MicOff, PhoneOff, Code2, PenTool, Monitor,
     MessageSquare, Send, ChevronDown, ChevronUp, Plus, ListChecks,
-    X, Circle, Star, CheckCircle2, Lock
+    X, Circle, Star, CheckCircle2, Lock, Bookmark
 } from 'lucide-react';
 import InterviewEditor from './InterviewEditor';
 import InterviewProblem from './InterviewProblem';
@@ -72,13 +72,17 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
     const [pushedQuestions, setPushedQuestions] = useState<string[]>([]);
     
     const [isRecording, setIsRecording] = useState(false);
+    const [recordingStartedAt, setRecordingStartedAt] = useState<number | null>(null);
     const [showEndConfirm, setShowEndConfirm] = useState(false);
     const [pipMinimized, setPipMinimized] = useState(false);
     const [countdown, setCountdown] = useState('00:00:00');
-    
+
     const [showRatingModal, setShowRatingModal] = useState(false);
     const [rating, setRating] = useState(0);
     const [summary, setSummary] = useState('');
+
+    const [showTimestampInput, setShowTimestampInput] = useState(false);
+    const [timestampTitle, setTimestampTitle] = useState('');
 
     const isRecruiter = role === 'recruiter';
     const remoteName = interviewData ? (isRecruiter ? interviewData.student.name : "Recruiter") : "Waiting...";
@@ -188,13 +192,14 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
             }
         });
 
-        // Recording events from server
         socket.on('recording-started', () => {
             setIsRecording(true);
+            setRecordingStartedAt(Date.now());
         });
 
         socket.on('recording-stopped', () => {
             setIsRecording(false);
+            setRecordingStartedAt(null);
         });
 
         return () => {
@@ -243,10 +248,26 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
         }
     };
 
+    /* ────────── Timestamp Helper ────────── */
+    const emitTimestamp = (type: string, label: string) => {
+        if (!socket || !id || !recordingStartedAt) return;
+        const offsetMs = Date.now() - recordingStartedAt;
+        socket.emit('add-timestamp', { interviewId: id, type, label, offsetMs });
+    };
+
     /* ────────── Synchronized Mode Switch ────────── */
     const switchMode = (newMode: Mode) => {
+        if (isRecording && recordingStartedAt) {
+            if (newMode === 'ide' && mode !== 'ide') {
+                emitTimestamp('ide_opened', 'IDE Opened');
+            } else if (mode === 'ide' && newMode !== 'ide') {
+                emitTimestamp('ide_closed', 'IDE Closed');
+            }
+            if (newMode === 'whiteboard' && mode !== 'whiteboard') {
+                emitTimestamp('whiteboard_opened', 'Whiteboard Opened');
+            }
+        }
         setMode(newMode);
-        // Broadcast mode change to the other participant
         if (socket && id) {
             socket.emit('mode-change', { interviewId: id, mode: newMode });
         }
@@ -486,7 +507,7 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
                     <InterviewProblem />
                 </div>
                 <div className="col-span-3 flex flex-col min-h-0">
-                    <InterviewEditor socket={socket} interviewId={id || ''} role={role} />
+                    <InterviewEditor socket={socket} interviewId={id || ''} role={role} onSubmit={() => emitTimestamp('code_submitted', 'Code Submitted')} />
                 </div>
             </div>
         </div>
@@ -592,6 +613,52 @@ export default function InterviewRoom({ role }: InterviewRoomProps) {
                             >
                                 <Circle size={18} className={isRecording ? 'fill-red-500 text-red-500' : ''} />
                             </button>
+                            {isRecording && (
+                                <div className="relative">
+                                    <button
+                                        onClick={() => setShowTimestampInput(!showTimestampInput)}
+                                        className={`p-2.5 rounded-xl transition-all border ${showTimestampInput ? 'bg-accent-500/15 text-accent-400 border-accent-500/30' : 'text-[#888] hover:text-white hover:bg-[#222] border-transparent'}`}
+                                        title="Add Timestamp"
+                                    >
+                                        <Bookmark size={18} />
+                                    </button>
+                                    <AnimatePresence>
+                                        {showTimestampInput && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: 10 }}
+                                                className="absolute bottom-14 right-0 w-64 bg-[#0A0A0A] border border-[#333] rounded-sm p-3 shadow-2xl z-50"
+                                            >
+                                                <label className="text-[9px] font-mono text-[#888] uppercase tracking-widest block mb-2">Timestamp Label</label>
+                                                <form onSubmit={(e) => {
+                                                    e.preventDefault();
+                                                    if (timestampTitle.trim()) {
+                                                        emitTimestamp('manual', timestampTitle.trim());
+                                                        setTimestampTitle('');
+                                                        setShowTimestampInput(false);
+                                                    }
+                                                }}>
+                                                    <input
+                                                        type="text"
+                                                        value={timestampTitle}
+                                                        onChange={(e) => setTimestampTitle(e.target.value)}
+                                                        placeholder="e.g. Good approach..."
+                                                        className="w-full bg-[#111] border border-[#333] rounded-sm py-1.5 px-2 text-xs text-white placeholder-[#555] focus:outline-none focus:border-accent-500/50 font-mono mb-2"
+                                                        autoFocus
+                                                    />
+                                                    <button
+                                                        type="submit"
+                                                        className="w-full py-1.5 bg-accent-500/20 text-accent-400 border border-accent-500/30 text-[9px] font-mono uppercase tracking-widest rounded-sm hover:bg-accent-500/30 transition-colors"
+                                                    >
+                                                        Add Marker
+                                                    </button>
+                                                </form>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            )}
                             <div className="w-px h-8 bg-[#333] mx-2" />
                         </>
                     )}

@@ -329,6 +329,8 @@ export const contestApi = {
     register: (contestId: string) => api.post(`/contests/${contestId}/register`, {}),
     getRegistrations: (contestId: string) => api.get<any[]>(`/contests/${contestId}/registrations`),
     getLeaderboard: (contestId: string) => api.get<any>(`/contests/${contestId}/leaderboard`),
+    getMyPercentile: (contestId: string) => api.get<{ percentile: number; totalParticipants: number }>(`/contests/${contestId}/percentile`),
+    getPercentileLeaderboard: (contestId: string) => api.get<any[]>(`/contests/${contestId}/percentile-leaderboard`),
 };
 
 export interface EvaluationCandidate {
@@ -642,6 +644,7 @@ export const interviewApi = {
         const blob = await response.blob();
         return URL.createObjectURL(blob);
     },
+    getTimestamps: (id: string) => api.get<{ id: string; offsetMs: number; type: string; label: string }[]>(`/interviews/${id}/timestamps`),
 };
 
 // ==========================================

@@ -282,6 +282,7 @@ model Interview {
   interviewRecording  InterviewRecording?
   messages            InterviewMessage[]
   evaluation          Evaluation?
+  timestamps          RecordingTimestamp[]
 }
 
 model Recording {
@@ -311,6 +312,20 @@ model InterviewRecording {
   interview Interview @relation(fields: [interview_id], references: [id], onDelete: Cascade)
 
   @@index([interview_id])
+}
+
+model RecordingTimestamp {
+  id          String   @id @default(uuid())
+  interviewId String
+  offsetMs    Int
+  type        String
+  label       String
+  createdBy   String?
+  createdAt   DateTime @default(now())
+
+  interview Interview @relation(fields: [interviewId], references: [id], onDelete: Cascade)
+
+  @@index([interviewId, offsetMs])
 }
 
 model InterviewMessage {

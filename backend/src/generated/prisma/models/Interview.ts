@@ -204,6 +204,7 @@ export type InterviewWhereInput = {
   interviewRecording?: Prisma.XOR<Prisma.InterviewRecordingNullableScalarRelationFilter, Prisma.InterviewRecordingWhereInput> | null
   messages?: Prisma.InterviewMessageListRelationFilter
   evaluation?: Prisma.XOR<Prisma.EvaluationNullableScalarRelationFilter, Prisma.EvaluationWhereInput> | null
+  timestamps?: Prisma.RecordingTimestampListRelationFilter
 }
 
 export type InterviewOrderByWithRelationInput = {
@@ -220,6 +221,7 @@ export type InterviewOrderByWithRelationInput = {
   interviewRecording?: Prisma.InterviewRecordingOrderByWithRelationInput
   messages?: Prisma.InterviewMessageOrderByRelationAggregateInput
   evaluation?: Prisma.EvaluationOrderByWithRelationInput
+  timestamps?: Prisma.RecordingTimestampOrderByRelationAggregateInput
 }
 
 export type InterviewWhereUniqueInput = Prisma.AtLeast<{
@@ -239,6 +241,7 @@ export type InterviewWhereUniqueInput = Prisma.AtLeast<{
   interviewRecording?: Prisma.XOR<Prisma.InterviewRecordingNullableScalarRelationFilter, Prisma.InterviewRecordingWhereInput> | null
   messages?: Prisma.InterviewMessageListRelationFilter
   evaluation?: Prisma.XOR<Prisma.EvaluationNullableScalarRelationFilter, Prisma.EvaluationWhereInput> | null
+  timestamps?: Prisma.RecordingTimestampListRelationFilter
 }, "id">
 
 export type InterviewOrderByWithAggregationInput = {
@@ -279,6 +282,7 @@ export type InterviewCreateInput = {
   interviewRecording?: Prisma.InterviewRecordingCreateNestedOneWithoutInterviewInput
   messages?: Prisma.InterviewMessageCreateNestedManyWithoutInterviewInput
   evaluation?: Prisma.EvaluationCreateNestedOneWithoutInterviewInput
+  timestamps?: Prisma.RecordingTimestampCreateNestedManyWithoutInterviewInput
 }
 
 export type InterviewUncheckedCreateInput = {
@@ -293,6 +297,7 @@ export type InterviewUncheckedCreateInput = {
   interviewRecording?: Prisma.InterviewRecordingUncheckedCreateNestedOneWithoutInterviewInput
   messages?: Prisma.InterviewMessageUncheckedCreateNestedManyWithoutInterviewInput
   evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutInterviewInput
+  timestamps?: Prisma.RecordingTimestampUncheckedCreateNestedManyWithoutInterviewInput
 }
 
 export type InterviewUpdateInput = {
@@ -307,6 +312,7 @@ export type InterviewUpdateInput = {
   interviewRecording?: Prisma.InterviewRecordingUpdateOneWithoutInterviewNestedInput
   messages?: Prisma.InterviewMessageUpdateManyWithoutInterviewNestedInput
   evaluation?: Prisma.EvaluationUpdateOneWithoutInterviewNestedInput
+  timestamps?: Prisma.RecordingTimestampUpdateManyWithoutInterviewNestedInput
 }
 
 export type InterviewUncheckedUpdateInput = {
@@ -321,6 +327,7 @@ export type InterviewUncheckedUpdateInput = {
   interviewRecording?: Prisma.InterviewRecordingUncheckedUpdateOneWithoutInterviewNestedInput
   messages?: Prisma.InterviewMessageUncheckedUpdateManyWithoutInterviewNestedInput
   evaluation?: Prisma.EvaluationUncheckedUpdateOneWithoutInterviewNestedInput
+  timestamps?: Prisma.RecordingTimestampUncheckedUpdateManyWithoutInterviewNestedInput
 }
 
 export type InterviewCreateManyInput = {
@@ -508,6 +515,20 @@ export type InterviewUpdateOneRequiredWithoutInterviewRecordingNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.InterviewUpdateToOneWithWhereWithoutInterviewRecordingInput, Prisma.InterviewUpdateWithoutInterviewRecordingInput>, Prisma.InterviewUncheckedUpdateWithoutInterviewRecordingInput>
 }
 
+export type InterviewCreateNestedOneWithoutTimestampsInput = {
+  create?: Prisma.XOR<Prisma.InterviewCreateWithoutTimestampsInput, Prisma.InterviewUncheckedCreateWithoutTimestampsInput>
+  connectOrCreate?: Prisma.InterviewCreateOrConnectWithoutTimestampsInput
+  connect?: Prisma.InterviewWhereUniqueInput
+}
+
+export type InterviewUpdateOneRequiredWithoutTimestampsNestedInput = {
+  create?: Prisma.XOR<Prisma.InterviewCreateWithoutTimestampsInput, Prisma.InterviewUncheckedCreateWithoutTimestampsInput>
+  connectOrCreate?: Prisma.InterviewCreateOrConnectWithoutTimestampsInput
+  upsert?: Prisma.InterviewUpsertWithoutTimestampsInput
+  connect?: Prisma.InterviewWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.InterviewUpdateToOneWithWhereWithoutTimestampsInput, Prisma.InterviewUpdateWithoutTimestampsInput>, Prisma.InterviewUncheckedUpdateWithoutTimestampsInput>
+}
+
 export type InterviewCreateNestedOneWithoutMessagesInput = {
   create?: Prisma.XOR<Prisma.InterviewCreateWithoutMessagesInput, Prisma.InterviewUncheckedCreateWithoutMessagesInput>
   connectOrCreate?: Prisma.InterviewCreateOrConnectWithoutMessagesInput
@@ -547,6 +568,7 @@ export type InterviewCreateWithoutRecruiterInput = {
   interviewRecording?: Prisma.InterviewRecordingCreateNestedOneWithoutInterviewInput
   messages?: Prisma.InterviewMessageCreateNestedManyWithoutInterviewInput
   evaluation?: Prisma.EvaluationCreateNestedOneWithoutInterviewInput
+  timestamps?: Prisma.RecordingTimestampCreateNestedManyWithoutInterviewInput
 }
 
 export type InterviewUncheckedCreateWithoutRecruiterInput = {
@@ -560,6 +582,7 @@ export type InterviewUncheckedCreateWithoutRecruiterInput = {
   interviewRecording?: Prisma.InterviewRecordingUncheckedCreateNestedOneWithoutInterviewInput
   messages?: Prisma.InterviewMessageUncheckedCreateNestedManyWithoutInterviewInput
   evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutInterviewInput
+  timestamps?: Prisma.RecordingTimestampUncheckedCreateNestedManyWithoutInterviewInput
 }
 
 export type InterviewCreateOrConnectWithoutRecruiterInput = {
@@ -612,6 +635,7 @@ export type InterviewCreateWithoutStudentInput = {
   interviewRecording?: Prisma.InterviewRecordingCreateNestedOneWithoutInterviewInput
   messages?: Prisma.InterviewMessageCreateNestedManyWithoutInterviewInput
   evaluation?: Prisma.EvaluationCreateNestedOneWithoutInterviewInput
+  timestamps?: Prisma.RecordingTimestampCreateNestedManyWithoutInterviewInput
 }
 
 export type InterviewUncheckedCreateWithoutStudentInput = {
@@ -625,6 +649,7 @@ export type InterviewUncheckedCreateWithoutStudentInput = {
   interviewRecording?: Prisma.InterviewRecordingUncheckedCreateNestedOneWithoutInterviewInput
   messages?: Prisma.InterviewMessageUncheckedCreateNestedManyWithoutInterviewInput
   evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutInterviewInput
+  timestamps?: Prisma.RecordingTimestampUncheckedCreateNestedManyWithoutInterviewInput
 }
 
 export type InterviewCreateOrConnectWithoutStudentInput = {
@@ -664,6 +689,7 @@ export type InterviewCreateWithoutRecordingInput = {
   interviewRecording?: Prisma.InterviewRecordingCreateNestedOneWithoutInterviewInput
   messages?: Prisma.InterviewMessageCreateNestedManyWithoutInterviewInput
   evaluation?: Prisma.EvaluationCreateNestedOneWithoutInterviewInput
+  timestamps?: Prisma.RecordingTimestampCreateNestedManyWithoutInterviewInput
 }
 
 export type InterviewUncheckedCreateWithoutRecordingInput = {
@@ -677,6 +703,7 @@ export type InterviewUncheckedCreateWithoutRecordingInput = {
   interviewRecording?: Prisma.InterviewRecordingUncheckedCreateNestedOneWithoutInterviewInput
   messages?: Prisma.InterviewMessageUncheckedCreateNestedManyWithoutInterviewInput
   evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutInterviewInput
+  timestamps?: Prisma.RecordingTimestampUncheckedCreateNestedManyWithoutInterviewInput
 }
 
 export type InterviewCreateOrConnectWithoutRecordingInput = {
@@ -706,6 +733,7 @@ export type InterviewUpdateWithoutRecordingInput = {
   interviewRecording?: Prisma.InterviewRecordingUpdateOneWithoutInterviewNestedInput
   messages?: Prisma.InterviewMessageUpdateManyWithoutInterviewNestedInput
   evaluation?: Prisma.EvaluationUpdateOneWithoutInterviewNestedInput
+  timestamps?: Prisma.RecordingTimestampUpdateManyWithoutInterviewNestedInput
 }
 
 export type InterviewUncheckedUpdateWithoutRecordingInput = {
@@ -719,6 +747,7 @@ export type InterviewUncheckedUpdateWithoutRecordingInput = {
   interviewRecording?: Prisma.InterviewRecordingUncheckedUpdateOneWithoutInterviewNestedInput
   messages?: Prisma.InterviewMessageUncheckedUpdateManyWithoutInterviewNestedInput
   evaluation?: Prisma.EvaluationUncheckedUpdateOneWithoutInterviewNestedInput
+  timestamps?: Prisma.RecordingTimestampUncheckedUpdateManyWithoutInterviewNestedInput
 }
 
 export type InterviewCreateWithoutInterviewRecordingInput = {
@@ -732,6 +761,7 @@ export type InterviewCreateWithoutInterviewRecordingInput = {
   recording?: Prisma.RecordingCreateNestedOneWithoutInterviewInput
   messages?: Prisma.InterviewMessageCreateNestedManyWithoutInterviewInput
   evaluation?: Prisma.EvaluationCreateNestedOneWithoutInterviewInput
+  timestamps?: Prisma.RecordingTimestampCreateNestedManyWithoutInterviewInput
 }
 
 export type InterviewUncheckedCreateWithoutInterviewRecordingInput = {
@@ -745,6 +775,7 @@ export type InterviewUncheckedCreateWithoutInterviewRecordingInput = {
   recording?: Prisma.RecordingUncheckedCreateNestedOneWithoutInterviewInput
   messages?: Prisma.InterviewMessageUncheckedCreateNestedManyWithoutInterviewInput
   evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutInterviewInput
+  timestamps?: Prisma.RecordingTimestampUncheckedCreateNestedManyWithoutInterviewInput
 }
 
 export type InterviewCreateOrConnectWithoutInterviewRecordingInput = {
@@ -774,6 +805,7 @@ export type InterviewUpdateWithoutInterviewRecordingInput = {
   recording?: Prisma.RecordingUpdateOneWithoutInterviewNestedInput
   messages?: Prisma.InterviewMessageUpdateManyWithoutInterviewNestedInput
   evaluation?: Prisma.EvaluationUpdateOneWithoutInterviewNestedInput
+  timestamps?: Prisma.RecordingTimestampUpdateManyWithoutInterviewNestedInput
 }
 
 export type InterviewUncheckedUpdateWithoutInterviewRecordingInput = {
@@ -785,6 +817,79 @@ export type InterviewUncheckedUpdateWithoutInterviewRecordingInput = {
   type?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   recording?: Prisma.RecordingUncheckedUpdateOneWithoutInterviewNestedInput
+  messages?: Prisma.InterviewMessageUncheckedUpdateManyWithoutInterviewNestedInput
+  evaluation?: Prisma.EvaluationUncheckedUpdateOneWithoutInterviewNestedInput
+  timestamps?: Prisma.RecordingTimestampUncheckedUpdateManyWithoutInterviewNestedInput
+}
+
+export type InterviewCreateWithoutTimestampsInput = {
+  id?: string
+  role: string
+  scheduledAt: Date | string
+  type: string
+  status?: string
+  recruiter: Prisma.RecruiterCreateNestedOneWithoutInterviewsInput
+  student: Prisma.StudentCreateNestedOneWithoutInterviewsInput
+  recording?: Prisma.RecordingCreateNestedOneWithoutInterviewInput
+  interviewRecording?: Prisma.InterviewRecordingCreateNestedOneWithoutInterviewInput
+  messages?: Prisma.InterviewMessageCreateNestedManyWithoutInterviewInput
+  evaluation?: Prisma.EvaluationCreateNestedOneWithoutInterviewInput
+}
+
+export type InterviewUncheckedCreateWithoutTimestampsInput = {
+  id?: string
+  recruiterId: string
+  studentId: string
+  role: string
+  scheduledAt: Date | string
+  type: string
+  status?: string
+  recording?: Prisma.RecordingUncheckedCreateNestedOneWithoutInterviewInput
+  interviewRecording?: Prisma.InterviewRecordingUncheckedCreateNestedOneWithoutInterviewInput
+  messages?: Prisma.InterviewMessageUncheckedCreateNestedManyWithoutInterviewInput
+  evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutInterviewInput
+}
+
+export type InterviewCreateOrConnectWithoutTimestampsInput = {
+  where: Prisma.InterviewWhereUniqueInput
+  create: Prisma.XOR<Prisma.InterviewCreateWithoutTimestampsInput, Prisma.InterviewUncheckedCreateWithoutTimestampsInput>
+}
+
+export type InterviewUpsertWithoutTimestampsInput = {
+  update: Prisma.XOR<Prisma.InterviewUpdateWithoutTimestampsInput, Prisma.InterviewUncheckedUpdateWithoutTimestampsInput>
+  create: Prisma.XOR<Prisma.InterviewCreateWithoutTimestampsInput, Prisma.InterviewUncheckedCreateWithoutTimestampsInput>
+  where?: Prisma.InterviewWhereInput
+}
+
+export type InterviewUpdateToOneWithWhereWithoutTimestampsInput = {
+  where?: Prisma.InterviewWhereInput
+  data: Prisma.XOR<Prisma.InterviewUpdateWithoutTimestampsInput, Prisma.InterviewUncheckedUpdateWithoutTimestampsInput>
+}
+
+export type InterviewUpdateWithoutTimestampsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  recruiter?: Prisma.RecruiterUpdateOneRequiredWithoutInterviewsNestedInput
+  student?: Prisma.StudentUpdateOneRequiredWithoutInterviewsNestedInput
+  recording?: Prisma.RecordingUpdateOneWithoutInterviewNestedInput
+  interviewRecording?: Prisma.InterviewRecordingUpdateOneWithoutInterviewNestedInput
+  messages?: Prisma.InterviewMessageUpdateManyWithoutInterviewNestedInput
+  evaluation?: Prisma.EvaluationUpdateOneWithoutInterviewNestedInput
+}
+
+export type InterviewUncheckedUpdateWithoutTimestampsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  recruiterId?: Prisma.StringFieldUpdateOperationsInput | string
+  studentId?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.StringFieldUpdateOperationsInput | string
+  scheduledAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  recording?: Prisma.RecordingUncheckedUpdateOneWithoutInterviewNestedInput
+  interviewRecording?: Prisma.InterviewRecordingUncheckedUpdateOneWithoutInterviewNestedInput
   messages?: Prisma.InterviewMessageUncheckedUpdateManyWithoutInterviewNestedInput
   evaluation?: Prisma.EvaluationUncheckedUpdateOneWithoutInterviewNestedInput
 }
@@ -800,6 +905,7 @@ export type InterviewCreateWithoutMessagesInput = {
   recording?: Prisma.RecordingCreateNestedOneWithoutInterviewInput
   interviewRecording?: Prisma.InterviewRecordingCreateNestedOneWithoutInterviewInput
   evaluation?: Prisma.EvaluationCreateNestedOneWithoutInterviewInput
+  timestamps?: Prisma.RecordingTimestampCreateNestedManyWithoutInterviewInput
 }
 
 export type InterviewUncheckedCreateWithoutMessagesInput = {
@@ -813,6 +919,7 @@ export type InterviewUncheckedCreateWithoutMessagesInput = {
   recording?: Prisma.RecordingUncheckedCreateNestedOneWithoutInterviewInput
   interviewRecording?: Prisma.InterviewRecordingUncheckedCreateNestedOneWithoutInterviewInput
   evaluation?: Prisma.EvaluationUncheckedCreateNestedOneWithoutInterviewInput
+  timestamps?: Prisma.RecordingTimestampUncheckedCreateNestedManyWithoutInterviewInput
 }
 
 export type InterviewCreateOrConnectWithoutMessagesInput = {
@@ -842,6 +949,7 @@ export type InterviewUpdateWithoutMessagesInput = {
   recording?: Prisma.RecordingUpdateOneWithoutInterviewNestedInput
   interviewRecording?: Prisma.InterviewRecordingUpdateOneWithoutInterviewNestedInput
   evaluation?: Prisma.EvaluationUpdateOneWithoutInterviewNestedInput
+  timestamps?: Prisma.RecordingTimestampUpdateManyWithoutInterviewNestedInput
 }
 
 export type InterviewUncheckedUpdateWithoutMessagesInput = {
@@ -855,6 +963,7 @@ export type InterviewUncheckedUpdateWithoutMessagesInput = {
   recording?: Prisma.RecordingUncheckedUpdateOneWithoutInterviewNestedInput
   interviewRecording?: Prisma.InterviewRecordingUncheckedUpdateOneWithoutInterviewNestedInput
   evaluation?: Prisma.EvaluationUncheckedUpdateOneWithoutInterviewNestedInput
+  timestamps?: Prisma.RecordingTimestampUncheckedUpdateManyWithoutInterviewNestedInput
 }
 
 export type InterviewCreateWithoutEvaluationInput = {
@@ -868,6 +977,7 @@ export type InterviewCreateWithoutEvaluationInput = {
   recording?: Prisma.RecordingCreateNestedOneWithoutInterviewInput
   interviewRecording?: Prisma.InterviewRecordingCreateNestedOneWithoutInterviewInput
   messages?: Prisma.InterviewMessageCreateNestedManyWithoutInterviewInput
+  timestamps?: Prisma.RecordingTimestampCreateNestedManyWithoutInterviewInput
 }
 
 export type InterviewUncheckedCreateWithoutEvaluationInput = {
@@ -881,6 +991,7 @@ export type InterviewUncheckedCreateWithoutEvaluationInput = {
   recording?: Prisma.RecordingUncheckedCreateNestedOneWithoutInterviewInput
   interviewRecording?: Prisma.InterviewRecordingUncheckedCreateNestedOneWithoutInterviewInput
   messages?: Prisma.InterviewMessageUncheckedCreateNestedManyWithoutInterviewInput
+  timestamps?: Prisma.RecordingTimestampUncheckedCreateNestedManyWithoutInterviewInput
 }
 
 export type InterviewCreateOrConnectWithoutEvaluationInput = {
@@ -910,6 +1021,7 @@ export type InterviewUpdateWithoutEvaluationInput = {
   recording?: Prisma.RecordingUpdateOneWithoutInterviewNestedInput
   interviewRecording?: Prisma.InterviewRecordingUpdateOneWithoutInterviewNestedInput
   messages?: Prisma.InterviewMessageUpdateManyWithoutInterviewNestedInput
+  timestamps?: Prisma.RecordingTimestampUpdateManyWithoutInterviewNestedInput
 }
 
 export type InterviewUncheckedUpdateWithoutEvaluationInput = {
@@ -923,6 +1035,7 @@ export type InterviewUncheckedUpdateWithoutEvaluationInput = {
   recording?: Prisma.RecordingUncheckedUpdateOneWithoutInterviewNestedInput
   interviewRecording?: Prisma.InterviewRecordingUncheckedUpdateOneWithoutInterviewNestedInput
   messages?: Prisma.InterviewMessageUncheckedUpdateManyWithoutInterviewNestedInput
+  timestamps?: Prisma.RecordingTimestampUncheckedUpdateManyWithoutInterviewNestedInput
 }
 
 export type InterviewCreateManyRecruiterInput = {
@@ -945,6 +1058,7 @@ export type InterviewUpdateWithoutRecruiterInput = {
   interviewRecording?: Prisma.InterviewRecordingUpdateOneWithoutInterviewNestedInput
   messages?: Prisma.InterviewMessageUpdateManyWithoutInterviewNestedInput
   evaluation?: Prisma.EvaluationUpdateOneWithoutInterviewNestedInput
+  timestamps?: Prisma.RecordingTimestampUpdateManyWithoutInterviewNestedInput
 }
 
 export type InterviewUncheckedUpdateWithoutRecruiterInput = {
@@ -958,6 +1072,7 @@ export type InterviewUncheckedUpdateWithoutRecruiterInput = {
   interviewRecording?: Prisma.InterviewRecordingUncheckedUpdateOneWithoutInterviewNestedInput
   messages?: Prisma.InterviewMessageUncheckedUpdateManyWithoutInterviewNestedInput
   evaluation?: Prisma.EvaluationUncheckedUpdateOneWithoutInterviewNestedInput
+  timestamps?: Prisma.RecordingTimestampUncheckedUpdateManyWithoutInterviewNestedInput
 }
 
 export type InterviewUncheckedUpdateManyWithoutRecruiterInput = {
@@ -989,6 +1104,7 @@ export type InterviewUpdateWithoutStudentInput = {
   interviewRecording?: Prisma.InterviewRecordingUpdateOneWithoutInterviewNestedInput
   messages?: Prisma.InterviewMessageUpdateManyWithoutInterviewNestedInput
   evaluation?: Prisma.EvaluationUpdateOneWithoutInterviewNestedInput
+  timestamps?: Prisma.RecordingTimestampUpdateManyWithoutInterviewNestedInput
 }
 
 export type InterviewUncheckedUpdateWithoutStudentInput = {
@@ -1002,6 +1118,7 @@ export type InterviewUncheckedUpdateWithoutStudentInput = {
   interviewRecording?: Prisma.InterviewRecordingUncheckedUpdateOneWithoutInterviewNestedInput
   messages?: Prisma.InterviewMessageUncheckedUpdateManyWithoutInterviewNestedInput
   evaluation?: Prisma.EvaluationUncheckedUpdateOneWithoutInterviewNestedInput
+  timestamps?: Prisma.RecordingTimestampUncheckedUpdateManyWithoutInterviewNestedInput
 }
 
 export type InterviewUncheckedUpdateManyWithoutStudentInput = {
@@ -1020,10 +1137,12 @@ export type InterviewUncheckedUpdateManyWithoutStudentInput = {
 
 export type InterviewCountOutputType = {
   messages: number
+  timestamps: number
 }
 
 export type InterviewCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   messages?: boolean | InterviewCountOutputTypeCountMessagesArgs
+  timestamps?: boolean | InterviewCountOutputTypeCountTimestampsArgs
 }
 
 /**
@@ -1043,6 +1162,13 @@ export type InterviewCountOutputTypeCountMessagesArgs<ExtArgs extends runtime.Ty
   where?: Prisma.InterviewMessageWhereInput
 }
 
+/**
+ * InterviewCountOutputType without action
+ */
+export type InterviewCountOutputTypeCountTimestampsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.RecordingTimestampWhereInput
+}
+
 
 export type InterviewSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1058,6 +1184,7 @@ export type InterviewSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   interviewRecording?: boolean | Prisma.Interview$interviewRecordingArgs<ExtArgs>
   messages?: boolean | Prisma.Interview$messagesArgs<ExtArgs>
   evaluation?: boolean | Prisma.Interview$evaluationArgs<ExtArgs>
+  timestamps?: boolean | Prisma.Interview$timestampsArgs<ExtArgs>
   _count?: boolean | Prisma.InterviewCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["interview"]>
 
@@ -1103,6 +1230,7 @@ export type InterviewInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   interviewRecording?: boolean | Prisma.Interview$interviewRecordingArgs<ExtArgs>
   messages?: boolean | Prisma.Interview$messagesArgs<ExtArgs>
   evaluation?: boolean | Prisma.Interview$evaluationArgs<ExtArgs>
+  timestamps?: boolean | Prisma.Interview$timestampsArgs<ExtArgs>
   _count?: boolean | Prisma.InterviewCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type InterviewIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1123,6 +1251,7 @@ export type $InterviewPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     interviewRecording: Prisma.$InterviewRecordingPayload<ExtArgs> | null
     messages: Prisma.$InterviewMessagePayload<ExtArgs>[]
     evaluation: Prisma.$EvaluationPayload<ExtArgs> | null
+    timestamps: Prisma.$RecordingTimestampPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1532,6 +1661,7 @@ export interface Prisma__InterviewClient<T, Null = never, ExtArgs extends runtim
   interviewRecording<T extends Prisma.Interview$interviewRecordingArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Interview$interviewRecordingArgs<ExtArgs>>): Prisma.Prisma__InterviewRecordingClient<runtime.Types.Result.GetResult<Prisma.$InterviewRecordingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   messages<T extends Prisma.Interview$messagesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Interview$messagesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InterviewMessagePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   evaluation<T extends Prisma.Interview$evaluationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Interview$evaluationArgs<ExtArgs>>): Prisma.Prisma__EvaluationClient<runtime.Types.Result.GetResult<Prisma.$EvaluationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  timestamps<T extends Prisma.Interview$timestampsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Interview$timestampsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RecordingTimestampPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2047,6 +2177,30 @@ export type Interview$evaluationArgs<ExtArgs extends runtime.Types.Extensions.In
    */
   include?: Prisma.EvaluationInclude<ExtArgs> | null
   where?: Prisma.EvaluationWhereInput
+}
+
+/**
+ * Interview.timestamps
+ */
+export type Interview$timestampsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RecordingTimestamp
+   */
+  select?: Prisma.RecordingTimestampSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RecordingTimestamp
+   */
+  omit?: Prisma.RecordingTimestampOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RecordingTimestampInclude<ExtArgs> | null
+  where?: Prisma.RecordingTimestampWhereInput
+  orderBy?: Prisma.RecordingTimestampOrderByWithRelationInput | Prisma.RecordingTimestampOrderByWithRelationInput[]
+  cursor?: Prisma.RecordingTimestampWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.RecordingTimestampScalarFieldEnum | Prisma.RecordingTimestampScalarFieldEnum[]
 }
 
 /**

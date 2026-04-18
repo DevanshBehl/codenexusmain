@@ -8,6 +8,7 @@ import {
     Trophy, Check, X, Code2, AlertCircle, Settings
 } from 'lucide-react';
 import { contestApi } from '../../lib/api';
+import PercentileWidget from '../../components/Contest/PercentileWidget';
 
 const LANGUAGES = [
     { id: 'cpp', name: 'C++' },
@@ -408,6 +409,10 @@ export default function Contest() {
                                                 {currProblem.constraints}
                                             </pre>
                                         </div>
+                                    )}
+
+                                    {contestId && contest?.status === 'ACTIVE' && (
+                                        <PercentileWidget contestId={contestId} contestStatus={contest.status} />
                                     )}
                                 </div>
                             )}

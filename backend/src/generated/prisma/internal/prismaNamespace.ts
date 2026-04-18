@@ -401,6 +401,7 @@ export const ModelName = {
   Interview: 'Interview',
   Recording: 'Recording',
   InterviewRecording: 'InterviewRecording',
+  RecordingTimestamp: 'RecordingTimestamp',
   InterviewMessage: 'InterviewMessage',
   Evaluation: 'Evaluation',
   Webinar: 'Webinar',
@@ -429,7 +430,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "refreshToken" | "university" | "company" | "companyUniversity" | "recruiter" | "student" | "project" | "contest" | "contestRegistration" | "problem" | "testCase" | "submission" | "jobApplication" | "interview" | "recording" | "interviewRecording" | "interviewMessage" | "evaluation" | "webinar" | "webinarTargetUniversity" | "webinarAttendee" | "webinarMessage" | "mail" | "mailPermissionViolation" | "caProblem" | "caTestCase" | "caSubmission" | "caRunResult" | "caSubmissionSummary"
+    modelProps: "user" | "refreshToken" | "university" | "company" | "companyUniversity" | "recruiter" | "student" | "project" | "contest" | "contestRegistration" | "problem" | "testCase" | "submission" | "jobApplication" | "interview" | "recording" | "interviewRecording" | "recordingTimestamp" | "interviewMessage" | "evaluation" | "webinar" | "webinarTargetUniversity" | "webinarAttendee" | "webinarMessage" | "mail" | "mailPermissionViolation" | "caProblem" | "caTestCase" | "caSubmission" | "caRunResult" | "caSubmissionSummary"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1691,6 +1692,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    RecordingTimestamp: {
+      payload: Prisma.$RecordingTimestampPayload<ExtArgs>
+      fields: Prisma.RecordingTimestampFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RecordingTimestampFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingTimestampPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RecordingTimestampFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingTimestampPayload>
+        }
+        findFirst: {
+          args: Prisma.RecordingTimestampFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingTimestampPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RecordingTimestampFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingTimestampPayload>
+        }
+        findMany: {
+          args: Prisma.RecordingTimestampFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingTimestampPayload>[]
+        }
+        create: {
+          args: Prisma.RecordingTimestampCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingTimestampPayload>
+        }
+        createMany: {
+          args: Prisma.RecordingTimestampCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RecordingTimestampCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingTimestampPayload>[]
+        }
+        delete: {
+          args: Prisma.RecordingTimestampDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingTimestampPayload>
+        }
+        update: {
+          args: Prisma.RecordingTimestampUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingTimestampPayload>
+        }
+        deleteMany: {
+          args: Prisma.RecordingTimestampDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RecordingTimestampUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RecordingTimestampUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingTimestampPayload>[]
+        }
+        upsert: {
+          args: Prisma.RecordingTimestampUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RecordingTimestampPayload>
+        }
+        aggregate: {
+          args: Prisma.RecordingTimestampAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRecordingTimestamp>
+        }
+        groupBy: {
+          args: Prisma.RecordingTimestampGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RecordingTimestampGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RecordingTimestampCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RecordingTimestampCountAggregateOutputType> | number
+        }
+      }
+    }
     InterviewMessage: {
       payload: Prisma.$InterviewMessagePayload<ExtArgs>
       fields: Prisma.InterviewMessageFieldRefs
@@ -2923,6 +2998,19 @@ export const InterviewRecordingScalarFieldEnum = {
 export type InterviewRecordingScalarFieldEnum = (typeof InterviewRecordingScalarFieldEnum)[keyof typeof InterviewRecordingScalarFieldEnum]
 
 
+export const RecordingTimestampScalarFieldEnum = {
+  id: 'id',
+  interviewId: 'interviewId',
+  offsetMs: 'offsetMs',
+  type: 'type',
+  label: 'label',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt'
+} as const
+
+export type RecordingTimestampScalarFieldEnum = (typeof RecordingTimestampScalarFieldEnum)[keyof typeof RecordingTimestampScalarFieldEnum]
+
+
 export const InterviewMessageScalarFieldEnum = {
   id: 'id',
   interviewId: 'interviewId',
@@ -3344,6 +3432,7 @@ export type GlobalOmitConfig = {
   interview?: Prisma.InterviewOmit
   recording?: Prisma.RecordingOmit
   interviewRecording?: Prisma.InterviewRecordingOmit
+  recordingTimestamp?: Prisma.RecordingTimestampOmit
   interviewMessage?: Prisma.InterviewMessageOmit
   evaluation?: Prisma.EvaluationOmit
   webinar?: Prisma.WebinarOmit

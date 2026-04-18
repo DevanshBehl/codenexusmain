@@ -127,6 +127,11 @@ export type Recording = Prisma.RecordingModel
  */
 export type InterviewRecording = Prisma.InterviewRecordingModel
 /**
+ * Model RecordingTimestamp
+ * 
+ */
+export type RecordingTimestamp = Prisma.RecordingTimestampModel
+/**
  * Model InterviewMessage
  * 
  */

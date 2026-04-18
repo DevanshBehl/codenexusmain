@@ -6,7 +6,7 @@ import {
     Calendar, Video, Code2, Play, CheckCircle2, Briefcase,
     PenTool, Box, Star, ChevronLeft, ChevronRight, Swords, Loader2
 } from 'lucide-react';
-import VideoPlayer from '../../components/VideoPlayer';
+import VideoPlayer, { type Timestamp } from '../../components/VideoPlayer';
 import { interviewApi } from '../../lib/api';
 
 /* ────────── Types & Mock Data ────────── */
@@ -52,6 +52,7 @@ export default function Recordings({ userRole }: RecordingsProps) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [blobUrl, setBlobUrl] = useState<string | null>(null);
+    const [videoTimestamps, setVideoTimestamps] = useState<Timestamp[]>([]);
 
     useEffect(() => {
         const fetchRecordings = async () => {
@@ -280,10 +281,15 @@ export default function Recordings({ userRole }: RecordingsProps) {
                                                 onClick={async () => {
                                                     setSelectedVideo({ isOpen: true, title: `Recording: ${rec.student} - ${rec.role}` });
                                                     setVideoLoading(true);
+                                                    setVideoTimestamps([]);
                                                     try {
-                                                        const url = await interviewApi.getRecordingBlobUrl(rec.id);
+                                                        const [url, tsRes] = await Promise.all([
+                                                            interviewApi.getRecordingBlobUrl(rec.id),
+                                                            interviewApi.getTimestamps(rec.id).catch(() => ({ data: [] })),
+                                                        ]);
                                                         setBlobUrl(url);
                                                         setSelectedVideo(prev => ({ ...prev, url }));
+                                                        setVideoTimestamps(tsRes.data as Timestamp[]);
                                                     } catch (err) {
                                                         console.error('Failed to load video:', err);
                                                         setSelectedVideo(prev => ({ ...prev, isOpen: false }));
@@ -313,10 +319,12 @@ export default function Recordings({ userRole }: RecordingsProps) {
                         URL.revokeObjectURL(blobUrl);
                         setBlobUrl(null);
                     }
+                    setVideoTimestamps([]);
                 }}
                 title={selectedVideo.title}
                 videoUrl={selectedVideo.url}
                 isLoading={videoLoading}
+                timestamps={videoTimestamps}
             />
         </div>
     );

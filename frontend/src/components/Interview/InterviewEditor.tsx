@@ -67,9 +67,10 @@ interface InterviewEditorProps {
     socket: Socket | null;
     interviewId: string;
     role: 'student' | 'recruiter';
+    onSubmit?: () => void;
 }
 
-export default function InterviewEditor({ socket, interviewId, role }: InterviewEditorProps) {
+export default function InterviewEditor({ socket, interviewId, role, onSubmit }: InterviewEditorProps) {
     const [language, setLanguage] = useState('cpp');
     const editorRef = useRef<Parameters<OnMount>[0] | null>(null);
     const isRemoteUpdate = useRef(false);
@@ -171,7 +172,10 @@ export default function InterviewEditor({ socket, interviewId, role }: Interview
                                 <Play size={14} className="text-green-400" />
                                 Run
                             </button>
-                            <button className="flex items-center gap-2 px-4 py-1.5 bg-accent-500/20 hover:bg-accent-500/30 border border-accent-500/50 rounded-sm text-sm font-semibold transition-all text-accent-400">
+                            <button
+                                onClick={onSubmit}
+                                className="flex items-center gap-2 px-4 py-1.5 bg-accent-500/20 hover:bg-accent-500/30 border border-accent-500/50 rounded-sm text-sm font-semibold transition-all text-accent-400"
+                            >
                                 <Send size={14} />
                                 Submit
                             </button>

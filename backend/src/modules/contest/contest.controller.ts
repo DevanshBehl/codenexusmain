@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from "express";
 import * as contestService from "./contest.service.js";
+import * as percentileService from "./percentile.service.js";
 import { ApiResponse } from "../../utils/api-response.js";
+import { ApiError } from "../../utils/api-error.js";
 
 export const createcontest = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -75,6 +77,32 @@ export const deleteContest = async (req: Request, res: Response, next: NextFunct
         const userId = req.user?.id;
         await contestService.deleteContest(userId as string, req.params.id as string);
         res.status(200).json(new ApiResponse(200, null, "Contest deleted successfully"));
+    } catch (e) {
+        next(e);
+    }
+}
+
+export const getMyPercentile = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const cnid = req.user?.cnid;
+        if (!cnid) throw new ApiError(401, "Missing CNID");
+        const contestId = req.params.id as string;
+        const result = await percentileService.computePercentile(contestId, cnid);
+        res.status(200).json(new ApiResponse(200, result, "Percentile fetched"));
+    } catch (e) {
+        next(e);
+    }
+}
+
+export const getPercentileLeaderboard = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const contestId = req.params.id as string;
+        const contest = await contestService.getContestById(contestId);
+        if (contest.status !== 'ENDED') {
+            throw new ApiError(403, "Leaderboard is only available after the contest ends");
+        }
+        const leaderboard = await percentileService.getFullPercentileLeaderboard(contestId);
+        res.status(200).json(new ApiResponse(200, leaderboard, "Percentile leaderboard fetched"));
     } catch (e) {
         next(e);
     }

@@ -68,6 +68,7 @@ export const ModelName = {
   Interview: 'Interview',
   Recording: 'Recording',
   InterviewRecording: 'InterviewRecording',
+  RecordingTimestamp: 'RecordingTimestamp',
   InterviewMessage: 'InterviewMessage',
   Evaluation: 'Evaluation',
   Webinar: 'Webinar',
@@ -328,6 +329,19 @@ export const InterviewRecordingScalarFieldEnum = {
 } as const
 
 export type InterviewRecordingScalarFieldEnum = (typeof InterviewRecordingScalarFieldEnum)[keyof typeof InterviewRecordingScalarFieldEnum]
+
+
+export const RecordingTimestampScalarFieldEnum = {
+  id: 'id',
+  interviewId: 'interviewId',
+  offsetMs: 'offsetMs',
+  type: 'type',
+  label: 'label',
+  createdBy: 'createdBy',
+  createdAt: 'createdAt'
+} as const
+
+export type RecordingTimestampScalarFieldEnum = (typeof RecordingTimestampScalarFieldEnum)[keyof typeof RecordingTimestampScalarFieldEnum]
 
 
 export const InterviewMessageScalarFieldEnum = {

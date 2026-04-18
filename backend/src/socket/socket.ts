@@ -5,6 +5,7 @@ import { env } from "../config/env.js";
 import { prisma } from "../lib/prisma.js";
 import { createRoomRouter, createWebRtcTransport, transports, producers, consumers, routers } from "../lib/mediasoup.js";
 import { startRecording, addProducerToRecording, stopRecording, removeProducerFromRecording, activeSessions } from "../lib/recording.manager.js";
+import * as percentileService from "../modules/contest/percentile.service.js";
 
 // Memory caches for Phase 2 Late-Joiner Hydration
 const roomWhiteboards = new Map<string, any[]>();
@@ -489,6 +490,33 @@ export function createSocketServer(httpServer: HttpServer): Server {
             }
         });
 
+        // ─── Recording Timestamps ───
+        socket.on("add-timestamp", async (data: { interviewId: string; type: string; label: string; offsetMs: number }, callback) => {
+            try {
+                const { interviewId, type, label, offsetMs } = data;
+                const ts = await prisma.recordingTimestamp.create({
+                    data: {
+                        interviewId,
+                        offsetMs,
+                        type,
+                        label,
+                        createdBy: socket.userId ?? null,
+                    },
+                });
+                const roomId = `interview-${interviewId}`;
+                io.to(roomId).emit("timestamp-added", {
+                    id: ts.id,
+                    offsetMs: ts.offsetMs,
+                    type: ts.type,
+                    label: ts.label,
+                });
+                callback?.({ success: true, timestamp: ts });
+            } catch (err: any) {
+                console.error("[Socket] add-timestamp error:", err);
+                callback?.({ error: err.message });
+            }
+        });
+
         // ─── Join Webinar Room ───
         socket.on("join-webinar", async (data: { webinarId: string }, callback) => {
             try {
@@ -836,6 +864,47 @@ export function createSocketServer(httpServer: HttpServer): Server {
                 console.log(`[Socket] ${socket.userName} left webinar room ${roomId}`);
             } catch (err) {
                 console.error("[Socket] leave-webinar error:", err);
+            }
+        });
+
+        // ─── Join Contest Live (Percentile Room) ───
+        socket.on("join-contest-live", async (data: { contestId: string }) => {
+            try {
+                const { contestId } = data;
+                if (!socket.userId) {
+                    socket.emit("error", { message: "Not authenticated" });
+                    return;
+                }
+                const user = await prisma.user.findUnique({
+                    where: { id: socket.userId },
+                    include: { studentProfile: { select: { id: true } } }
+                });
+                if (!user?.cnid || !user.studentProfile) {
+                    socket.emit("error", { message: "Only students can join contest live" });
+                    return;
+                }
+
+                const reg = await prisma.contestRegistration.findFirst({
+                    where: { studentId: user.studentProfile.id, contestId }
+                });
+                if (!reg) {
+                    socket.emit("error", { message: "Not registered for this contest" });
+                    return;
+                }
+
+                const personalRoom = `contest-live:${contestId}:${user.cnid}`;
+                socket.join(personalRoom);
+
+                await percentileService.registerParticipant(contestId, user.cnid);
+                const { percentile, totalParticipants } = await percentileService.computePercentile(contestId, user.cnid);
+
+                socket.emit("percentile-update", {
+                    percentile,
+                    totalParticipants,
+                    timestamp: Date.now(),
+                });
+            } catch (err) {
+                console.error("[Socket] join-contest-live error:", err);
             }
         });
 

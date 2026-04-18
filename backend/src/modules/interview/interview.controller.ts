@@ -132,6 +132,17 @@ export const downloadServerRecording = async (req: Request, res: Response, next:
     }
 }
 
+export const getTimestamps = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const userId = req.user?.id;
+        const role = req.user?.role;
+        const timestamps = await interviewService.getTimestamps(userId as string, role as string, req.params.id as string);
+        res.status(200).json(new ApiResponse(200, timestamps, "Timestamps fetched successfully"));
+    } catch (e) {
+        next(e);
+    }
+}
+
 export const getMessages = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const userId = req.user?.id;

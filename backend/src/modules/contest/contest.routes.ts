@@ -26,6 +26,16 @@ router.get("/:id/registrations",
 
 router.get("/:id/leaderboard", contestController.getContestLeaderboard as RequestHandler);
 
+router.get("/:id/percentile",
+    authenticate as RequestHandler,
+    authorize(["STUDENT"]) as RequestHandler,
+    contestController.getMyPercentile as RequestHandler
+);
+
+router.get("/:id/percentile-leaderboard",
+    contestController.getPercentileLeaderboard as RequestHandler
+);
+
 // Protected routes - create contest (COMPANY_ADMIN only)
 router.post("/",
     authenticate as RequestHandler,

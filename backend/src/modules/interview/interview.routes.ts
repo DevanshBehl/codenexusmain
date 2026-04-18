@@ -65,6 +65,12 @@ router.get("/:id/recording/download",
     interviewController.downloadServerRecording as RequestHandler
 );
 
+// Get recording timestamps
+router.get("/:id/timestamps",
+    authorize(["RECRUITER", "COMPANY_ADMIN"]) as RequestHandler,
+    interviewController.getTimestamps as RequestHandler
+);
+
 // Get chat messages (Participants only)
 router.get("/:id/messages",
     authorize(["RECRUITER", "STUDENT"]) as RequestHandler,

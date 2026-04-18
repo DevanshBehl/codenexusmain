@@ -4,6 +4,7 @@ import { prisma } from '../../lib/prisma.js';
 import { submitToJudge0, pollJudge0, determineVerdict, LANGUAGE_MAP } from './judge0.js';
 import { getIo } from '../../socket/socket.js';
 import * as leaderboardService from './leaderboard.service.js';
+import * as percentileService from '../contest/percentile.service.js';
 
 const queueOpts = {
   redis: {
@@ -242,7 +243,37 @@ export function initSubmissionWorker() {
                 }
             }
 
-            // 10. Emit final result via WebSockets
+            // 10. Update real-time percentile (contest submissions — all verdicts count test cases)
+            if (isContestSubmission && passed > 0) {
+                const problem = await prisma.problem.findUnique({
+                    where: { id: submission.problemId },
+                    include: { contest: true }
+                });
+                if (problem?.contest) {
+                    const contest = problem.contest;
+                    const student = await prisma.student.findUnique({
+                        where: { id: submission.studentId },
+                        include: { user: { select: { cnid: true } } }
+                    });
+                    if (student?.user?.cnid) {
+                        const contestStartMs = new Date(contest.date).getTime();
+                        const { percentile, totalParticipants } = await percentileService.updatePercentileScore(
+                            contest.id,
+                            student.user.cnid,
+                            passed,
+                            contestStartMs
+                        );
+                        percentileService.pushPercentileToClient(
+                            contest.id,
+                            student.user.cnid,
+                            percentile,
+                            totalParticipants
+                        );
+                    }
+                }
+            }
+
+            // 11. Emit final result via WebSockets
             const ioClient2 = getIo();
             if (ioClient2) {
                 ioClient2.to(`submission:${submissionId}`).emit('submission_result', {

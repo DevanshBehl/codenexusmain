@@ -317,6 +317,26 @@ export const downloadServerRecording = async (userId: string, userRole: string, 
     };
 };
 
+export const getTimestamps = async (userId: string, role: string, interviewId: string) => {
+    const interview = await prisma.interview.findUnique({
+        where: { id: interviewId },
+        include: { student: true, recruiter: true },
+    });
+    if (!interview) throw new ApiError(404, "Interview not found");
+
+    if (role === 'STUDENT' && interview.student.userId !== userId) {
+        throw new ApiError(403, "Not authorized");
+    }
+    if (role === 'RECRUITER' && interview.recruiter.userId !== userId) {
+        throw new ApiError(403, "Not authorized");
+    }
+
+    return prisma.recordingTimestamp.findMany({
+        where: { interviewId },
+        orderBy: { offsetMs: 'asc' },
+    });
+};
+
 export const getMessages = async (userId: string, role: string, interviewId: string) => {
     // Check access
     const interview = await prisma.interview.findUnique({
